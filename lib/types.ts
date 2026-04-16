@@ -81,6 +81,7 @@ export type ClientMessage =
   | { type: "slide_next" }
   | { type: "slide_prev" }
   | { type: "highlight_question"; questionId: string }
+  | { type: "session_finished"; sessionId: string }
 
 export type ServerMessage =
   | { type: "sync"; state: AppState }
@@ -88,3 +89,4 @@ export type ServerMessage =
   | { type: "slide_next" }
   | { type: "slide_prev" }
   | { type: "highlight_question"; questionId: string }
+  | { type: "session_finished"; sessionId: string }

@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, useCallback, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ReactTab } from "@/components/attendee/react-tab"
 import { AskTab } from "@/components/attendee/ask-tab"
 import { ScheduleTab } from "@/components/attendee/schedule-tab"
+import { FeedbackScreen } from "@/components/attendee/feedback-screen"
 import { Header } from "@/components/shared/header"
 import { useParty } from "@/hooks/use-party"
 import { Zap, MessageCircleQuestion, Calendar, Share2, X } from "lucide-react"
@@ -76,10 +77,67 @@ function LiveBanner() {
   )
 }
 
+// Get or create a persistent anonymous token for this attendee
+function getAttendeeToken(): string {
+  if (typeof window === "undefined") return ""
+  let token = localStorage.getItem("evoca-attendee-token")
+  if (!token) {
+    token = `anon_${Math.random().toString(36).slice(2, 11)}_${Date.now().toString(36)}`
+    localStorage.setItem("evoca-attendee-token", token)
+  }
+  return token
+}
+
 function AttendeePageInner() {
   const searchParams = useSearchParams()
   const room = searchParams.get("room") ?? undefined
-  const { state, send, connectionCount, isConnected } = useParty(room)
+  const sessionId = searchParams.get("session") ?? null
+
+  const [sessionFinished, setSessionFinished] = useState(false)
+  const [finishedSessionId, setFinishedSessionId] = useState<string | null>(null)
+  const [attendeeToken] = useState(() => getAttendeeToken())
+
+  const handlePartyMessage = useCallback((msg: { type: string; sessionId?: string }) => {
+    if (msg.type === "session_finished") {
+      setSessionFinished(true)
+      setFinishedSessionId(msg.sessionId ?? sessionId)
+    }
+  }, [sessionId])
+
+  const { state, send, connectionCount, isConnected } = useParty(room, handlePartyMessage as any)
+
+  // Also check if session is already finished when connecting (e.g. scanning QR after session ended)
+  useEffect(() => {
+    if (!sessionId) return
+    async function checkStatus() {
+      const { createClient } = await import("@/lib/supabase/client")
+      const supabase = createClient()
+      const { data } = await supabase
+        .from("sessions")
+        .select("status, id")
+        .eq("id", sessionId)
+        .single()
+      if (data?.status === "finished") {
+        setSessionFinished(true)
+        setFinishedSessionId(data.id)
+      }
+    }
+    checkStatus()
+  }, [sessionId])
+
+  // Show feedback screen if session has ended
+  if (sessionFinished && finishedSessionId) {
+    return (
+      <div className="min-h-screen bg-jsconf-bg">
+        <Header connectionCount={0} isConnected={false} currentTalk="" />
+        <FeedbackScreen
+          sessionId={finishedSessionId}
+          talkTitle={state.currentTalk || "Session"}
+          attendeeToken={attendeeToken}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-jsconf-bg">

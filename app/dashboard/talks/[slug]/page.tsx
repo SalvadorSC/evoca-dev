@@ -1,15 +1,17 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect, notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Radio, Clock, MessageSquare, Zap, ExternalLink } from "lucide-react"
+import { ArrowLeft, Radio, Clock, MessageSquare, Zap, ExternalLink, Star } from "lucide-react"
 import { StartSessionButton } from "./start-session-button"
 import { DeleteTalkButton } from "@/components/dashboard/delete-talk-button"
+import { SessionFeedbackResults } from "@/components/dashboard/session-feedback-results"
 
 type SessionRow = {
   id: string
   partykit_room: string
   scheduled_at: string
   ended_at: string | null
+  status: string
   question_count: number
   reaction_count: number
 }
@@ -64,11 +66,20 @@ export default async function TalkDetailPage({
   // context through the foreign key join.
   const { data: sessionsData } = await supabase
     .from("sessions")
-    .select("id, partykit_room, scheduled_at, ended_at, question_count, reaction_count")
+    .select("id, partykit_room, scheduled_at, ended_at, status, question_count, reaction_count")
     .eq("talk_id", talkData.id)
     .order("scheduled_at", { ascending: false })
 
   const sessions = (sessionsData ?? []) as SessionRow[]
+
+  // Check if speaker has PRO
+  const { data: speakerProfile } = await supabase
+    .from("speakers")
+    .select("is_pro")
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  const speakerIsPro = speakerProfile?.is_pro ?? false
 
   return (
     <div className="px-6 py-8 max-w-3xl mx-auto">
@@ -101,7 +112,7 @@ export default async function TalkDetailPage({
               talkTitle={talkData.title}
               variant="full"
             />
-            <StartSessionButton talkId={talkData.id} />
+            <StartSessionButton talkId={talkData.id} speakerIsPro={speakerIsPro} />
           </div>
         </div>
 
@@ -157,7 +168,7 @@ export default async function TalkDetailPage({
                 hour: "2-digit",
                 minute: "2-digit",
               })
-              const isLive = !session.ended_at
+              const isLive = !session.ended_at && session.status !== "finished"
               const duration = formatDuration(session.scheduled_at, session.ended_at)
 
               return (
@@ -212,12 +223,24 @@ export default async function TalkDetailPage({
                         Rejoin
                       </Link>
                     ) : (
-                      <span className="inline-flex items-center px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted">
-                        Ended
+                      <span className="inline-flex items-center gap-1 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted">
+                        <Star className="h-3 w-3" />
+                        Finished
                       </span>
                     )}
                   </div>
                 </div>
+
+                {/* Feedback results — only shown for ended sessions */}
+                {!isLive && (
+                  <div className="mt-4 pt-4 border-t border-jsconf-border">
+                    <p className="font-mono text-[10px] text-jsconf-muted uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                      <Star className="h-3 w-3" />
+                      Feedback
+                    </p>
+                    <SessionFeedbackResults sessionId={session.id} />
+                  </div>
+                )}
               )
             })}
           </div>

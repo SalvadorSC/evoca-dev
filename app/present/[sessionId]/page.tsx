@@ -81,7 +81,7 @@ export default function PresentPage() {
 
       setSession(data as unknown as SessionRow)
       setLoading(false)
-      setAppUrl(window.location.origin + "/app?room=" + data.partykit_room)
+      setAppUrl(`${window.location.origin}/app?room=${data.partykit_room}&session=${data.id}`)
     }
 
     load()
@@ -183,9 +183,11 @@ export default function PresentPage() {
   const handleEndSession = async () => {
     setEnding(true)
     const supabase = createClient()
+    // Broadcast to all attendees that the session is finished
+    send({ type: "session_finished", sessionId })
     await supabase
       .from("sessions")
-      .update({ ended_at: new Date().toISOString() })
+      .update({ ended_at: new Date().toISOString(), status: "finished" })
       .eq("id", sessionId)
     router.push("/dashboard")
   }
@@ -481,7 +483,7 @@ export default function PresentPage() {
                 End this session?
               </p>
               <p className="font-mono text-xs text-jsconf-muted">
-                This will save Q&A to your dashboard.
+                Attendees will be shown a feedback form. Results will appear in your dashboard.
               </p>
             </div>
             <div className="flex gap-3">
