@@ -5,7 +5,7 @@ import { QRCodeSVG } from "qrcode.react"
 import { ReactTab } from "@/components/attendee/react-tab"
 import { AskTab } from "@/components/attendee/ask-tab"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { AppState, ClientMessage, Reaction, Question } from "@/lib/types"
+import type { AppState, ClientMessage, Question } from "@/lib/types"
 
 // ─── Phone Frame ──────────────────────────────────────────────────────────────
 export function PhoneFrame({
@@ -31,7 +31,7 @@ export function PhoneFrame({
   )
 }
 
-// ─── Demo Phone Mockup ────────────────────────────────────────────────────────
+// ─── Demo Phone Mockup (used by /demo, connected to PartyKit) ─────────────────
 export function DemoPhoneMockup({
   send,
   questions,
@@ -96,30 +96,31 @@ export function DemoPhoneMockup({
 }
 
 // ─── Simulation data ──────────────────────────────────────────────────────────
-const EMOJIS = ["🔥", "👏", "🤯", "🚀", "😂"]
+const EMOJIS = ["🔥", "👏", "🤯", "🚀", "😂", "💀"]
 
-const SIM_REACTIONS: Array<{ emoji: string; text?: string; name: string }> = [
-  { emoji: "🔥", name: "Alex" },
-  { emoji: "👏", text: "Try me", name: "Sarah" },
-  { emoji: "🤯", name: "Jordan" },
-  { emoji: "🚀", text: "Evoca is truly useful for conferences", name: "Marco" },
-  { emoji: "🔥", name: "Priya" },
-  { emoji: "😂", name: "Tom" },
-  { emoji: "👏", text: "Evoca works really well in engaging attendees", name: "Lena" },
-  { emoji: "🚀", name: "Carlos" },
-  { emoji: "🤯", text: "I always use Evoca to get feedback on my talks", name: "Mia" },
-  { emoji: "🔥", text: "Try me", name: "David" },
+const SIM_SCRIPTS: Array<{ tab: "react" | "ask"; emoji?: string; name: string; text: string }> = [
+  { tab: "react", emoji: "🔥", name: "Alex",   text: "" },
+  { tab: "react", emoji: "👏", name: "Sarah",  text: "Try me" },
+  { tab: "react", emoji: "🤯", name: "Jordan", text: "Evoca is truly useful for conferences" },
+  { tab: "react", emoji: "🚀", name: "Marco",  text: "" },
+  { tab: "react", emoji: "🔥", name: "Priya",  text: "Evoca works really well in engaging attendees" },
+  { tab: "react", emoji: "😂", name: "Tom",    text: "" },
+  { tab: "react", emoji: "👏", name: "Lena",   text: "I always use Evoca to get feedback on my talks" },
+  { tab: "react", emoji: "🚀", name: "Carlos", text: "" },
+  { tab: "react", emoji: "💀", name: "Mia",    text: "Try me" },
 ]
 
 // ─── Hero Background ──────────────────────────────────────────────────────────
-// Renders floating reactions + question cards behind the hero content.
-interface LiveItem {
+export interface LiveItem {
   id: string
   kind: "reaction" | "question"
   emoji?: string
   text?: string
   name: string
-  x: number   // 0–100 % of container width
+  /** 0–100 % vertical start position within container */
+  y: number
+  /** Direction: true = left→right, false = right→left */
+  ltr: boolean
   ts: number
 }
 
@@ -137,287 +138,347 @@ function FloatingItem({ item }: { item: LiveItem }) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    // Tiny delay so the CSS transition fires
-    const t = requestAnimationFrame(() => setVisible(true))
-    return () => cancelAnimationFrame(t)
+    const id = requestAnimationFrame(() => setVisible(true))
+    return () => cancelAnimationFrame(id)
   }, [])
+
+  const startX = item.ltr ? "-180px" : "calc(100vw + 180px)"
+  const endX   = item.ltr ? "calc(100vw + 180px)" : "-180px"
 
   return (
     <div
-      className="absolute bottom-0 flex flex-col items-center gap-1 transition-all duration-[8000ms] ease-out"
+      className="absolute flex items-center gap-2 transition-none"
       style={{
-        left: `${item.x}%`,
-        transform: visible ? "translateY(-110vh)" : "translateY(0)",
-        opacity: visible ? 0 : 1,
+        top: `${item.y}%`,
+        left: 0,
+        right: 0,
+        // Use a CSS animation so we can control duration independently of React re-renders
+        animation: visible
+          ? `hero-float-${item.ltr ? "ltr" : "rtl"} 14s linear forwards`
+          : undefined,
+        transform: visible ? undefined : `translateX(${startX})`,
+        opacity: 0,
       }}
     >
+      <style>{`
+        @keyframes hero-float-ltr {
+          0%   { transform: translateX(-220px); opacity: 0; }
+          8%   { opacity: 1; }
+          85%  { opacity: 1; }
+          100% { transform: translateX(calc(100vw + 220px)); opacity: 0; }
+        }
+        @keyframes hero-float-rtl {
+          0%   { transform: translateX(calc(100vw + 220px)); opacity: 0; }
+          8%   { opacity: 1; }
+          85%  { opacity: 1; }
+          100% { transform: translateX(-220px); opacity: 0; }
+        }
+      `}</style>
+
       {item.kind === "reaction" ? (
-        <div className="flex flex-col items-center gap-0.5">
-          <span className="text-2xl drop-shadow-lg">{item.emoji}</span>
+        <div className="flex items-center gap-2 bg-black/40 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-full shrink-0">
+          <span className="text-3xl leading-none">{item.emoji}</span>
           {item.text && (
-            <span className="font-mono text-[10px] text-white/60 bg-black/40 px-2 py-0.5 rounded-full max-w-[120px] text-center leading-tight">
-              {item.text}
-            </span>
+            <span className="font-sans text-sm text-white/80 whitespace-nowrap">{item.text}</span>
           )}
-          <span className="font-mono text-[9px] text-white/30">{item.name}</span>
+          <span className="font-mono text-xs text-white/40 whitespace-nowrap">{item.name}</span>
         </div>
       ) : (
-        <div className="bg-black/50 border border-white/10 px-3 py-2 rounded max-w-[180px] backdrop-blur-sm">
-          <p className="font-sans text-[11px] text-white/80 leading-tight mb-1">{item.text}</p>
-          <p className="font-mono text-[9px] text-white/30">{item.name}</p>
+        <div className="bg-black/50 border border-white/10 px-4 py-2.5 rounded-xl backdrop-blur-sm shrink-0 max-w-[280px]">
+          <p className="font-sans text-sm text-white/80 leading-snug mb-1">{item.text}</p>
+          <p className="font-mono text-xs text-white/40">{item.name}</p>
         </div>
       )}
     </div>
   )
 }
 
-// ─── Interactive Phone Mockup ─────────────────────────────────────────────────
-// Landing page version: local state, no PartyKit. Fires callbacks to parent
-// so the hero background can be filled with activity.
+// ─── Interactive Phone Mockup (landing page) ──────────────────────────────────
+// Uses the exact same PhoneFrame + ReactTab/AskTab as DemoPhoneMockup.
+// During simulation, an overlay animates the fields before firing send().
+
+interface SimState {
+  active: boolean
+  tab: "react" | "ask"
+  name: string
+  typedName: string
+  text: string
+  typedText: string
+  emoji: string | null
+  phase: "typing-name" | "typing-text" | "picking-emoji" | "sending" | "done"
+}
+
 export function InteractivePhoneMockup({
   onActivity,
 }: {
   onActivity: (item: LiveItem) => void
 }) {
-  const [activeTab, setActiveTab] = useState<"react" | "ask">("react")
-  const [name, setName] = useState("")
-  const [reaction, setReaction] = useState("🔥")
-  const [inputText, setInputText] = useState("")
-  const [questions, setQuestions] = useState<Question[]>([])
+  // Sim overlay state — shown on top of the real tabs during automation
+  const [sim, setSim] = useState<SimState | null>(null)
+  const [activeTab, setActiveTab] = useState<"wall" | "qa">("wall")
+  const phoneTab = activeTab === "wall" ? "react" : "ask"
 
-  // Idle simulation
   const lastInteractionRef = useRef<number>(Date.now())
-  const simIndexRef = useRef(0)
-  const simIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const simRunningRef       = useRef(false)
+  const simIndexRef         = useRef(0)
+  const idleTimerRef        = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const markInteraction = useCallback(() => {
     lastInteractionRef.current = Date.now()
-    // Stop simulation when user interacts
-    if (simIntervalRef.current) {
-      clearInterval(simIntervalRef.current)
-      simIntervalRef.current = null
-    }
-  }, [])
+    simRunningRef.current = false
+    setSim(null)
+    // Reset the idle timer
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
+    idleTimerRef.current = setTimeout(() => { runNextSim() }, 20_000)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const fireSimReaction = useCallback(() => {
-    const entry = SIM_REACTIONS[simIndexRef.current % SIM_REACTIONS.length]
+  // Typewriter helper — calls setSim progressively
+  function typewrite(
+    field: "typedName" | "typedText",
+    fullText: string,
+    intervalMs: number,
+    onDone: () => void
+  ) {
+    let i = 0
+    const t = setInterval(() => {
+      if (!simRunningRef.current) { clearInterval(t); return }
+      i++
+      setSim((prev) => prev ? { ...prev, [field]: fullText.slice(0, i) } : prev)
+      if (i >= fullText.length) { clearInterval(t); onDone() }
+    }, intervalMs)
+  }
+
+  const runNextSim = useCallback(() => {
+    if (!simRunningRef.current) simRunningRef.current = true
+
+    const script = SIM_SCRIPTS[simIndexRef.current % SIM_SCRIPTS.length]
     simIndexRef.current++
 
-    const item: LiveItem = {
-      id: crypto.randomUUID(),
-      kind: "reaction",
-      emoji: entry.emoji,
-      text: entry.text,
-      name: entry.name,
-      x: 10 + Math.random() * 80,
-      ts: Date.now(),
+    const emoji = script.emoji ?? EMOJIS[Math.floor(Math.random() * EMOJIS.length)]
+    const hasText = script.text.length > 0
+
+    // Switch to correct tab
+    setActiveTab(script.tab === "react" ? "wall" : "qa")
+
+    const base: SimState = {
+      active: true,
+      tab: script.tab,
+      name: script.name,
+      typedName: "",
+      text: script.text,
+      typedText: "",
+      emoji: null,
+      phase: "typing-name",
     }
-    onActivity(item)
-  }, [onActivity])
+    setSim(base)
 
-  const startSimulation = useCallback(() => {
-    if (simIntervalRef.current) return
-    // Fire once immediately, then every 2.5s
-    fireSimReaction()
-    simIntervalRef.current = setInterval(() => {
-      fireSimReaction()
-    }, 2500)
-  }, [fireSimReaction])
+    // Phase 1: type name
+    typewrite("typedName", script.name, 60, () => {
+      if (!simRunningRef.current) return
+      setSim((p) => p ? { ...p, phase: hasText ? "typing-text" : "picking-emoji" } : p)
 
-  // Check for 20s idle, start simulation
-  useEffect(() => {
-    const idleCheck = setInterval(() => {
-      const idle = Date.now() - lastInteractionRef.current
-      if (idle >= 20_000 && !simIntervalRef.current) {
-        startSimulation()
+      if (hasText) {
+        // Phase 2: type text
+        setTimeout(() => {
+          typewrite("typedText", script.text, 45, () => {
+            if (!simRunningRef.current) return
+            setSim((p) => p ? { ...p, phase: "picking-emoji" } : p)
+            pickEmojiThenSend(emoji, script)
+          })
+        }, 300)
+      } else {
+        pickEmojiThenSend(emoji, script)
       }
-    }, 1000)
+    })
+  }, [onActivity]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function pickEmojiThenSend(emoji: string, script: (typeof SIM_SCRIPTS)[number]) {
+    if (!simRunningRef.current) return
+    setTimeout(() => {
+      setSim((p) => p ? { ...p, emoji, phase: "sending" } : p)
+      setTimeout(() => {
+        if (!simRunningRef.current) return
+
+        const item: LiveItem = {
+          id: crypto.randomUUID(),
+          kind: "reaction",
+          emoji,
+          text: script.text || undefined,
+          name: script.name,
+          y: 15 + Math.random() * 65,
+          ltr: Math.random() > 0.5,
+          ts: Date.now(),
+        }
+        onActivity(item)
+
+        setSim((p) => p ? { ...p, phase: "done" } : p)
+
+        // Pause then run next
+        setTimeout(() => {
+          if (!simRunningRef.current) return
+          setSim(null)
+          setTimeout(() => { if (simRunningRef.current) runNextSim() }, 800)
+        }, 1200)
+      }, 500)
+    }, 400)
+  }
+
+  // Start idle timer on mount
+  useEffect(() => {
+    idleTimerRef.current = setTimeout(() => {
+      simRunningRef.current = true
+      runNextSim()
+    }, 20_000)
     return () => {
-      clearInterval(idleCheck)
-      if (simIntervalRef.current) clearInterval(simIntervalRef.current)
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
+      simRunningRef.current = false
     }
-  }, [startSimulation])
+  }, [runNextSim])
 
-  const handleSendReaction = () => {
+  // Stub send for the real tabs (no PartyKit — user actions only update local display)
+  const stubSend = useCallback((_msg: ClientMessage) => {
     markInteraction()
-    const item: LiveItem = {
-      id: crypto.randomUUID(),
-      kind: "reaction",
-      emoji: reaction,
-      text: name.trim() || undefined,
-      name: name.trim() || "Anonymous",
-      x: 10 + Math.random() * 80,
-      ts: Date.now(),
+    if (_msg.type === "reaction" || _msg.type === "question") {
+      const item: LiveItem = {
+        id: _msg.id ?? crypto.randomUUID(),
+        kind: _msg.type === "reaction" ? "reaction" : "question",
+        emoji: _msg.type === "reaction" ? _msg.emoji : undefined,
+        text: _msg.type === "reaction" ? (_msg.text || undefined) : _msg.text,
+        name: _msg.name || "Anonymous",
+        y: 15 + Math.random() * 65,
+        ltr: Math.random() > 0.5,
+        ts: Date.now(),
+      }
+      onActivity(item)
     }
-    onActivity(item)
-  }
-
-  const handleSendQuestion = () => {
-    if (!inputText.trim()) return
-    markInteraction()
-    const q: Question = {
-      type: "question",
-      id: crypto.randomUUID(),
-      name: name.trim() || "Anonymous",
-      text: inputText.trim(),
-      votes: 0,
-      answered: false,
-      ts: Date.now(),
-    }
-    setQuestions((prev) => [q, ...prev])
-    const item: LiveItem = {
-      id: q.id,
-      kind: "question",
-      text: q.text,
-      name: q.name,
-      x: 5 + Math.random() * 60,
-      ts: Date.now(),
-    }
-    onActivity(item)
-    setInputText("")
-  }
-
-  // Stub send for AskTab vote UI (no-op locally)
-  const stubSend = useCallback((_msg: ClientMessage) => {}, [])
+  }, [markInteraction, onActivity])
 
   return (
     <div
       className="relative"
-      style={{ width: "280px" }}
       onMouseMove={markInteraction}
       onTouchStart={markInteraction}
+      style={{ width: "260px" }}
     >
-      {/* Phone shell — 3D perspective tilt */}
+      {/* 3D tilt wrapper */}
       <div
         className="transition-transform duration-500 hover:scale-[1.02]"
-        style={{
-          transform: "perspective(1000px) rotateY(-15deg) rotateX(5deg)",
-        }}
+        style={{ transform: "perspective(1000px) rotateY(-12deg) rotateX(4deg)" }}
       >
-        <div
-          className="relative border-[6px] border-zinc-800 bg-zinc-950 shadow-2xl overflow-hidden"
-          style={{
-            borderRadius: "40px",
-            boxShadow: "0 0 0 1px #111, inset 0 0 0 1px #333",
-            width: "280px",
-            height: "560px",
-          }}
-        >
-          {/* Notch */}
-          <div className="absolute left-1/2 -translate-x-1/2 bg-zinc-900 z-20" style={{ top: "14px", width: "72px", height: "6px", borderRadius: "3px" }} />
+        <PhoneFrame>
+          {/* Status bar */}
+          <div className="shrink-0 bg-jsconf-bg flex items-center justify-between px-5 pt-6 pb-1 z-10" />
 
-          {/* Screen */}
-          <div
-            className="overflow-hidden bg-zinc-950 flex flex-col relative z-10"
-            style={{ borderRadius: "32px", margin: "8px", height: "calc(100% - 16px)" }}
+          {/* Tabs — same structure as DemoPhoneMockup */}
+          <Tabs
+            value={phoneTab}
+            onValueChange={(v) => { setActiveTab(v === "react" ? "wall" : "qa"); markInteraction() }}
+            className="flex-1 flex flex-col min-h-0 px-1 relative"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 pt-8 pb-4 shrink-0">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-bold text-white">EVOCA</span>
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-400" />
-                </span>
-                <span className="font-mono text-zinc-500" style={{ fontSize: "10px" }}>LIVE</span>
+            <div
+              style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }}
+              className="shrink-0"
+            >
+              <TabsList className="grid w-full grid-cols-2 bg-jsconf-surface border border-jsconf-border rounded-none h-auto p-0 mb-0">
+                <TabsTrigger value="react" className="rounded-none data-[state=active]:bg-jsconf-yellow data-[state=active]:text-black font-display font-bold uppercase tracking-wide py-2.5 text-xs">
+                  React
+                </TabsTrigger>
+                <TabsTrigger value="ask" className="rounded-none data-[state=active]:bg-jsconf-yellow data-[state=active]:text-black font-display font-bold uppercase tracking-wide py-2.5 text-xs">
+                  Ask
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="react" className="mt-0 flex-1 min-h-0 relative">
+              <div style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }} className="pb-4">
+                <ReactTab send={stubSend} />
               </div>
-            </div>
 
-            {/* Name input (shared across tabs) */}
-            <div className="px-4 mb-3 shrink-0">
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => { setName(e.target.value); markInteraction() }}
-                placeholder="Your name (optional)"
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 font-mono text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-yellow-400 transition-colors"
-              />
-            </div>
+              {/* Sim overlay for React tab */}
+              {sim?.active && sim.tab === "react" && (
+                <SimOverlayReact sim={sim} />
+              )}
+            </TabsContent>
 
-            {/* Tab switcher */}
-            <div className="flex border border-zinc-800 mx-4 mb-4 rounded-sm overflow-hidden shrink-0">
-              <button
-                onClick={() => { setActiveTab("react"); markInteraction() }}
-                className={`flex-1 py-2 text-center font-mono text-xs font-bold transition-colors ${activeTab === "react" ? "bg-yellow-400 text-black" : "bg-transparent text-zinc-500 hover:text-zinc-300"}`}
-              >
-                React
-              </button>
-              <div className="bg-zinc-800" style={{ width: "1px" }} />
-              <button
-                onClick={() => { setActiveTab("ask"); markInteraction() }}
-                className={`flex-1 py-2 text-center font-mono text-xs font-bold transition-colors ${activeTab === "ask" ? "bg-yellow-400 text-black" : "bg-transparent text-zinc-500 hover:text-zinc-300"}`}
-              >
-                Ask
-              </button>
-            </div>
+            <TabsContent value="ask" className="mt-0 flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] relative">
+              <div style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }} className="pb-8">
+                <AskTab send={stubSend} questions={[]} />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </PhoneFrame>
+      </div>
+    </div>
+  )
+}
 
-            {/* Tab content */}
-            <div className="flex-1 px-4 flex flex-col min-h-0">
-              {activeTab === "react" ? (
-                <div className="flex flex-col h-full animate-in fade-in duration-300">
-                  <div className="grid grid-cols-5 gap-2 mb-4 shrink-0">
-                    {EMOJIS.map((emoji) => (
-                      <button
-                        key={emoji}
-                        onClick={() => { setReaction(emoji); markInteraction() }}
-                        className={`aspect-square flex items-center justify-center text-lg border rounded-lg transition-all ${
-                          reaction === emoji
-                            ? "border-yellow-400 bg-yellow-400/10 scale-110"
-                            : "border-zinc-800 bg-transparent hover:border-zinc-600"
-                        }`}
-                      >
-                        {emoji}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="mt-auto mb-6 shrink-0">
-                    <button
-                      onClick={handleSendReaction}
-                      className="w-full py-3.5 rounded-xl font-mono text-xs font-bold uppercase tracking-wide bg-yellow-400 text-black hover:bg-yellow-500 transition-transform active:scale-95"
-                    >
-                      Send {reaction}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col h-full animate-in fade-in duration-300 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                  <div className="mb-3 shrink-0">
-                    <textarea
-                      placeholder="Ask the speaker a question..."
-                      value={inputText}
-                      onChange={(e) => { setInputText(e.target.value); markInteraction() }}
-                      className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-3 font-mono text-xs text-white placeholder-zinc-600 resize-none focus:outline-none focus:border-yellow-400 transition-colors h-20"
-                    />
-                  </div>
-                  <div className="mb-4 shrink-0">
-                    <button
-                      onClick={handleSendQuestion}
-                      disabled={!inputText.trim()}
-                      className={`w-full py-3 rounded-xl font-mono text-xs font-bold uppercase tracking-wide transition-all active:scale-95 ${
-                        inputText.trim() ? "bg-yellow-400 text-black hover:bg-yellow-500" : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
-                      }`}
-                    >
-                      Submit Question
-                    </button>
-                  </div>
-                  {/* Local questions list */}
-                  {questions.length > 0 && (
-                    <div className="flex flex-col gap-2">
-                      {questions.map((q) => (
-                        <div key={q.id} className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2">
-                          <p className="font-sans text-[11px] text-white leading-tight mb-1">{q.text}</p>
-                          <p className="font-mono text-[9px] text-zinc-500">{q.name}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+// ─── Sim Overlay — React Tab ──────────────────────────────────────────────────
+// Sits on top of the real ReactTab during simulation to show typed values + selected emoji.
+const EMOJI_OPTIONS = ["🔥", "🤯", "😂", "💀", "👏", "🚀"]
+
+function SimOverlayReact({ sim }: { sim: SimState }) {
+  return (
+    <div
+      className="absolute inset-0 pointer-events-none"
+      style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%", paddingBottom: "1rem" }}
+    >
+      <div className="flex flex-col gap-5 pt-1">
+        {/* Name field */}
+        <div className="flex flex-col gap-2">
+          <label className="font-mono text-xs text-jsconf-muted uppercase tracking-wide">
+            Your Name <span className="normal-case">(optional)</span>
+          </label>
+          <div className="bg-jsconf-surface border border-jsconf-yellow h-11 flex items-center px-3 font-sans text-white text-sm relative overflow-hidden">
+            {sim.typedName}
+            <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />
+          </div>
+        </div>
+
+        {/* Text field */}
+        {sim.text && (
+          <div className="flex flex-col gap-2">
+            <label className="font-mono text-xs text-jsconf-muted uppercase tracking-wide">
+              Your Reaction
+            </label>
+            <div className="bg-jsconf-surface border border-jsconf-yellow px-3 py-2 font-sans text-white text-sm min-h-[72px] relative">
+              {sim.typedText}
+              {sim.phase === "typing-text" && (
+                <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />
               )}
             </div>
-
-            {/* Home bar */}
-            <div className="absolute left-1/2 -translate-x-1/2 bg-zinc-700" style={{ bottom: "10px", width: "80px", height: "4px", borderRadius: "2px" }} />
           </div>
+        )}
+
+        {/* Emoji picker */}
+        <div className="flex flex-col gap-2">
+          <label className="font-mono text-xs text-jsconf-muted uppercase tracking-wide">
+            How are you feeling?
+          </label>
+          <div className="flex gap-2 flex-wrap p-2">
+            {EMOJI_OPTIONS.map((emoji) => (
+              <div
+                key={emoji}
+                className={`text-3xl p-3 rounded-none border transition-all duration-150 ${
+                  sim.emoji === emoji
+                    ? "bg-jsconf-yellow-dim border-jsconf-yellow scale-110"
+                    : "bg-jsconf-surface border-jsconf-border"
+                }`}
+              >
+                {emoji}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Send button */}
+        <div
+          className={`w-full h-12 flex items-center justify-center font-display font-bold uppercase tracking-wide text-sm transition-colors ${
+            sim.phase === "sending" || sim.phase === "done"
+              ? "bg-jsconf-yellow text-black"
+              : "bg-jsconf-surface border border-jsconf-border text-jsconf-muted"
+          }`}
+        >
+          {sim.phase === "sending" ? `Send ${sim.emoji ?? ""}` : sim.phase === "done" ? "Sent!" : "Send Reaction"}
         </div>
       </div>
     </div>
@@ -425,4 +486,4 @@ export function InteractivePhoneMockup({
 }
 
 // Export LiveItem type for parent use
-export type { LiveItem }
+export type { }

@@ -195,10 +195,10 @@ function SpeakerExperience() {
 
   const handleActivity = useCallback((item: LiveItem) => {
     setHeroItems((prev) => [...prev.slice(-30), item])
-    // Auto-expire items after 10s
+    // Expire after 15s (animation is 14s)
     setTimeout(() => {
       setHeroItems((prev) => prev.filter((i) => i.id !== item.id))
-    }, 10_000)
+    }, 15_000)
   }, [])
 
   const speakerFAQ = [
@@ -323,7 +323,7 @@ function OrganizerExperience() {
     setHeroItems((prev) => [...prev.slice(-30), item])
     setTimeout(() => {
       setHeroItems((prev) => prev.filter((i) => i.id !== item.id))
-    }, 10_000)
+    }, 15_000)
   }, [])
 
   const organizerFAQ = [
