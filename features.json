@@ -1,0 +1,173 @@
+[
+  {
+    "id": "feat-001",
+    "name": "Homepage pop-up and hover reactions",
+    "description": "Fix non-functional pop-up animations and hover/click reactions on the homepage. Ensure all interactive elements respond correctly to user interactions.",
+    "complexity": "low",
+    "priority": "high",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-002",
+    "name": "Full responsive layout — homepage",
+    "description": "Ensure the homepage is fully responsive across all breakpoints (mobile, tablet, desktop). Test and fix any layout overflow, wrapping, or scaling issues.",
+    "complexity": "medium",
+    "priority": "high",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-003",
+    "name": "Full responsive layout — global",
+    "description": "Audit and fix responsive layouts across the entire application, not just the homepage. Every page must render correctly on mobile, tablet, and desktop viewports.",
+    "complexity": "high",
+    "priority": "high",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-004",
+    "name": "Account page — username management",
+    "description": "Replace the placeholder account page with a functional form allowing users to update their display name and username. Include validation and save confirmation.",
+    "complexity": "low",
+    "priority": "high",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-005",
+    "name": "Account page — plan management",
+    "description": "Add a plan section to the account page showing the user's current plan (Free or Pro) with an upgrade/downgrade flow. Connect to Stripe when the payment feature is live.",
+    "complexity": "medium",
+    "priority": "high",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-006",
+    "name": "Conference multi-day scheduling (up to 5 days)",
+    "description": "Allow conference organizers to plan a conference spanning 1–5 days. Each day has its own timeline where slots (talks, breaks, workshops, etc.) can be created, moved, and resized.",
+    "complexity": "high",
+    "priority": "high",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-007",
+    "name": "Conference slot management",
+    "description": "Organizers can create named, typed reserved slots (talk, break, keynote, workshop, lightning talk, etc.) within each day. Slots have a start time, duration, title, and optional description.",
+    "complexity": "medium",
+    "priority": "high",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-008",
+    "name": "Speaker assignment to conference slots",
+    "description": "Organizers can assign speakers to slots by typing an email address or selecting from a future 'call for speakers' list. Each assigned speaker receives an email invitation to join the conference.",
+    "complexity": "medium",
+    "priority": "high",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-009",
+    "name": "Speaker conference talk portal",
+    "description": "Speakers who have both conference talks and personal presentations can manage all of them from the same speaker portal. Conference talks are excluded from the personal free-tier talk count.",
+    "complexity": "medium",
+    "priority": "medium",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-010",
+    "name": "Stripe payment integration",
+    "description": "Integrate Stripe to handle plan upgrades, subscription management, and any paid features. Includes webhook handling for subscription lifecycle events (created, updated, cancelled). Must comply with PCI-DSS requirements via Stripe Elements.",
+    "complexity": "high",
+    "priority": "high",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-011",
+    "name": "Color mode (theme switcher)",
+    "description": "Implement a clear/light mode alongside the existing mode. Test multiple color palette combinations. Expose a toggle in user settings and persist the preference.",
+    "complexity": "medium",
+    "priority": "medium",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-012",
+    "name": "Favicon — SVG with 'e' in jsconf colors",
+    "description": "Replace the placeholder favicon with a custom SVG favicon displaying the letter 'e' styled in jsconf brand colors. Provide both SVG and ICO fallback formats.",
+    "complexity": "low",
+    "priority": "medium",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-013",
+    "name": "PowerPoint and PDF presentation support",
+    "description": "Enable speakers to upload PowerPoint (.pptx) and PDF files as their presentation source, reducing dependency on slides.com. Files are converted and rendered slide-by-slide in the viewer.",
+    "complexity": "high",
+    "priority": "high",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-014",
+    "name": "iFrame URL embedding (experimental)",
+    "description": "Offer an option to embed a presentation via an arbitrary URL in an iframe. This is explicitly marked as experimental: compatibility is not guaranteed and will vary by source. A clear disclaimer must be shown to the organizer and audience.",
+    "complexity": "low",
+    "priority": "medium",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-015",
+    "name": "Speaker slide control via phone",
+    "description": "Allow speakers to control their slide deck (next, previous, jump to slide) from a mobile phone via a dedicated remote-control view. Connection should be low-latency and require no app install (PWA or web).",
+    "complexity": "high",
+    "priority": "medium",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-016",
+    "name": "Q&A — flagged questions remain visible (dimmed)",
+    "description": "In the session Q&A view ([sessionId].tsx), questions that are flagged are no longer hidden. Instead they remain visible but visually dimmed and pushed to the bottom of the list, so moderators retain context.",
+    "complexity": "low",
+    "priority": "high",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-017",
+    "name": "Q&A — question deletion by moderator",
+    "description": "Moderators can permanently delete individual questions from the Q&A view for moderation purposes. Deletion requires a confirmation step.",
+    "complexity": "low",
+    "priority": "high",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-018",
+    "name": "Q&A — ban user on question ban",
+    "description": "When a moderator bans (flags + removes) a question, the author is automatically banned from submitting further questions in that session. The ban is session-scoped and is reversible by the moderator. This is a sensitive moderation action and must include a confirmation dialog with clear explanation of consequences.",
+    "complexity": "medium",
+    "priority": "high",
+    "status": "pending",
+    "complete": false
+  },
+  {
+    "id": "feat-019",
+    "name": "Dev floating overlay — features & ideas tracker",
+    "description": "A draggable floating panel visible only in the development environment (NODE_ENV=development) that displays the features.json and ideas.json lists. Features can be highlighted with annotated arrows. The panel can be minimized and re-opened via a persistent button. Has no effect on production UI.",
+    "complexity": "medium",
+    "priority": "high",
+    "status": "pending",
+    "complete": false
+  }
+]

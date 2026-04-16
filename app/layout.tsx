@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Space_Grotesk, Inter, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
+import { DevOverlay } from '@/components/dev/DevOverlay'
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -60,6 +61,7 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-jsconf-bg text-white">
         {children}
         <Analytics />
+        {process.env.NODE_ENV === 'development' && <DevOverlay />}
       </body>
     </html>
   )

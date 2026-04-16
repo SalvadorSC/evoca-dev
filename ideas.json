@@ -1,0 +1,29 @@
+[
+  {
+    "id": "idea-001",
+    "name": "Dailymotion live streaming integration",
+    "description": "Allow conference organizers to stream their event live via the Dailymotion API and embed the Dailymotion video player directly on the conference page. No Dailymotion login required for viewers. Organizer authentication handled server-side.",
+    "complexity": "high",
+    "priority": "medium",
+    "status": "idea",
+    "complete": false
+  },
+  {
+    "id": "idea-002",
+    "name": "Talk submission process (CFP — Call for Papers)",
+    "description": "Implement an end-to-end submission flow inspired by the Software Crafters conference process. Speakers submit talk proposals with title, abstract, format, level, and tags. Organizers review, accept, reject, or waitlist submissions. Accepted speakers are notified and their talk can be slotted directly into the conference schedule. Full spec to be provided separately.",
+    "complexity": "high",
+    "priority": "medium",
+    "status": "idea",
+    "complete": false
+  },
+  {
+    "id": "idea-003",
+    "name": "Draw-on-presentation annotations",
+    "description": "Allow speakers (or possibly remote viewers) to draw freehand annotations on top of a live presentation slide, like a digital whiteboard overlay. Could be triggered from a phone. Not a current priority — needs UX scoping before implementation.",
+    "complexity": "high",
+    "priority": "low",
+    "status": "idea",
+    "complete": false
+  }
+]
