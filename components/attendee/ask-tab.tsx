@@ -11,9 +11,11 @@ import { AttendeeQuestionCard } from "@/components/shared/question-card"
 interface AskTabProps {
   send: (message: ClientMessage) => void
   questions: Question[]
+  /** When provided, submitted questions are also persisted to the DB. Omit for demo mode. */
+  sessionId?: string | null
 }
 
-export function AskTab({ send, questions }: AskTabProps) {
+export function AskTab({ send, questions, sessionId }: AskTabProps) {
   const [name, setName] = useState("")
   const [text, setText] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -30,20 +32,44 @@ export function AskTab({ send, questions }: AskTabProps) {
     }
   }, [])
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!text.trim()) return
 
     setIsSubmitting(true)
 
+    const id = crypto.randomUUID()
+    const questionName = name.trim() || "Anonymous"
+    const questionText = text.trim()
+
     send({
       type: "question",
-      id: crypto.randomUUID(),
-      name: name.trim() || "Anonymous",
-      text: text.trim(),
+      id,
+      name: questionName,
+      text: questionText,
       votes: 0,
       answered: false,
       ts: Date.now(),
     })
+
+    // Persist to DB when a real session is active (not demo)
+    if (sessionId) {
+      try {
+        const { createClient } = await import("@/lib/supabase/client")
+        const supabase = createClient()
+        await supabase.from("questions").insert({
+          id,
+          session_id: sessionId,
+          text: questionText,
+          name: questionName,
+          votes: 0,
+          answered: false,
+          party_id: id,
+        })
+      } catch (e) {
+        // Non-blocking — party message already sent
+        console.error("[ask-tab] Failed to persist question:", e)
+      }
+    }
 
     setText("")
     setIsSubmitting(false)

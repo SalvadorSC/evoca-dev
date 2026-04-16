@@ -232,18 +232,18 @@ function PhoneMockup({ send, questions, qrUrl }: { send: (m: ClientMessage) => v
           {/* Top notch */}
           <div className="absolute top-[10px] left-1/2 -translate-x-1/2 w-[72px] h-[20px] bg-black rounded-full z-10" />
 
-          {/* Screen - scrollable content */}
-          <div className="h-full overflow-y-auto rounded-[2rem] bg-jsconf-bg">
+          {/* Screen */}
+          <div className="h-full flex flex-col rounded-[2rem] bg-jsconf-bg overflow-hidden">
             {/* Status bar inside phone */}
-            <div className="sticky top-0 z-10 bg-jsconf-bg flex items-center justify-between px-5 pt-8 pb-1">
+            <div className="shrink-0 bg-jsconf-bg flex items-center justify-between px-5 pt-8 pb-1 z-10">
               <span className="font-mono text-[10px] text-jsconf-muted">Live Wall</span>
               <span className="font-mono text-[10px] text-jsconf-yellow">DEMO</span>
             </div>
 
-            {/* Scaled attendee UI */}
-            <div className="origin-top px-3 pb-8" style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%" /* 100/0.82 */, marginLeft: "-11%" }}>
-              <Tabs defaultValue="react" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-jsconf-surface border border-jsconf-border rounded-none h-auto p-0 mb-3">
+            {/* Scaled attendee UI — React tab fixed, Ask tab scrollable */}
+            <Tabs defaultValue="react" className="flex-1 flex flex-col min-h-0 px-1">
+              <div style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }} className="shrink-0">
+                <TabsList className="grid w-full grid-cols-2 bg-jsconf-surface border border-jsconf-border rounded-none h-auto p-0 mb-0">
                   <TabsTrigger value="react" className="rounded-none data-[state=active]:bg-jsconf-yellow data-[state=active]:text-black font-display font-bold uppercase tracking-wide py-2.5 text-xs">
                     React
                   </TabsTrigger>
@@ -251,14 +251,20 @@ function PhoneMockup({ send, questions, qrUrl }: { send: (m: ClientMessage) => v
                     Ask
                   </TabsTrigger>
                 </TabsList>
-                <TabsContent value="react" className="mt-0">
+              </div>
+              {/* React tab: no scroll */}
+              <TabsContent value="react" className="mt-0 flex-1 min-h-0">
+                <div style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }} className="pb-4">
                   <ReactTab send={send} />
-                </TabsContent>
-                <TabsContent value="ask" className="mt-0">
+                </div>
+              </TabsContent>
+              {/* Ask tab: scrollable */}
+              <TabsContent value="ask" className="mt-0 flex-1 min-h-0 overflow-y-auto">
+                <div style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }} className="pb-8">
                   <AskTab send={send} questions={questions} />
-                </TabsContent>
-              </Tabs>
-            </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </div>
 
           {/* Home bar */}
@@ -295,7 +301,7 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
   }, [sessionId])
 
   return (
-    <div className="min-h-screen bg-jsconf-bg text-white flex flex-col">
+    <div className="h-screen bg-jsconf-bg text-white flex flex-col overflow-hidden">
       {/* Slim live banner */}
       <div className="bg-jsconf-yellow text-black px-4 py-2 flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
@@ -338,20 +344,13 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 bg-jsconf-surface border border-jsconf-border px-3 py-1.5">
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-jsconf-red opacity-75" />
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-jsconf-red" />
-          </span>
-          <span className="font-mono text-xs text-jsconf-muted uppercase tracking-wide">Now</span>
-          <span className="font-sans text-xs text-white">{DEMO_TALK.speaker} — {DEMO_TALK.title}</span>
-        </div>
+
       </header>
 
-      {/* Two-column layout with flex for height management */}
-      <div className="flex-1 flex flex-col lg:flex-row min-h-0">
+      {/* Two-column layout — flex-1 min-h-0 ensures inner panels scroll, not the page */}
+      <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
         {/* Left: Live Wall feed */}
-        <div className="flex-1 lg:flex-[65] border-b lg:border-b-0 lg:border-r border-jsconf-border flex flex-col min-h-0">
+        <div className="flex-1 lg:flex-[65] border-b lg:border-b-0 lg:border-r border-jsconf-border flex flex-col min-h-0 overflow-hidden">
           {/* Tab switcher */}
           <div className="px-6 py-3 border-b border-jsconf-border shrink-0">
             <div className="flex gap-0 w-fit border border-jsconf-border">
@@ -397,7 +396,7 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
         </div>
 
         {/* Right: Phone mockup - fixed width, doesn't grow */}
-        <div className="lg:flex-[35] bg-jsconf-surface flex items-start justify-center px-6 py-8 shrink-0">
+        <div className="lg:flex-[35] bg-jsconf-surface flex items-start justify-center px-6 py-8 shrink-0 overflow-y-auto">
           <PhoneMockup send={send} questions={state.questions} qrUrl={qrUrl} />
         </div>
       </div>

@@ -188,7 +188,7 @@ function AttendeePageInner() {
             </TabsContent>
 
             <TabsContent value="ask" className="mt-0">
-              <AskTab send={send} questions={state.questions} />
+              <AskTab send={send} questions={state.questions} sessionId={sessionId} />
             </TabsContent>
 
             <TabsContent value="schedule" className="mt-0">

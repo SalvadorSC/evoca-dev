@@ -89,8 +89,8 @@ export default function PresentPage() {
     iframeRef.current?.contentWindow?.postMessage({ method }, "*")
   }, [])
 
-  const slideNext = useCallback(() => postToIframe("next"), [postToIframe])
-  const slidePrev = useCallback(() => postToIframe("prev"), [postToIframe])
+  const slideNext = useCallback(() => { postToIframe("next"); postToIframe("down") }, [postToIframe])
+  const slidePrev = useCallback(() => { postToIframe("prev"); postToIframe("up") }, [postToIframe])
   const slideUp = useCallback(() => postToIframe("up"), [postToIframe])
   const slideDown = useCallback(() => postToIframe("down"), [postToIframe])
 
@@ -144,8 +144,8 @@ export default function PresentPage() {
       if ((e.target as HTMLElement).tagName === "INPUT") return
       if (e.key === "ArrowRight") { sendSlide("next"); slideNext() }
       else if (e.key === "ArrowLeft") { sendSlide("prev"); slidePrev() }
-      else if (e.key === "ArrowUp") { e.preventDefault(); slideUp() }
-      else if (e.key === "ArrowDown") { e.preventDefault(); slideDown() }
+      else if (e.key === "ArrowUp") { e.preventDefault(); postToIframe("up") }
+      else if (e.key === "ArrowDown") { e.preventDefault(); postToIframe("down") }
       else if (e.key === "q" || e.key === "Q") setQaOpen((v) => !v)
       else if (e.key === "f" || e.key === "F") toggleFullscreen()
       else if (e.key === "Escape") {
@@ -164,8 +164,6 @@ export default function PresentPage() {
 
   const handleSlideNext = () => { sendSlide("next"); slideNext() }
   const handleSlidePrev = () => { sendSlide("prev"); slidePrev() }
-  const handleSlideUp = () => slideUp()
-  const handleSlideDown = () => slideDown()
 
   // ── Fullscreen ──────────────────────────────────────────────────────────────
   const toggleFullscreen = () => {
@@ -258,6 +256,13 @@ export default function PresentPage() {
           </p>
         </div>
       )}
+
+      {/* ── Layer 0.5: transparent capture layer — receives mousemove over iframe ── */}
+      <div
+        className="absolute inset-0"
+        style={{ zIndex: 5, pointerEvents: controlsVisible ? "none" : "auto" }}
+        onMouseMove={resetControlsTimer}
+      />
 
       {/* ── Layer 1: Overlay ── */}
       <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 10 }}>
@@ -424,10 +429,8 @@ export default function PresentPage() {
             padding: "8px 16px",
           }}
         >
-          <ControlBtn onClick={handleSlidePrev} title="Previous slide (←)">←</ControlBtn>
-          <ControlBtn onClick={handleSlideNext} title="Next slide (→)">→</ControlBtn>
-          <ControlBtn onClick={handleSlideUp} title="Slide up (↑)">↑</ControlBtn>
-          <ControlBtn onClick={handleSlideDown} title="Slide down (↓)">↓</ControlBtn>
+          <ControlBtn onClick={handleSlidePrev} title="Previous / up (← ↑)">←</ControlBtn>
+          <ControlBtn onClick={handleSlideNext} title="Next / down (→ ↓)">→</ControlBtn>
           <Divider />
           <ControlBtn onClick={toggleFullscreen} title="Toggle fullscreen (F)">⛶</ControlBtn>
           <ControlBtn onClick={() => setQaOpen((v) => !v)} title="Toggle Q&A (Q)">Q</ControlBtn>
