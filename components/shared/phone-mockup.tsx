@@ -99,15 +99,15 @@ export function DemoPhoneMockup({
 const EMOJIS = ["🔥", "👏", "🤯", "🚀", "😂", "💀"]
 
 const SIM_SCRIPTS: Array<{ tab: "react" | "ask"; emoji?: string; name: string; text: string }> = [
-  { tab: "react", emoji: "🔥", name: "Alex",   text: "" },
-  { tab: "react", emoji: "👏", name: "Sarah",  text: "Try me" },
+  { tab: "react", emoji: "🔥", name: "Alex", text: "" },
+  { tab: "react", emoji: "👏", name: "Sarah", text: "Try me" },
   { tab: "react", emoji: "🤯", name: "Jordan", text: "Evoca is truly useful for conferences" },
-  { tab: "react", emoji: "🚀", name: "Marco",  text: "" },
-  { tab: "react", emoji: "🔥", name: "Priya",  text: "Evoca works really well in engaging attendees" },
-  { tab: "react", emoji: "😂", name: "Tom",    text: "" },
-  { tab: "react", emoji: "👏", name: "Lena",   text: "I always use Evoca to get feedback on my talks" },
+  { tab: "react", emoji: "🚀", name: "Marco", text: "" },
+  { tab: "react", emoji: "🔥", name: "Priya", text: "Evoca works really well in engaging attendees" },
+  { tab: "react", emoji: "😂", name: "Tom", text: "" },
+  { tab: "react", emoji: "👏", name: "Lena", text: "I always use Evoca to get feedback on my talks" },
   { tab: "react", emoji: "🚀", name: "Carlos", text: "" },
-  { tab: "react", emoji: "💀", name: "Mia",    text: "Try me" },
+  { tab: "react", emoji: "💀", name: "Mia", text: "Try me, try Evoca!" },
 ]
 
 // ─── Hero Background ──────────────────────────────────────────────────────────
@@ -122,6 +122,8 @@ export interface LiveItem {
   /** Direction: true = left→right, false = right→left */
   ltr: boolean
   ts: number
+  /** If true the item loops indefinitely (user-submitted). Sim items play once. */
+  persistent?: boolean
 }
 
 export function HeroBackground({ items }: { items: LiveItem[] }) {
@@ -152,7 +154,7 @@ function FloatingItem({ item }: { item: LiveItem }) {
         top: `${item.y}%`,
         left: 0,
         right: 0,
-        animation: visible ? `${animName} 18s linear infinite` : undefined,
+        animation: visible ? `${animName} 18s linear ${item.persistent ? "infinite" : "forwards"}` : undefined,
         animationDelay: delay,
         opacity: visible ? undefined : 0,
       }}
@@ -216,9 +218,9 @@ export function InteractivePhoneMockup({
   const phoneTab = activeTab === "wall" ? "react" : "ask"
 
   const lastInteractionRef = useRef<number>(Date.now())
-  const simRunningRef       = useRef(false)
-  const simIndexRef         = useRef(0)
-  const idleTimerRef        = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const simRunningRef = useRef(false)
+  const simIndexRef = useRef(0)
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const markInteraction = useCallback(() => {
     lastInteractionRef.current = Date.now()
@@ -345,6 +347,7 @@ export function InteractivePhoneMockup({
         y: 15 + Math.random() * 65,
         ltr: Math.random() > 0.5,
         ts: Date.now(),
+        persistent: true,
       }
       onActivity(item)
     }
@@ -417,8 +420,8 @@ const EMOJI_OPTIONS = ["🔥", "🤯", "😂", "💀", "👏", "🚀"]
 function SimOverlayReact({ sim }: { sim: SimState }) {
   const isTypingName = sim.phase === "typing-name"
   const isTypingText = sim.phase === "typing-text"
-  const isPicking    = sim.phase === "picking-emoji"
-  const isSending    = sim.phase === "sending" || sim.phase === "done"
+  const isPicking = sim.phase === "picking-emoji"
+  const isSending = sim.phase === "sending" || sim.phase === "done"
 
   return (
     <div
@@ -459,11 +462,10 @@ function SimOverlayReact({ sim }: { sim: SimState }) {
             {EMOJI_OPTIONS.map((emoji) => (
               <div
                 key={emoji}
-                className={`text-3xl p-3 border transition-all duration-150 ${
-                  sim.emoji === emoji
-                    ? "bg-jsconf-yellow-dim border-jsconf-yellow scale-110"
-                    : "bg-jsconf-surface border-jsconf-border"
-                }`}
+                className={`text-3xl p-3 border transition-all duration-150 bg-jsconf-yellow ${sim.emoji === emoji
+                  ? "bg-jsconf-yellow-dim border-jsconf-yellow scale-110"
+                  : "bg-jsconf-surface border-jsconf-border"
+                  }`}
               >
                 {emoji}
               </div>
@@ -473,9 +475,8 @@ function SimOverlayReact({ sim }: { sim: SimState }) {
 
         {/* Send button — yellow once an emoji is selected, matching real ReactTab */}
         <div
-          className={`w-full h-12 flex items-center justify-center font-display font-bold uppercase tracking-wide text-sm transition-colors ${
-            sim.emoji ? "bg-jsconf-yellow text-black" : "bg-jsconf-surface border border-jsconf-border text-jsconf-muted"
-          }`}
+          className={`w-full h-12 flex items-center justify-center font-display font-bold uppercase tracking-wide text-sm bg-jsconf-yellow transition-colors ${sim.emoji ? "text-black" : "border border-jsconf-border text-jsconf-muted"
+            }`}
         >
           {sim.phase === "done" ? "Sent!" : sim.emoji ? `Send ${sim.emoji}` : "Send Reaction"}
         </div>
