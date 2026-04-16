@@ -348,8 +348,8 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1.5">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red opacity-40" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-black" />
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-600 opacity-40" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600" />
                 </span>
                 <span className="font-mono text-xs font-bold uppercase tracking-widest">Live Demo</span>
               </span>
