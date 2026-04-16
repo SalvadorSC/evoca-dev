@@ -4,13 +4,13 @@ import { useState, useEffect, useRef, useCallback, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import PartySocket from "partysocket"
-import { QRCodeSVG } from "qrcode.react"
 import { ReactionCard } from "@/components/wall/reaction-card"
 import { QuestionCard } from "@/components/wall/question-card"
 import { EmojiBurst } from "@/components/wall/emoji-burst"
 import { ReactTab } from "@/components/attendee/react-tab"
 import { AskTab } from "@/components/attendee/ask-tab"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DemoPhoneMockup } from "@/components/shared/phone-mockup"
 import type { AppState, ClientMessage, ServerMessage } from "@/lib/types"
 
 const PARTY_HOST = "jsconf-live-wall.salvadorsc.partykit.dev"
@@ -221,78 +221,7 @@ function AttendeeView({ sessionId }: { sessionId: string }) {
   )
 }
 
-// Phone mockup component - fixed size with scrollable content
-function PhoneMockup({ send, questions, qrUrl, activeTab, onTabChange }: {
-  send: (m: ClientMessage) => void
-  questions: AppState["questions"]
-  qrUrl: string
-  activeTab: "wall" | "qa"
-  onTabChange: (tab: "wall" | "qa") => void
-}) {
-  const phoneTab = activeTab === "wall" ? "react" : "ask"
-  return (
-    <div className="flex items-start gap-6">
-      {/* Phone frame - fixed dimensions */}
-      <div className="flex flex-col items-center gap-3 shrink-0">
-        <p className="font-mono text-xs text-jsconf-muted uppercase tracking-widest">Attendee View</p>
-        <div className="relative w-[260px] h-[520px] rounded-[2.5rem] border-4 border-zinc-700 bg-zinc-900 shadow-2xl overflow-hidden">
-          {/* Top notch */}
-          <div className="absolute top-[10px] left-1/2 -translate-x-1/2 w-[72px] h-[20px] bg-black rounded-full z-10" />
 
-          {/* Screen */}
-          <div className="h-full flex flex-col rounded-[2rem] bg-jsconf-bg overflow-hidden p-2">
-            {/* Status bar inside phone */}
-            <div className="shrink-0 bg-jsconf-bg flex items-center justify-between px-5 pt-6 pb-1 z-10">
-              {/* <span className="font-mono text-[10px] text-jsconf-muted">Live Wall</span>
-              <span className="font-mono text-[10px] text-jsconf-yellow">DEMO</span> */}
-            </div>
-
-            {/* Scaled attendee UI — controlled by shared activeTab */}
-            <Tabs value={phoneTab} onValueChange={(v) => onTabChange(v === "react" ? "wall" : "qa")} className="flex-1 flex flex-col min-h-0 px-1">
-              <div style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }} className="shrink-0">
-                <TabsList className="grid w-full grid-cols-2 bg-jsconf-surface border border-jsconf-border rounded-none h-auto p-0 mb-0">
-                  <TabsTrigger value="react" className="rounded-none data-[state=active]:bg-jsconf-yellow data-[state=active]:text-black font-display font-bold uppercase tracking-wide py-2.5 text-xs">
-                    React
-                  </TabsTrigger>
-                  <TabsTrigger value="ask" className="rounded-none data-[state=active]:bg-jsconf-yellow data-[state=active]:text-black font-display font-bold uppercase tracking-wide py-2.5 text-xs">
-                    Ask
-                  </TabsTrigger>
-                </TabsList>
-              </div>
-              {/* React tab: no scroll */}
-              <TabsContent value="react" className="mt-0 flex-1 min-h-0">
-                <div style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }} className="pb-4">
-                  <ReactTab send={send} />
-                </div>
-              </TabsContent>
-              {/* Ask tab: scrollable */}
-              <TabsContent value="ask" className="mt-0 flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                <div style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }} className="pb-8">
-                  <AskTab send={send} questions={questions} />
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-
-          {/* Home bar */}
-          <div className="absolute bottom-[10px] left-1/2 -translate-x-1/2 w-[80px] h-[4px] bg-white/30 rounded-full" />
-        </div>
-      </div>
-
-      {/* QR Code - to the right of phone */}
-      {qrUrl && (
-        <div className="flex flex-col items-center gap-2 pt-8">
-          <div className="bg-white p-2 rounded">
-            <QRCodeSVG value={qrUrl} size={72} />
-          </div>
-          <p className="font-mono text-[10px] text-jsconf-muted leading-relaxed text-center max-w-[80px]">
-            Scan to try on your phone
-          </p>
-        </div>
-      )}
-    </div>
-  )
-}
 
 // Full demo view
 function FullDemoView({ sessionId }: { sessionId: string }) {
@@ -424,7 +353,7 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
 
         {/* Right: Phone mockup - fixed width, doesn't grow */}
         <div className="lg:flex-[35] bg-jsconf-surface flex items-start justify-center px-6 py-8 shrink-0 overflow-y-auto">
-          <PhoneMockup send={send} questions={state.questions} qrUrl={qrUrl} activeTab={activeTab} onTabChange={setActiveTab} />
+          <DemoPhoneMockup send={send} questions={state.questions} qrUrl={qrUrl} activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
       </div>
 
