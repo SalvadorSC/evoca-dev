@@ -471,13 +471,13 @@ function SimOverlayReact({ sim }: { sim: SimState }) {
           </div>
         </div>
 
-        {/* Send button */}
+        {/* Send button — yellow once an emoji is selected, matching real ReactTab */}
         <div
           className={`w-full h-12 flex items-center justify-center font-display font-bold uppercase tracking-wide text-sm transition-colors ${
-            isSending ? "bg-jsconf-yellow text-black" : "bg-jsconf-surface border border-jsconf-border text-jsconf-muted"
+            sim.emoji ? "bg-jsconf-yellow text-black" : "bg-jsconf-surface border border-jsconf-border text-jsconf-muted"
           }`}
         >
-          {sim.phase === "done" ? "Sent!" : isSending ? `Send ${sim.emoji ?? ""}` : "Send Reaction"}
+          {sim.phase === "done" ? "Sent!" : sim.emoji ? `Send ${sim.emoji}` : "Send Reaction"}
         </div>
 
       </div>
