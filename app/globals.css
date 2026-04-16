@@ -1,0 +1,117 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* JSConf España 2026 Design System */
+  --jsconf-bg: #080808;
+  --jsconf-surface: #111111;
+  --jsconf-surface-2: #1a1a1a;
+  --jsconf-border: #2a2a2a;
+  --jsconf-yellow: #F7E018;
+  --jsconf-yellow-dim: rgba(247, 224, 24, 0.12);
+  --jsconf-white: #FFFFFF;
+  --jsconf-muted: #888888;
+  --jsconf-red: #FF3B3B;
+  --jsconf-purple: #9B5CF6;
+  --jsconf-blue: #3B82F6;
+  --jsconf-orange: #F97316;
+
+  /* Tailwind mappings */
+  --background: #080808;
+  --foreground: #FFFFFF;
+  --card: #111111;
+  --card-foreground: #FFFFFF;
+  --popover: #111111;
+  --popover-foreground: #FFFFFF;
+  --primary: #F7E018;
+  --primary-foreground: #080808;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #FFFFFF;
+  --muted: #1a1a1a;
+  --muted-foreground: #888888;
+  --accent: #1a1a1a;
+  --accent-foreground: #FFFFFF;
+  --destructive: #FF3B3B;
+  --destructive-foreground: #FFFFFF;
+  --border: #2a2a2a;
+  --input: #2a2a2a;
+  --ring: #F7E018;
+  --radius: 0px;
+}
+
+@theme inline {
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  
+  /* JSConf Colors */
+  --color-jsconf-bg: #080808;
+  --color-jsconf-surface: #111111;
+  --color-jsconf-surface-2: #1a1a1a;
+  --color-jsconf-border: #2a2a2a;
+  --color-jsconf-yellow: #F7E018;
+  --color-jsconf-yellow-dim: rgba(247, 224, 24, 0.12);
+  --color-jsconf-muted: #888888;
+  --color-jsconf-red: #FF3B3B;
+  --color-jsconf-purple: #9B5CF6;
+  --color-jsconf-blue: #3B82F6;
+  --color-jsconf-orange: #F97316;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-jsconf-bg text-foreground font-sans antialiased;
+  }
+  
+  /* All interactive elements get 150ms transitions */
+  button, a, input, textarea, select {
+    @apply transition-all duration-150 ease-out;
+  }
+}
+
+/* Typography utilities */
+.font-display {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+}
+
+.heading {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.heading-wide {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
