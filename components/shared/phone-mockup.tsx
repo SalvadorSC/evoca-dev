@@ -136,14 +136,14 @@ export function HeroBackground({ items }: { items: LiveItem[] }) {
 
 function FloatingItem({ item }: { item: LiveItem }) {
   const [visible, setVisible] = useState(false)
+  const animName = `hero-float-${item.ltr ? "ltr" : "rtl"}`
+  // Random delay so simultaneous items don't overlap perfectly
+  const delay = `${(item.ts % 1000) / 1000}s`
 
   useEffect(() => {
     const id = requestAnimationFrame(() => setVisible(true))
     return () => cancelAnimationFrame(id)
   }, [])
-
-  const startX = item.ltr ? "-180px" : "calc(100vw + 180px)"
-  const endX   = item.ltr ? "calc(100vw + 180px)" : "-180px"
 
   return (
     <div
@@ -152,26 +152,23 @@ function FloatingItem({ item }: { item: LiveItem }) {
         top: `${item.y}%`,
         left: 0,
         right: 0,
-        // Use a CSS animation so we can control duration independently of React re-renders
-        animation: visible
-          ? `hero-float-${item.ltr ? "ltr" : "rtl"} 14s linear forwards`
-          : undefined,
-        transform: visible ? undefined : `translateX(${startX})`,
-        opacity: 0,
+        animation: visible ? `${animName} 18s linear infinite` : undefined,
+        animationDelay: delay,
+        opacity: visible ? undefined : 0,
       }}
     >
       <style>{`
         @keyframes hero-float-ltr {
-          0%   { transform: translateX(-220px); opacity: 0; }
-          8%   { opacity: 1; }
-          85%  { opacity: 1; }
-          100% { transform: translateX(calc(100vw + 220px)); opacity: 0; }
+          0%   { transform: translateX(-240px); opacity: 0; }
+          6%   { opacity: 1; }
+          88%  { opacity: 1; }
+          100% { transform: translateX(calc(100vw + 240px)); opacity: 0; }
         }
         @keyframes hero-float-rtl {
-          0%   { transform: translateX(calc(100vw + 220px)); opacity: 0; }
-          8%   { opacity: 1; }
-          85%  { opacity: 1; }
-          100% { transform: translateX(-220px); opacity: 0; }
+          0%   { transform: translateX(calc(100vw + 240px)); opacity: 0; }
+          6%   { opacity: 1; }
+          88%  { opacity: 1; }
+          100% { transform: translateX(-240px); opacity: 0; }
         }
       `}</style>
 
@@ -413,52 +410,56 @@ export function InteractivePhoneMockup({
 }
 
 // ─── Sim Overlay — React Tab ──────────────────────────────────────────────────
-// Sits on top of the real ReactTab during simulation to show typed values + selected emoji.
+// Covers the real ReactTab during simulation. Always renders ALL fields to match
+// the real layout — text field is always shown (empty when script has no text).
 const EMOJI_OPTIONS = ["🔥", "🤯", "😂", "💀", "👏", "🚀"]
 
 function SimOverlayReact({ sim }: { sim: SimState }) {
+  const isTypingName = sim.phase === "typing-name"
+  const isTypingText = sim.phase === "typing-text"
+  const isPicking    = sim.phase === "picking-emoji"
+  const isSending    = sim.phase === "sending" || sim.phase === "done"
+
   return (
     <div
-      className="absolute inset-0 pointer-events-none"
-      style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%", paddingBottom: "1rem" }}
+      className="absolute inset-0 bg-jsconf-bg pointer-events-none"
+      style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }}
     >
-      <div className="flex flex-col gap-5 pt-1">
+      <div className="flex flex-col gap-5 pt-1 pb-4">
+
         {/* Name field */}
         <div className="flex flex-col gap-2">
           <label className="font-mono text-xs text-jsconf-muted uppercase tracking-wide">
             Your Name <span className="normal-case">(optional)</span>
           </label>
-          <div className="bg-jsconf-surface border border-jsconf-yellow h-11 flex items-center px-3 font-sans text-white text-sm relative overflow-hidden">
-            {sim.typedName}
-            <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />
+          <div className={`bg-jsconf-surface border h-11 flex items-center px-3 font-sans text-white text-sm ${isTypingName ? "border-jsconf-yellow" : "border-jsconf-border"}`}>
+            <span>{sim.typedName}</span>
+            {isTypingName && <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />}
           </div>
         </div>
 
-        {/* Text field */}
-        {sim.text && (
-          <div className="flex flex-col gap-2">
-            <label className="font-mono text-xs text-jsconf-muted uppercase tracking-wide">
-              Your Reaction
-            </label>
-            <div className="bg-jsconf-surface border border-jsconf-yellow px-3 py-2 font-sans text-white text-sm min-h-[72px] relative">
-              {sim.typedText}
-              {sim.phase === "typing-text" && (
-                <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />
-              )}
-            </div>
+        {/* Reaction text field — always shown */}
+        <div className="flex flex-col gap-2">
+          <label className="font-mono text-xs text-jsconf-muted uppercase tracking-wide flex items-center justify-between">
+            <span>Your Reaction <span className="normal-case font-sans font-normal">(optional)</span></span>
+            <span className="font-mono text-xs text-jsconf-muted">{sim.typedText.length}/160</span>
+          </label>
+          <div className={`bg-jsconf-surface border px-3 py-2 font-sans text-white text-sm min-h-[72px] ${isTypingText ? "border-jsconf-yellow" : "border-jsconf-border"}`}>
+            <span>{sim.typedText}</span>
+            {isTypingText && <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />}
           </div>
-        )}
+        </div>
 
         {/* Emoji picker */}
         <div className="flex flex-col gap-2">
           <label className="font-mono text-xs text-jsconf-muted uppercase tracking-wide">
             How are you feeling?
           </label>
-          <div className="flex gap-2 flex-wrap p-2">
+          <div className={`flex gap-2 flex-wrap p-2 border transition-colors ${isPicking || isSending ? "border-transparent" : "border-transparent"}`}>
             {EMOJI_OPTIONS.map((emoji) => (
               <div
                 key={emoji}
-                className={`text-3xl p-3 rounded-none border transition-all duration-150 ${
+                className={`text-3xl p-3 border transition-all duration-150 ${
                   sim.emoji === emoji
                     ? "bg-jsconf-yellow-dim border-jsconf-yellow scale-110"
                     : "bg-jsconf-surface border-jsconf-border"
@@ -473,13 +474,12 @@ function SimOverlayReact({ sim }: { sim: SimState }) {
         {/* Send button */}
         <div
           className={`w-full h-12 flex items-center justify-center font-display font-bold uppercase tracking-wide text-sm transition-colors ${
-            sim.phase === "sending" || sim.phase === "done"
-              ? "bg-jsconf-yellow text-black"
-              : "bg-jsconf-surface border border-jsconf-border text-jsconf-muted"
+            isSending ? "bg-jsconf-yellow text-black" : "bg-jsconf-surface border border-jsconf-border text-jsconf-muted"
           }`}
         >
-          {sim.phase === "sending" ? `Send ${sim.emoji ?? ""}` : sim.phase === "done" ? "Sent!" : "Send Reaction"}
+          {sim.phase === "done" ? "Sent!" : isSending ? `Send ${sim.emoji ?? ""}` : "Send Reaction"}
         </div>
+
       </div>
     </div>
   )

@@ -194,11 +194,7 @@ function SpeakerExperience() {
   const [heroItems, setHeroItems] = useState<LiveItem[]>([])
 
   const handleActivity = useCallback((item: LiveItem) => {
-    setHeroItems((prev) => [...prev.slice(-30), item])
-    // Expire after 15s (animation is 14s)
-    setTimeout(() => {
-      setHeroItems((prev) => prev.filter((i) => i.id !== item.id))
-    }, 15_000)
+    setHeroItems((prev) => [...prev.slice(-40), item])
   }, [])
 
   const speakerFAQ = [
@@ -320,10 +316,7 @@ function OrganizerExperience() {
   const [heroItems, setHeroItems] = useState<LiveItem[]>([])
 
   const handleActivity = useCallback((item: LiveItem) => {
-    setHeroItems((prev) => [...prev.slice(-30), item])
-    setTimeout(() => {
-      setHeroItems((prev) => prev.filter((i) => i.id !== item.id))
-    }, 15_000)
+    setHeroItems((prev) => [...prev.slice(-40), item])
   }, [])
 
   const organizerFAQ = [
