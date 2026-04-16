@@ -194,7 +194,7 @@ function SpeakerExperience() {
   const [heroItems, setHeroItems] = useState<LiveItem[]>([])
 
   const handleActivity = useCallback((item: LiveItem) => {
-    setHeroItems((prev) => [...prev.slice(-40), item])
+    setHeroItems((prev) => [...prev.slice(-6), item])
   }, [])
 
   const speakerFAQ = [
@@ -316,7 +316,7 @@ function OrganizerExperience() {
   const [heroItems, setHeroItems] = useState<LiveItem[]>([])
 
   const handleActivity = useCallback((item: LiveItem) => {
-    setHeroItems((prev) => [...prev.slice(-40), item])
+    setHeroItems((prev) => [...prev.slice(-6), item])
   }, [])
 
   const organizerFAQ = [

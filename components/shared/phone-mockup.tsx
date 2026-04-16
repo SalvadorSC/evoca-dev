@@ -126,9 +126,22 @@ export interface LiveItem {
   persistent?: boolean
 }
 
+const MAX_VISIBLE = 6
+
 export function HeroBackground({ items, accentColor = "#F7E018" }: { items: LiveItem[]; accentColor?: string }) {
+  const [paused, setPaused] = useState(false)
+
+  useEffect(() => {
+    const onVisibility = () => setPaused(document.hidden)
+    document.addEventListener("visibilitychange", onVisibility)
+    return () => document.removeEventListener("visibilitychange", onVisibility)
+  }, [])
+
+  // Only render the most recent MAX_VISIBLE items to prevent bursts
+  const visible = items.slice(-MAX_VISIBLE)
+
   return (
-    <div className="absolute inset-0 overflow-hidden" aria-hidden>
+    <div className="absolute inset-0 overflow-hidden" aria-hidden style={{ animationPlayState: paused ? "paused" : "running" }}>
       {/* Wavy line background — pointer-events-none so it doesn't block content */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
@@ -159,14 +172,14 @@ export function HeroBackground({ items, accentColor = "#F7E018" }: { items: Live
         <rect width="100%" height="100%" fill="url(#wave-pattern-2)" />
       </svg>
 
-      {items.map((item) => (
-        <FloatingItem key={item.id} item={item} />
+      {visible.map((item) => (
+        <FloatingItem key={item.id} item={item} paused={paused} />
       ))}
     </div>
   )
 }
 
-function FloatingItem({ item }: { item: LiveItem }) {
+function FloatingItem({ item, paused }: { item: LiveItem; paused: boolean }) {
   const [visible, setVisible] = useState(false)
   const [hovered, setHovered] = useState(false)
   const [popped, setPopped] = useState(false)
@@ -217,6 +230,7 @@ function FloatingItem({ item }: { item: LiveItem }) {
           right: 0,
           animation: visible ? `${animName} ${duration} linear ${item.persistent ? "infinite" : "forwards"}` : undefined,
           animationDelay: visible ? delay : undefined,
+          animationPlayState: paused ? "paused" : "running",
           opacity: visible ? undefined : 0,
         }}
       >
