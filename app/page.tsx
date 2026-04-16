@@ -5,7 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { ChevronDown, QrCode } from "lucide-react"
 import { STORAGE_KEYS } from "@/lib/storage-keys"
-import { StaticPhoneMockup } from "@/components/shared/phone-mockup"
+import { InteractivePhoneMockup, HeroBackground } from "@/components/shared/phone-mockup"
+import type { LiveItem } from "@/components/shared/phone-mockup"
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const ROLES = {
@@ -188,8 +189,18 @@ function FAQ({ items }: { items: { q: string; a: string }[] }) {
   )
 }
 
-// ─── Speaker Experience ──────────────────────────────��────────────────────────
+// ─── Speaker Experience ───────────────────────────────────────────────────────
 function SpeakerExperience() {
+  const [heroItems, setHeroItems] = useState<LiveItem[]>([])
+
+  const handleActivity = useCallback((item: LiveItem) => {
+    setHeroItems((prev) => [...prev.slice(-30), item])
+    // Auto-expire items after 10s
+    setTimeout(() => {
+      setHeroItems((prev) => prev.filter((i) => i.id !== item.id))
+    }, 10_000)
+  }, [])
+
   const speakerFAQ = [
     { q: "Do attendees need an account?", a: "No, they scan a QR and they're in." },
     { q: "What happens to Q&A after the talk?", a: "Saved to your dashboard." },
@@ -200,8 +211,9 @@ function SpeakerExperience() {
   return (
     <div>
       {/* Hero */}
-      <section className="px-6 py-4 lg:py-12">
-        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+      <section className="relative px-6 py-4 lg:py-12 overflow-hidden min-h-[480px]">
+        <HeroBackground items={heroItems} />
+        <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
             <h1 className="font-display font-bold text-white text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
               Turn any talk into a live experience
@@ -227,7 +239,7 @@ function SpeakerExperience() {
             </div>
           </div>
           <div className="flex-shrink-0 hidden lg:block">
-                <StaticPhoneMockup role="speaker" />
+            <InteractivePhoneMockup onActivity={handleActivity} />
           </div>
         </div>
       </section>
@@ -305,6 +317,15 @@ function SpeakerExperience() {
 
 // ─── Organizer Experience ─────────────────────────────────────────────────────
 function OrganizerExperience() {
+  const [heroItems, setHeroItems] = useState<LiveItem[]>([])
+
+  const handleActivity = useCallback((item: LiveItem) => {
+    setHeroItems((prev) => [...prev.slice(-30), item])
+    setTimeout(() => {
+      setHeroItems((prev) => prev.filter((i) => i.id !== item.id))
+    }, 10_000)
+  }, [])
+
   const organizerFAQ = [
     { q: "How do I invite speakers?", a: "Send a link or email. They set up their own talks." },
     { q: "Can I brand it with my event colors?", a: "Coming soon." },
@@ -315,8 +336,9 @@ function OrganizerExperience() {
   return (
     <div>
       {/* Hero */}
-      <section className="px-6 py-16 lg:py-12">
-        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+      <section className="relative px-6 py-16 lg:py-12 overflow-hidden min-h-[480px]">
+        <HeroBackground items={heroItems} />
+        <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
             <h1 className="font-display font-bold text-white text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
               One platform for your schedule, speakers and live engagement
@@ -342,7 +364,7 @@ function OrganizerExperience() {
             </div>
           </div>
           <div className="flex-shrink-0 hidden lg:block">
-                <StaticPhoneMockup role="organizer" />
+            <InteractivePhoneMockup onActivity={handleActivity} />
           </div>
         </div>
       </section>
