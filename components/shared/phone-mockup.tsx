@@ -273,12 +273,16 @@ export function InteractivePhoneMockup({
   // null = user is interacting (real tab visible), non-null = sim overlay shown (even between rounds)
   const [sim, setSim] = useState<SimState | null>(null)
   const [activeTab, setActiveTab] = useState<"wall" | "qa">("wall")
+  const [resetKey, setResetKey] = useState(0)
   const phoneTab = activeTab === "wall" ? "react" : "ask"
 
   const lastInteractionRef = useRef<number>(Date.now())
   const simRunningRef = useRef(false)
   const simIndexRef = useRef(0)
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isHoveringRef = useRef(false)
+  const hasInteractedRef = useRef(false)
   const currentItemsRef = useRef<LiveItem[]>(currentItems)
   useEffect(() => { currentItemsRef.current = currentItems }, [currentItems])
 
@@ -286,13 +290,50 @@ export function InteractivePhoneMockup({
     active: true, tab: "react", name: "", typedName: "", text: "", typedText: "", emoji: null, phase: "typing-name",
   }
 
+  const RESET_MS = 8_000
+
+  const startResetTimer = useCallback(() => {
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current)
+    resetTimerRef.current = setTimeout(() => {
+      // Only reset if the user is still not hovering
+      if (!isHoveringRef.current) {
+        hasInteractedRef.current = false
+        simRunningRef.current = true
+        setResetKey((k) => k + 1) // remount tabs to clear any typed input
+        setSim(EMPTY_SIM)
+        setTimeout(() => { if (simRunningRef.current) runNextSim() }, 600)
+      }
+    }, RESET_MS)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const cancelResetTimer = useCallback(() => {
+    if (resetTimerRef.current) {
+      clearTimeout(resetTimerRef.current)
+      resetTimerRef.current = null
+    }
+  }, [])
+
   const markInteraction = useCallback(() => {
     lastInteractionRef.current = Date.now()
+    hasInteractedRef.current = true
     simRunningRef.current = false
     setSim(null)
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
-    idleTimerRef.current = setTimeout(() => { runNextSim() }, IDLE_MS)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    cancelResetTimer()
+  }, [cancelResetTimer])
+
+  const handleMouseEnter = useCallback(() => {
+    isHoveringRef.current = true
+    cancelResetTimer()
+  }, [cancelResetTimer])
+
+  const handleMouseLeave = useCallback(() => {
+    isHoveringRef.current = false
+    // If user interacted but didn't submit, start the reset countdown
+    if (hasInteractedRef.current && !simRunningRef.current) {
+      startResetTimer()
+    }
+  }, [startResetTimer])
 
   // Typewriter helper — calls setSim progressively
   function typewrite(
@@ -403,6 +444,7 @@ export function InteractivePhoneMockup({
     }, IDLE_MS)
     return () => {
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current)
       simRunningRef.current = false
     }
   }, [runNextSim])
@@ -410,6 +452,7 @@ export function InteractivePhoneMockup({
   // Stub send for the real tabs (no PartyKit — user actions only update local display)
   const stubSend = useCallback((_msg: ClientMessage) => {
     markInteraction()
+    hasInteractedRef.current = false // successful submit — no need to reset
     if (_msg.type === "reaction" || _msg.type === "question") {
       const item: LiveItem = {
         id: _msg.id ?? crypto.randomUUID(),
@@ -430,6 +473,8 @@ export function InteractivePhoneMockup({
     <div
       className="relative"
       onMouseMove={markInteraction}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       onTouchStart={markInteraction}
       style={{ width: "260px" }}
     >
@@ -464,7 +509,7 @@ export function InteractivePhoneMockup({
 
             <TabsContent value="react" className="mt-0 flex-1 min-h-0 relative">
               <div style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }} className="pb-4">
-                <ReactTab send={stubSend} />
+                <ReactTab key={resetKey} send={stubSend} />
               </div>
 
               {/* Sim overlay for React tab */}
@@ -475,7 +520,7 @@ export function InteractivePhoneMockup({
 
             <TabsContent value="ask" className="mt-0 flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] relative">
               <div style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }} className="pb-8">
-                <AskTab send={stubSend} questions={[]} />
+                <AskTab key={resetKey} send={stubSend} questions={[]} />
               </div>
             </TabsContent>
           </Tabs>
