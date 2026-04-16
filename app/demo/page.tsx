@@ -222,7 +222,14 @@ function AttendeeView({ sessionId }: { sessionId: string }) {
 }
 
 // Phone mockup component - fixed size with scrollable content
-function PhoneMockup({ send, questions, qrUrl }: { send: (m: ClientMessage) => void; questions: AppState["questions"]; qrUrl: string }) {
+function PhoneMockup({ send, questions, qrUrl, activeTab, onTabChange }: {
+  send: (m: ClientMessage) => void
+  questions: AppState["questions"]
+  qrUrl: string
+  activeTab: "wall" | "qa"
+  onTabChange: (tab: "wall" | "qa") => void
+}) {
+  const phoneTab = activeTab === "wall" ? "react" : "ask"
   return (
     <div className="flex items-start gap-6">
       {/* Phone frame - fixed dimensions */}
@@ -240,8 +247,8 @@ function PhoneMockup({ send, questions, qrUrl }: { send: (m: ClientMessage) => v
               <span className="font-mono text-[10px] text-jsconf-yellow">DEMO</span> */}
             </div>
 
-            {/* Scaled attendee UI — React tab fixed, Ask tab scrollable */}
-            <Tabs defaultValue="react" className="flex-1 flex flex-col min-h-0 px-1">
+            {/* Scaled attendee UI — controlled by shared activeTab */}
+            <Tabs value={phoneTab} onValueChange={(v) => onTabChange(v === "react" ? "wall" : "qa")} className="flex-1 flex flex-col min-h-0 px-1">
               <div style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }} className="shrink-0">
                 <TabsList className="grid w-full grid-cols-2 bg-jsconf-surface border border-jsconf-border rounded-none h-auto p-0 mb-0">
                   <TabsTrigger value="react" className="rounded-none data-[state=active]:bg-jsconf-yellow data-[state=active]:text-black font-display font-bold uppercase tracking-wide py-2.5 text-xs">
@@ -290,7 +297,8 @@ function PhoneMockup({ send, questions, qrUrl }: { send: (m: ClientMessage) => v
 // Full demo view
 function FullDemoView({ sessionId }: { sessionId: string }) {
   const { state, connectionCount, isConnected, send, visibleReactions, visibleQuestions } = useDemoParty(sessionId)
-  const [wallTab, setWallTab] = useState<"wall" | "qa">("wall")
+  // "wall"/"react" and "qa"/"ask" are linked — one state drives both panels
+  const [activeTab, setActiveTab] = useState<"wall" | "qa">("wall")
   const [qrUrl, setQrUrl] = useState("")
 
   useEffect(() => {
@@ -374,14 +382,14 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
           <div className="px-6 py-3 border-b border-jsconf-border shrink-0">
             <div className="flex gap-0 w-fit border border-jsconf-border">
               <button
-                onClick={() => setWallTab("wall")}
-                className={`font-display font-bold text-xs uppercase tracking-widest px-5 py-2.5 transition-colors ${wallTab === "wall" ? "bg-jsconf-yellow text-black" : "bg-transparent text-jsconf-muted hover:text-white"}`}
+                onClick={() => setActiveTab("wall")}
+                className={`font-display font-bold text-xs uppercase tracking-widest px-5 py-2.5 transition-colors ${activeTab === "wall" ? "bg-jsconf-yellow text-black" : "bg-transparent text-jsconf-muted hover:text-white"}`}
               >
                 Reactions
               </button>
               <button
-                onClick={() => setWallTab("qa")}
-                className={`font-display font-bold text-xs uppercase tracking-widest px-5 py-2.5 transition-colors border-l border-jsconf-border ${wallTab === "qa" ? "bg-jsconf-yellow text-black" : "bg-transparent text-jsconf-muted hover:text-white"}`}
+                onClick={() => setActiveTab("qa")}
+                className={`font-display font-bold text-xs uppercase tracking-widest px-5 py-2.5 transition-colors border-l border-jsconf-border ${activeTab === "qa" ? "bg-jsconf-yellow text-black" : "bg-transparent text-jsconf-muted hover:text-white"}`}
               >
                 Q&amp;A
               </button>
@@ -390,7 +398,7 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
 
           {/* Scrollable feed area */}
           <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-3 min-h-0">
-            {wallTab === "wall" ? (
+            {activeTab === "wall" ? (
               visibleReactions.length === 0 ? (
                 <div className="flex items-center justify-center h-40 text-jsconf-muted font-mono text-sm uppercase tracking-wide">
                   Loading reactions...
@@ -416,7 +424,7 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
 
         {/* Right: Phone mockup - fixed width, doesn't grow */}
         <div className="lg:flex-[35] bg-jsconf-surface flex items-start justify-center px-6 py-8 shrink-0 overflow-y-auto">
-          <PhoneMockup send={send} questions={state.questions} qrUrl={qrUrl} />
+          <PhoneMockup send={send} questions={state.questions} qrUrl={qrUrl} activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
       </div>
 
