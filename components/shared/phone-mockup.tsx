@@ -128,10 +128,10 @@ export interface LiveItem {
 
 export function HeroBackground({ items, accentColor = "#F7E018" }: { items: LiveItem[]; accentColor?: string }) {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-      {/* Wavy line background */}
+    <div className="absolute inset-0 overflow-hidden" aria-hidden>
+      {/* Wavy line background — pointer-events-none so it doesn't block content */}
       <svg
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-0 w-full h-full pointer-events-none"
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="xMidYMid slice"
       >
@@ -168,8 +168,9 @@ export function HeroBackground({ items, accentColor = "#F7E018" }: { items: Live
 
 function FloatingItem({ item }: { item: LiveItem }) {
   const [visible, setVisible] = useState(false)
+  const [hovered, setHovered] = useState(false)
+  const [popped, setPopped] = useState(false)
   const animName = `hero-float-${item.ltr ? "ltr" : "rtl"}`
-  // Random delay so simultaneous items don't overlap perfectly
   const delay = `${(item.ts % 1000) / 1000}s`
 
   useEffect(() => {
@@ -177,18 +178,17 @@ function FloatingItem({ item }: { item: LiveItem }) {
     return () => cancelAnimationFrame(id)
   }, [])
 
+  // When popped, auto-reset after the pop animation completes
+  useEffect(() => {
+    if (!popped) return
+    const t = setTimeout(() => setPopped(false), 600)
+    return () => clearTimeout(t)
+  }, [popped])
+
+  const duration = hovered ? "120s" : "18s"
+
   return (
-    <div
-      className="absolute flex items-center gap-2 transition-none"
-      style={{
-        top: `${item.y}%`,
-        left: 0,
-        right: 0,
-        animation: visible ? `${animName} 18s linear ${item.persistent ? "infinite" : "forwards"}` : undefined,
-        animationDelay: delay,
-        opacity: visible ? undefined : 0,
-      }}
-    >
+    <>
       <style>{`
         @keyframes hero-float-ltr {
           0%   { transform: translateX(-240px); opacity: 0; }
@@ -202,23 +202,60 @@ function FloatingItem({ item }: { item: LiveItem }) {
           88%  { opacity: 1; }
           100% { transform: translateX(-240px); opacity: 0; }
         }
+        @keyframes pop-burst {
+          0%   { transform: scale(1); }
+          30%  { transform: scale(1.6); }
+          60%  { transform: scale(0.9); }
+          100% { transform: scale(1); }
+        }
       `}</style>
-
-      {item.kind === "reaction" ? (
-        <div className="flex items-center gap-2 bg-black/40 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-full shrink-0">
-          <span className="text-3xl leading-none">{item.emoji}</span>
-          {item.text && (
-            <span className="font-sans text-sm text-white/80 whitespace-nowrap">{item.text}</span>
-          )}
-          <span className="font-mono text-xs text-white/40 whitespace-nowrap">{item.name}</span>
-        </div>
-      ) : (
-        <div className="bg-black/50 border border-white/10 px-4 py-2.5 rounded-xl backdrop-blur-sm shrink-0 max-w-[280px]">
-          <p className="font-sans text-sm text-white/80 leading-snug mb-1">{item.text}</p>
-          <p className="font-mono text-xs text-white/40">{item.name}</p>
-        </div>
-      )}
-    </div>
+      <div
+        className="absolute flex items-center gap-2"
+        style={{
+          top: `${item.y}%`,
+          left: 0,
+          right: 0,
+          animation: visible ? `${animName} ${duration} linear ${item.persistent ? "infinite" : "forwards"}` : undefined,
+          animationDelay: visible ? delay : undefined,
+          opacity: visible ? undefined : 0,
+        }}
+      >
+        {item.kind === "reaction" ? (
+          <div
+            className="flex items-center gap-2 bg-black/40 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-full shrink-0 cursor-pointer select-none transition-colors hover:border-white/30 hover:bg-black/60"
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            onClick={() => setPopped(true)}
+          >
+            <span
+              className="text-3xl leading-none"
+              style={popped ? { animation: "pop-burst 0.6s ease-out forwards" } : undefined}
+            >
+              {item.emoji}
+            </span>
+            {item.text && (
+              <span className="font-sans text-sm text-white/80 whitespace-nowrap">{item.text}</span>
+            )}
+            <span className="font-mono text-xs text-white/40 whitespace-nowrap">{item.name}</span>
+          </div>
+        ) : (
+          <div
+            className="bg-black/50 border border-white/10 px-4 py-2.5 rounded-xl backdrop-blur-sm shrink-0 max-w-[280px] cursor-pointer select-none hover:border-white/30 hover:bg-black/60"
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            onClick={() => setPopped(true)}
+          >
+            <p
+              className="font-sans text-sm text-white/80 leading-snug mb-1"
+              style={popped ? { animation: "pop-burst 0.6s ease-out forwards" } : undefined}
+            >
+              {item.text}
+            </p>
+            <p className="font-mono text-xs text-white/40">{item.name}</p>
+          </div>
+        )}
+      </div>
+    </>
   )
 }
 
@@ -494,12 +531,12 @@ function SimOverlayReact({ sim }: { sim: SimState }) {
           <label className="font-mono text-xs text-jsconf-muted uppercase tracking-wide">
             Your Name <span className="normal-case">(optional)</span>
           </label>
-          <div className={`bg-jsconf-surface border h-11 flex items-center px-3 font-sans text-sm ${isTypingName ? "border-jsconf-yellow" : "border-jsconf-border"}`}>
+          <div className={`bg-jsconf-surface border h-11 flex items-center px-3 font-sans text-sm border-jsconf-border ${isTypingName && sim.typedName ? "border-jsconf-yellow" : "border-jsconf-border"}`}>
             {sim.typedName
               ? <span className="text-white">{sim.typedName}</span>
               : <span className="text-jsconf-muted">Anonymous</span>
             }
-            {isTypingName && <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />}
+            {isTypingName && sim.typedName && <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />}
           </div>
         </div>
 
@@ -514,7 +551,7 @@ function SimOverlayReact({ sim }: { sim: SimState }) {
               ? <span className="text-white">{sim.typedText}</span>
               : <span className="text-jsconf-muted">Share your thoughts...</span>
             }
-            {isTypingText && <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />}
+            {isTypingText && sim.typedText && <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />}
           </div>
         </div>
 
