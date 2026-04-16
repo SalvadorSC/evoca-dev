@@ -208,7 +208,7 @@ function SpeakerExperience() {
     <div>
       {/* Hero */}
       <section className="relative px-6 py-4 lg:py-12 overflow-hidden min-h-[480px]">
-        <HeroBackground items={heroItems} />
+        <HeroBackground items={heroItems} accentColor="var(--accent)" />
         <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
             <h1 className="font-display font-bold text-white text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
@@ -235,7 +235,7 @@ function SpeakerExperience() {
             </div>
           </div>
           <div className="flex-shrink-0 hidden lg:block">
-            <InteractivePhoneMockup onActivity={handleActivity} />
+            <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} />
           </div>
         </div>
       </section>
@@ -330,7 +330,7 @@ function OrganizerExperience() {
     <div>
       {/* Hero */}
       <section className="relative px-6 py-16 lg:py-12 overflow-hidden min-h-[480px]">
-        <HeroBackground items={heroItems} />
+        <HeroBackground items={heroItems} accentColor="var(--accent)" />
         <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
             <h1 className="font-display font-bold text-white text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
@@ -357,7 +357,7 @@ function OrganizerExperience() {
             </div>
           </div>
           <div className="flex-shrink-0 hidden lg:block">
-            <InteractivePhoneMockup onActivity={handleActivity} />
+            <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} />
           </div>
         </div>
       </section>

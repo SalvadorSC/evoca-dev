@@ -126,9 +126,39 @@ export interface LiveItem {
   persistent?: boolean
 }
 
-export function HeroBackground({ items }: { items: LiveItem[] }) {
+export function HeroBackground({ items, accentColor = "#F7E018" }: { items: LiveItem[]; accentColor?: string }) {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
+      {/* Wavy line background */}
+      <svg
+        className="absolute inset-0 w-full h-full"
+        xmlns="http://www.w3.org/2000/svg"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        <defs>
+          <pattern id="wave-pattern" x="0" y="0" width="120" height="60" patternUnits="userSpaceOnUse">
+            <path
+              d="M0 30 Q30 10 60 30 Q90 50 120 30"
+              fill="none"
+              stroke={accentColor}
+              strokeWidth="1"
+              strokeOpacity="0.10"
+            />
+          </pattern>
+          <pattern id="wave-pattern-2" x="60" y="20" width="120" height="60" patternUnits="userSpaceOnUse">
+            <path
+              d="M0 30 Q30 10 60 30 Q90 50 120 30"
+              fill="none"
+              stroke={accentColor}
+              strokeWidth="0.6"
+              strokeOpacity="0.06"
+            />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#wave-pattern)" />
+        <rect width="100%" height="100%" fill="url(#wave-pattern-2)" />
+      </svg>
+
       {items.map((item) => (
         <FloatingItem key={item.id} item={item} />
       ))}
@@ -192,6 +222,15 @@ function FloatingItem({ item }: { item: LiveItem }) {
   )
 }
 
+// ─── Lane picker — finds a y% value not currently occupied by other items ────
+function pickLane(existing: LiveItem[]): number {
+  const LANES = [12, 22, 32, 42, 52, 62, 72, 82]
+  const used = new Set(existing.map((i) => Math.round(i.y / 10) * 10))
+  const free = LANES.filter((l) => !used.has(l))
+  const pool = free.length > 0 ? free : LANES
+  return pool[Math.floor(Math.random() * pool.length)] + (Math.random() * 6 - 3)
+}
+
 // ─── Interactive Phone Mockup (landing page) ──────────────────────────────────
 // Uses the exact same PhoneFrame + ReactTab/AskTab as DemoPhoneMockup.
 // During simulation, an overlay animates the fields before firing send().
@@ -207,12 +246,17 @@ interface SimState {
   phase: "typing-name" | "typing-text" | "picking-emoji" | "sending" | "done"
 }
 
+const IDLE_MS = 3_000
+
 export function InteractivePhoneMockup({
   onActivity,
+  currentItems = [],
 }: {
   onActivity: (item: LiveItem) => void
+  currentItems?: LiveItem[]
 }) {
   // Sim overlay state — shown on top of the real tabs during automation
+  // null = user is interacting (real tab visible), non-null = sim overlay shown (even between rounds)
   const [sim, setSim] = useState<SimState | null>(null)
   const [activeTab, setActiveTab] = useState<"wall" | "qa">("wall")
   const phoneTab = activeTab === "wall" ? "react" : "ask"
@@ -221,14 +265,19 @@ export function InteractivePhoneMockup({
   const simRunningRef = useRef(false)
   const simIndexRef = useRef(0)
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const currentItemsRef = useRef<LiveItem[]>(currentItems)
+  useEffect(() => { currentItemsRef.current = currentItems }, [currentItems])
+
+  const EMPTY_SIM: SimState = {
+    active: true, tab: "react", name: "", typedName: "", text: "", typedText: "", emoji: null, phase: "typing-name",
+  }
 
   const markInteraction = useCallback(() => {
     lastInteractionRef.current = Date.now()
     simRunningRef.current = false
     setSim(null)
-    // Reset the idle timer
     if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
-    idleTimerRef.current = setTimeout(() => { runNextSim() }, 20_000)
+    idleTimerRef.current = setTimeout(() => { runNextSim() }, IDLE_MS)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Typewriter helper — calls setSim progressively
@@ -256,8 +305,10 @@ export function InteractivePhoneMockup({
     const emoji = script.emoji ?? EMOJIS[Math.floor(Math.random() * EMOJIS.length)]
     const hasText = script.text.length > 0
 
-    // Switch to correct tab
     setActiveTab(script.tab === "react" ? "wall" : "qa")
+
+    // Show empty state briefly before starting to type
+    setSim(EMPTY_SIM)
 
     const base: SimState = {
       active: true,
@@ -269,26 +320,33 @@ export function InteractivePhoneMockup({
       emoji: null,
       phase: "typing-name",
     }
-    setSim(base)
 
-    // Phase 1: type name
-    typewrite("typedName", script.name, 60, () => {
+    setTimeout(() => {
       if (!simRunningRef.current) return
-      setSim((p) => p ? { ...p, phase: hasText ? "typing-text" : "picking-emoji" } : p)
+      setSim(base)
+    }, 600)
 
-      if (hasText) {
-        // Phase 2: type text
-        setTimeout(() => {
-          typewrite("typedText", script.text, 45, () => {
+    // Phase 1: type name (starts after brief empty-state pause)
+    setTimeout(() => {
+      if (!simRunningRef.current) return
+      typewrite("typedName", script.name, 60, () => {
+        if (!simRunningRef.current) return
+        setSim((p) => p ? { ...p, phase: hasText ? "typing-text" : "picking-emoji" } : p)
+
+        if (hasText) {
+          setTimeout(() => {
             if (!simRunningRef.current) return
-            setSim((p) => p ? { ...p, phase: "picking-emoji" } : p)
-            pickEmojiThenSend(emoji, script)
-          })
-        }, 300)
-      } else {
-        pickEmojiThenSend(emoji, script)
-      }
-    })
+            typewrite("typedText", script.text, 45, () => {
+              if (!simRunningRef.current) return
+              setSim((p) => p ? { ...p, phase: "picking-emoji" } : p)
+              pickEmojiThenSend(emoji, script)
+            })
+          }, 300)
+        } else {
+          pickEmojiThenSend(emoji, script)
+        }
+      })
+    }, 700)
   }, [onActivity]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function pickEmojiThenSend(emoji: string, script: (typeof SIM_SCRIPTS)[number]) {
@@ -304,7 +362,7 @@ export function InteractivePhoneMockup({
           emoji,
           text: script.text || undefined,
           name: script.name,
-          y: 15 + Math.random() * 65,
+          y: pickLane(currentItemsRef.current),
           ltr: Math.random() > 0.5,
           ts: Date.now(),
         }
@@ -312,12 +370,12 @@ export function InteractivePhoneMockup({
 
         setSim((p) => p ? { ...p, phase: "done" } : p)
 
-        // Pause then run next
+        // After "done", go back to empty overlay then start next round
         setTimeout(() => {
           if (!simRunningRef.current) return
-          setSim(null)
-          setTimeout(() => { if (simRunningRef.current) runNextSim() }, 800)
-        }, 1200)
+          setSim(EMPTY_SIM)
+          setTimeout(() => { if (simRunningRef.current) runNextSim() }, 1_200)
+        }, 1_000)
       }, 500)
     }, 400)
   }
@@ -326,8 +384,9 @@ export function InteractivePhoneMockup({
   useEffect(() => {
     idleTimerRef.current = setTimeout(() => {
       simRunningRef.current = true
-      runNextSim()
-    }, 20_000)
+      setSim(EMPTY_SIM)
+      setTimeout(() => { if (simRunningRef.current) runNextSim() }, 600)
+    }, IDLE_MS)
     return () => {
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
       simRunningRef.current = false
@@ -344,7 +403,7 @@ export function InteractivePhoneMockup({
         emoji: _msg.type === "reaction" ? _msg.emoji : undefined,
         text: _msg.type === "reaction" ? (_msg.text || undefined) : _msg.text,
         name: _msg.name || "Anonymous",
-        y: 15 + Math.random() * 65,
+        y: pickLane(currentItemsRef.current),
         ltr: Math.random() > 0.5,
         ts: Date.now(),
         persistent: true,
@@ -435,8 +494,11 @@ function SimOverlayReact({ sim }: { sim: SimState }) {
           <label className="font-mono text-xs text-jsconf-muted uppercase tracking-wide">
             Your Name <span className="normal-case">(optional)</span>
           </label>
-          <div className={`bg-jsconf-surface border h-11 flex items-center px-3 font-sans text-white text-sm ${isTypingName ? "border-jsconf-yellow" : "border-jsconf-border"}`}>
-            <span>{sim.typedName}</span>
+          <div className={`bg-jsconf-surface border h-11 flex items-center px-3 font-sans text-sm ${isTypingName ? "border-jsconf-yellow" : "border-jsconf-border"}`}>
+            {sim.typedName
+              ? <span className="text-white">{sim.typedName}</span>
+              : <span className="text-jsconf-muted">Anonymous</span>
+            }
             {isTypingName && <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />}
           </div>
         </div>
@@ -447,8 +509,11 @@ function SimOverlayReact({ sim }: { sim: SimState }) {
             <span>Your Reaction <span className="normal-case font-sans font-normal">(optional)</span></span>
             <span className="font-mono text-xs text-jsconf-muted">{sim.typedText.length}/160</span>
           </label>
-          <div className={`bg-jsconf-surface border px-3 py-2 font-sans text-white text-sm min-h-[72px] ${isTypingText ? "border-jsconf-yellow" : "border-jsconf-border"}`}>
-            <span>{sim.typedText}</span>
+          <div className={`bg-jsconf-surface border px-3 py-2 font-sans text-sm min-h-[72px] ${isTypingText ? "border-jsconf-yellow" : "border-jsconf-border"}`}>
+            {sim.typedText
+              ? <span className="text-white">{sim.typedText}</span>
+              : <span className="text-jsconf-muted">Share your thoughts...</span>
+            }
             {isTypingText && <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />}
           </div>
         </div>
@@ -462,7 +527,7 @@ function SimOverlayReact({ sim }: { sim: SimState }) {
             {EMOJI_OPTIONS.map((emoji) => (
               <div
                 key={emoji}
-                className={`text-3xl p-3 border transition-all duration-150 bg-jsconf-yellow ${sim.emoji === emoji
+                className={`text-3xl p-3 border transition-all duration-150 ${sim.emoji === emoji
                   ? "bg-jsconf-yellow-dim border-jsconf-yellow scale-110"
                   : "bg-jsconf-surface border-jsconf-border"
                   }`}
@@ -475,8 +540,7 @@ function SimOverlayReact({ sim }: { sim: SimState }) {
 
         {/* Send button — yellow once an emoji is selected, matching real ReactTab */}
         <div
-          className={`w-full h-12 flex items-center justify-center font-display font-bold uppercase tracking-wide text-sm bg-jsconf-yellow transition-colors ${sim.emoji ? "text-black" : "border border-jsconf-border text-jsconf-muted"
-            }`}
+          className={`w-full h-12 flex items-center justify-center font-display font-bold uppercase tracking-wide text-sm bg-jsconf-yellow transition-colors text-black`}
         >
           {sim.phase === "done" ? "Sent!" : sim.emoji ? `Send ${sim.emoji}` : "Send Reaction"}
         </div>
