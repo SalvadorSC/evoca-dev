@@ -126,7 +126,7 @@ export interface LiveItem {
   persistent?: boolean
 }
 
-const MAX_VISIBLE = 6
+const MAX_VISIBLE = 10
 
 export function HeroBackground({ items, accentColor = "#F7E018" }: { items: LiveItem[]; accentColor?: string }) {
   const [paused, setPaused] = useState(false)
