@@ -303,7 +303,7 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
   return (
     <div className="h-screen bg-jsconf-bg text-white flex flex-col overflow-hidden">
       {/* Slim live banner */}
-      <div className="bg-jsconf-yellow text-black px-4 py-2 flex items-center justify-between gap-3 flex-wrap">
+      {/* <div className="bg-jsconf-yellow text-black px-4 py-2 flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5">
             <span className="relative flex h-2 w-2">
@@ -319,28 +319,47 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
         <Link href="/login" className="font-mono text-xs font-bold bg-black text-jsconf-yellow px-3 py-1.5 hover:bg-zinc-900 transition-colors">
           Start for free
         </Link>
-      </div>
+      </div> */}
 
       {/* Wall header */}
       <header className="border-b border-jsconf-border px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="font-display font-bold text-lg tracking-wide">
-              <span className="text-white">Live</span>
-              <span className="text-jsconf-yellow">Wall</span>
-            </span>
-            <span className="text-jsconf-muted">·</span>
-            <span className="text-jsconf-muted font-mono text-xs">{DEMO_TALK.conference}</span>
-            <span className="font-mono text-xs font-bold text-jsconf-yellow border border-jsconf-yellow px-2 py-0.5 uppercase tracking-widest ml-2">
-              Demo
-            </span>
+        <div className="flex justify-between gap-3 w-[100%]">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="font-display font-bold text-lg tracking-wide">
+                <span className="text-white">Evo</span>
+                <span className="text-jsconf-yellow">ca</span>
+              </span>
+              <span className="text-jsconf-muted">·</span>
+              <span className="text-jsconf-muted font-mono text-xs">{DEMO_TALK.conference}</span>
+              <span className="font-mono text-xs font-bold text-jsconf-yellow border border-jsconf-yellow px-2 py-0.5 uppercase tracking-widest ml-2">
+                Demo
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 ml-2">
+              <span className="relative flex h-2 w-2">
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isConnected ? "bg-green-400" : "bg-jsconf-muted"}`} />
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${isConnected ? "bg-green-400" : "bg-jsconf-muted"}`} />
+              </span>
+              <span className="font-mono text-xs text-jsconf-muted">{connectionCount} online</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 ml-2">
-            <span className="relative flex h-2 w-2">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isConnected ? "bg-green-400" : "bg-jsconf-muted"}`} />
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${isConnected ? "bg-green-400" : "bg-jsconf-muted"}`} />
-            </span>
-            <span className="font-mono text-xs text-jsconf-muted">{connectionCount} online</span>
+          <div className="bg-jsconf-yellow text-black px-4 py-2 flex items-center justify-between gap-3 flex-wrap h-[100%]">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red opacity-40" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-black" />
+                </span>
+                <span className="font-mono text-xs font-bold uppercase tracking-widest">Live Demo</span>
+              </span>
+              <span className="font-sans text-xs font-medium hidden sm:inline">
+                Post a reaction and watch it appear on the wall in real time. No sign-up needed.
+              </span>
+            </div>
+            <Link href="/login" className="font-mono text-xs font-bold bg-black text-jsconf-yellow px-3 py-1.5 hover:bg-zinc-900 transition-colors">
+              Start for free
+            </Link>
           </div>
         </div>
 
