@@ -82,7 +82,7 @@ export function StartSessionButton({ talkId, speakerIsPro = false }: Props) {
     try {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { router.push("/login"); return }
+      if (!session?.user) { router.push("/login"); return }
 
       const roomId = `evoca-${talkId.slice(0, 8)}-${Date.now().toString(36)}`
 

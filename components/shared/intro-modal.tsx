@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Zap, MessageCircleQuestion, Calendar, Monitor, Shield, Mic, Code2, ExternalLink } from "lucide-react"
+import { STORAGE_KEYS } from "@/lib/storage-keys"
 
 const ROUTES = [
   {
@@ -50,14 +51,14 @@ export function IntroModal() {
 
   useEffect(() => {
     // Check if user has seen the intro before
-    const hasSeenIntro = localStorage.getItem("evoca-intro-seen")
+    const hasSeenIntro = localStorage.getItem(STORAGE_KEYS.introSeen)
     if (!hasSeenIntro) {
       setOpen(true)
     }
   }, [])
 
   const handleClose = () => {
-    localStorage.setItem("evoca-intro-seen", "true")
+    localStorage.setItem(STORAGE_KEYS.introSeen, "true")
     setOpen(false)
   }
 

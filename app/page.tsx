@@ -3,8 +3,10 @@
 import { useState, useEffect, useCallback, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { QRCodeSVG } from "qrcode.react"
 import { ChevronDown, QrCode } from "lucide-react"
+import { STORAGE_KEYS } from "@/lib/storage-keys"
+import { InteractivePhoneMockup, HeroBackground } from "@/components/shared/phone-mockup"
+import type { LiveItem } from "@/components/shared/phone-mockup"
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const ROLES = {
@@ -143,267 +145,7 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
   )
 }
 
-// ─── Phone Mockup ─────────────────────────────────────────────────────────────
-function PhoneMockupStatic({ role }: { role: Role }) {
-  const [qrUrl, setQrUrl] = useState("")
-  const [activeTab, setActiveTab] = useState("react");
-  const [inputText, setInputText] = useState("");
-  const [reaction, setReaction] = useState("🔥");
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setQrUrl(window.location.origin + "/demo")
-    }
-  }, [])
 
-  {/* <div className="flex flex-col items-center gap-4">
-    <div 
-      className="relative w-[280px] transition-transform duration-300 hover:scale-[1.02]"
-      style={{ 
-        transform: "perspective(1000px) rotateY(-15deg) rotateX(5deg)",
-      }}
-    >
-      <div className="rounded-[40px] border-[6px] border-[#2e2e2e] bg-[#080808] shadow-2xl" style={{ boxShadow: "0 0 0 1px #111, inset 0 0 0 1px #333" }}>
-        <div className="absolute top-[14px] left-1/2 -translate-x-1/2 w-[72px] h-[6px] bg-[#111] rounded-[3px] z-10" />
-        
-        <div className="rounded-[28px] overflow-hidden m-[8px] bg-[#080808]">
-          <div className="p-4 pt-8">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-bold text-white">EVOCA</span>
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"/>
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-400"/>
-                </span>
-                <span className="font-mono text-[10px] text-[#666]">12</span>
-              </div>
-            </div>
-            
-            <div className="flex border border-[#2a2a2a] mb-4">
-              <div className="flex-1 py-2 text-center font-mono text-xs font-bold" style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}>React</div>
-              <div className="flex-1 py-2 text-center font-mono text-xs text-[#666] border-l border-[#2a2a2a]">Ask</div>
-              {role === "organizer" && <div className="flex-1 py-2 text-center font-mono text-xs text-[#666] border-l border-[#2a2a2a]">Schedule</div>}
-            </div>
-            
-            {role === "speaker" ? (
-              <>
-                <div className="mb-3">
-                  <input 
-                    type="text" 
-                    placeholder="Anonymous" 
-                    className="w-full bg-[#111] border border-[#2a2a2a] px-3 py-2 font-mono text-xs text-[#666] placeholder-[#444]"
-                    disabled
-                  />
-                </div>
-                
-                <div className="mb-3">
-                  <textarea 
-                    placeholder="Share your thoughts..."
-                    className="w-full bg-[#111] border border-[#2a2a2a] px-3 py-2 font-mono text-xs text-[#666] placeholder-[#444] resize-none h-16"
-                    disabled
-                  />
-                </div>
-                
-                <div className="flex gap-2 mb-4">
-                  {["🔥", "👏", "🤯", "🚀", "😂"].map((emoji, i) => (
-                    <div 
-                      key={emoji} 
-                      className="w-10 h-10 flex items-center justify-center text-lg border"
-                      style={{ 
-                        borderColor: i === 0 ? "var(--accent)" : "#2a2a2a",
-                        backgroundColor: i === 0 ? "var(--accent-dim)" : "transparent"
-                      }}
-                    >
-                      {emoji}
-                    </div>
-                  ))}
-                </div>
-                
-                <button 
-                  className="w-full py-3 font-mono text-xs font-bold uppercase tracking-wide"
-                  style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
-                  disabled
-                >
-                  Send Reaction
-                </button>
-              </>
-            ) : (
-              <>
-                <div className="space-y-2">
-                  {[
-                    { time: "9:00", title: "Opening Keynote", speaker: "Sarah Chen" },
-                    { time: "10:30", title: "Web Performance", speaker: "Alex Rivera" },
-                    { time: "14:00", title: "Design Systems", speaker: "Jordan Park" },
-                  ].map((session, i) => (
-                    <div key={i} className="bg-[#111] border border-[#2a2a2a] p-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-mono text-[10px]" style={{ color: "var(--accent)" }}>{session.time}</span>
-                        {i === 0 && (
-                          <span className="font-mono text-[8px] px-1 py-0.5 border" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>LIVE</span>
-                        )}
-                      </div>
-                      <p className="font-sans text-xs text-white mb-0.5">{session.title}</p>
-                      <p className="font-mono text-[10px] text-[#666]">{session.speaker}</p>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-        
-        <div className="absolute bottom-[10px] left-1/2 -translate-x-1/2 w-[80px] h-[4px] bg-[#333] rounded-[2px]" />
-      </div>
-    </div>
-    
-    <div className="flex items-center gap-3 mt-2">
-      <p className="font-mono text-xs text-[#666] uppercase tracking-widest">Attendee View</p>
-      {qrUrl && (
-        <div className="bg-white p-1.5 rounded">
-          <QRCodeSVG value={qrUrl} size={48} />
-        </div>
-      )}
-      <p className="font-mono text-[10px] text-[#444]">Scan to try</p>
-    </div>
-  </div> */}
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8 w-full overflow-hidden">
-      <div className="flex flex-col md:flex-col items-center md:items-start gap-12">
-
-        {/* Phone Container with 3D Transform */}
-        <div
-          className="relative transition-transform duration-500 hover:scale-105 group cursor-pointer"
-          style={{
-            width: "280px",
-            transform: "perspective(1000px) rotateY(-15deg) rotateX(5deg)",
-          }}
-        >
-          {/* Phone shell */}
-          <div
-            className="border-zinc-800 bg-zinc-950 shadow-2xl overflow-hidden relative"
-            style={{
-              borderRadius: "40px",
-              borderWidth: "6px",
-              boxShadow: "0 0 0 1px #111, inset 0 0 0 1px #333",
-              height: "560px"
-            }}
-          >
-            {/* Notch */}
-            <div className="absolute left-1/2 -translate-x-1/2 bg-zinc-900 z-20" style={{ top: "14px", width: "72px", height: "6px", borderRadius: "3px" }} />
-
-            {/* Screen */}
-            <div className="overflow-hidden bg-zinc-950 flex flex-col relative z-10" style={{ borderRadius: "32px", margin: "8px", height: "calc(100% - 16px)" }}>
-
-              {/* Header */}
-              <div className="flex items-center justify-between px-4 pt-8 pb-4 shrink-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-white">EVOCA</span>
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-400" />
-                  </span>
-                  <span className="font-mono text-xs text-zinc-500" style={{ fontSize: "10px" }}>LIVE</span>
-                </div>
-                {/* <span className="font-mono text-xs text-yellow-400 font-bold" style={{ fontSize: "10px" }}>DEMO</span> */}
-              </div>
-
-              {/* Tabs */}
-              <div className="flex border border-zinc-800 mx-4 mb-4 rounded-sm overflow-hidden shrink-0">
-                <button
-                  onClick={() => setActiveTab("react")}
-                  className={`flex-1 py-2 text-center font-mono text-xs font-bold transition-colors ${activeTab === "react" ? "bg-yellow-400 text-black" : "bg-transparent text-zinc-500 hover:text-zinc-300"
-                    }`}
-                >
-                  React
-                </button>
-                <div className="bg-zinc-800" style={{ width: "1px" }} />
-                <button
-                  onClick={() => setActiveTab("ask")}
-                  className={`flex-1 py-2 text-center font-mono text-xs font-bold transition-colors ${activeTab === "ask" ? "bg-yellow-400 text-black" : "bg-transparent text-zinc-500 hover:text-zinc-300"
-                    }`}
-                >
-                  Ask
-                </button>
-              </div>
-
-              {/* Tab Content - No Scroll (Flex-1) */}
-              <div className="flex-1 px-4 flex flex-col min-h-0">
-                {activeTab === "react" ? (
-                  <div className="flex flex-col h-full animate-in fade-in duration-300">
-                    <div className="mb-4 shrink-0">
-                      <input
-                        type="text"
-                        placeholder="Your Name (Optional)"
-                        className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2.5 font-mono text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-yellow-400 transition-colors"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-5 gap-2 mb-4 shrink-0">
-                      {["🔥", "👏", "🤯", "🚀", "😂"].map((emoji) => (
-                        <button
-                          key={emoji}
-                          onClick={() => setReaction(emoji)}
-                          className={`aspect-square flex items-center justify-center text-lg border rounded-lg transition-all ${reaction === emoji
-                            ? "border-yellow-400 bg-yellow-400/10 scale-110"
-                            : "border-zinc-800 bg-transparent hover:border-zinc-600"
-                            }`}
-                        >
-                          {emoji}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="mt-auto mb-6 shrink-0">
-                      <button className="w-full py-3.5 rounded-xl font-mono text-xs font-bold uppercase tracking-wide bg-yellow-400 text-black hover:bg-yellow-500 transition-transform active:scale-95">
-                        Send {reaction}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col h-full animate-in fade-in duration-300">
-                    <div className="mb-4 flex-1 flex flex-col min-h-0">
-                      <textarea
-                        placeholder="What's on your mind? Ask the speaker a question..."
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        className="w-full flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-3 font-mono text-xs text-white placeholder-zinc-600 resize-none focus:outline-none focus:border-yellow-400 transition-colors"
-                      />
-                    </div>
-
-                    <div className="mt-auto mb-6 shrink-0">
-                      <button
-                        disabled={!inputText.trim()}
-                        className={`w-full py-3.5 rounded-xl font-mono text-xs font-bold uppercase tracking-wide transition-all active:scale-95 ${inputText.trim()
-                          ? "bg-yellow-400 text-black hover:bg-yellow-500"
-                          : "bg-zinc-800 text-zinc-600 cursor-not-allowed"
-                          }`}
-                      >
-                        Submit Question
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Home bar */}
-              <div className="absolute left-1/2 -translate-x-1/2 bg-zinc-700" style={{ bottom: "10px", width: "80px", height: "4px", borderRadius: "2px" }} />
-            </div>
-          </div>
-        </div>
-
-        {/* Info panel / QR Code placed next to it */}
-        {/* <div className="flex flex-col items-center gap-3 mt-2">
-          <p className="font-mono text-xs text-[#666] uppercase tracking-widest">Scan to try our DEMO</p>
-          {qrUrl && (
-            <div className="bg-white p-1.5 rounded">
-              <QRCodeSVG value={qrUrl} size={48} />
-            </div>
-          )}
-        </div> */}
-
-      </div>
-    </div>
-  )
-}
 
 // ─── Feature Card ─────────────────────────────────────────────────────────────
 function FeatureCard({ icon, title, description, badge }: { icon: string; title: string; description: string; badge?: string }) {
@@ -447,8 +189,14 @@ function FAQ({ items }: { items: { q: string; a: string }[] }) {
   )
 }
 
-// ─── Speaker Experience ──────────────────────────────��────────────────────────
+// ─── Speaker Experience ───────────────────────────────────────────────────────
 function SpeakerExperience() {
+  const [heroItems, setHeroItems] = useState<LiveItem[]>([])
+
+  const handleActivity = useCallback((item: LiveItem) => {
+    setHeroItems((prev) => [...prev.slice(-6), item])
+  }, [])
+
   const speakerFAQ = [
     { q: "Do attendees need an account?", a: "No, they scan a QR and they're in." },
     { q: "What happens to Q&A after the talk?", a: "Saved to your dashboard." },
@@ -459,8 +207,9 @@ function SpeakerExperience() {
   return (
     <div>
       {/* Hero */}
-      <section className="px-6 py-4 lg:py-12">
-        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+      <section className="relative px-6 py-4 lg:py-12 overflow-hidden min-h-[480px]">
+        <HeroBackground items={heroItems} accentColor="var(--accent)" />
+        <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
             <h1 className="font-display font-bold text-white text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
               Turn any talk into a live experience
@@ -486,7 +235,7 @@ function SpeakerExperience() {
             </div>
           </div>
           <div className="flex-shrink-0 hidden lg:block">
-            <PhoneMockupStatic role="speaker" />
+            <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} />
           </div>
         </div>
       </section>
@@ -564,6 +313,12 @@ function SpeakerExperience() {
 
 // ─── Organizer Experience ─────────────────────────────────────────────────────
 function OrganizerExperience() {
+  const [heroItems, setHeroItems] = useState<LiveItem[]>([])
+
+  const handleActivity = useCallback((item: LiveItem) => {
+    setHeroItems((prev) => [...prev.slice(-6), item])
+  }, [])
+
   const organizerFAQ = [
     { q: "How do I invite speakers?", a: "Send a link or email. They set up their own talks." },
     { q: "Can I brand it with my event colors?", a: "Coming soon." },
@@ -574,8 +329,9 @@ function OrganizerExperience() {
   return (
     <div>
       {/* Hero */}
-      <section className="px-6 py-16 lg:py-12">
-        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+      <section className="relative px-6 py-16 lg:py-12 overflow-hidden min-h-[480px]">
+        <HeroBackground items={heroItems} accentColor="var(--accent)" />
+        <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
             <h1 className="font-display font-bold text-white text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
               One platform for your schedule, speakers and live engagement
@@ -601,7 +357,7 @@ function OrganizerExperience() {
             </div>
           </div>
           <div className="flex-shrink-0 hidden lg:block">
-            <PhoneMockupStatic role="organizer" />
+            <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} />
           </div>
         </div>
       </section>
@@ -771,11 +527,11 @@ function LandingContent() {
       return
     }
 
-    const storedRole = localStorage.getItem("evoca-role") as Role | null
+    const storedRole = localStorage.getItem(STORAGE_KEYS.role) as Role | null
     if (storedRole && (storedRole === "speaker" || storedRole === "organizer")) {
       setRole(storedRole)
       const storedAccent = storedRole === "organizer"
-        ? localStorage.getItem("evoca-organizer-accent") || ROLES.organizer.accent
+        ? localStorage.getItem(STORAGE_KEYS.organizerAccent) || ROLES.organizer.accent
         : ROLES.speaker.accent
       if (storedRole === "organizer") setOrganizerAccent(storedAccent)
       applyAccent(storedRole, storedAccent)
@@ -801,7 +557,7 @@ function LandingContent() {
   const handleWipeComplete = useCallback(() => {
     if (pendingRole) {
       setRole(pendingRole)
-      localStorage.setItem("evoca-role", pendingRole)
+      localStorage.setItem(STORAGE_KEYS.role, pendingRole)
       router.push(`/?role=${pendingRole}`, { scroll: false })
       applyAccent(pendingRole, pendingRole === "organizer" ? organizerAccent : undefined)
       setPendingRole(null)
@@ -816,7 +572,7 @@ function LandingContent() {
 
   const handleOrganizerColorChange = useCallback((color: string) => {
     setOrganizerAccent(color)
-    localStorage.setItem("evoca-organizer-accent", color)
+    localStorage.setItem(STORAGE_KEYS.organizerAccent, color)
     if (role === "organizer") {
       applyAccent("organizer", color)
     }

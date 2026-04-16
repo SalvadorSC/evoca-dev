@@ -1,17 +1,12 @@
 "use server"
 
 import { createClient } from "@/lib/supabase/server"
+import { requireAuth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
 
 export async function deleteTalk(talkId: string) {
+  await requireAuth()
   const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect("/login")
 
   // RLS ensures you can only delete your own talks.
   // Sessions will cascade-delete via the FK constraint.

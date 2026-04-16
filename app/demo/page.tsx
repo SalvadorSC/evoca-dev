@@ -4,13 +4,13 @@ import { useState, useEffect, useRef, useCallback, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import PartySocket from "partysocket"
-import { QRCodeSVG } from "qrcode.react"
 import { ReactionCard } from "@/components/wall/reaction-card"
 import { QuestionCard } from "@/components/wall/question-card"
 import { EmojiBurst } from "@/components/wall/emoji-burst"
 import { ReactTab } from "@/components/attendee/react-tab"
 import { AskTab } from "@/components/attendee/ask-tab"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DemoPhoneMockup } from "@/components/shared/phone-mockup"
 import type { AppState, ClientMessage, ServerMessage } from "@/lib/types"
 
 const PARTY_HOST = "jsconf-live-wall.salvadorsc.partykit.dev"
@@ -115,7 +115,7 @@ function useDemoParty(sessionId: string) {
         setTimeout(() => {
           send({ type: "reaction", id: crypto.randomUUID(), name: r.name, text: r.text, emoji: r.emoji, ts: Date.now() - (4 - i) * 15000 })
           reactionCountRef.current++
-        }, i * 600)
+        }, i * 1000)
       })
       // Seed 2 questions
       DEMO_QUESTIONS.slice(0, 2).forEach((q, i) => {
@@ -132,7 +132,7 @@ function useDemoParty(sessionId: string) {
   // Auto-add reactions: every 15s until 7, then every 60s
   useEffect(() => {
     if (!isConnected) return
-    
+
     const scheduleNextReaction = () => {
       const delay = reactionCountRef.current >= 7 ? 60000 : 15000
       autoReactionRef.current = setTimeout(() => {
@@ -142,7 +142,7 @@ function useDemoParty(sessionId: string) {
         scheduleNextReaction()
       }, delay)
     }
-    
+
     scheduleNextReaction()
     return () => clearTimeout(autoReactionRef.current)
   }, [isConnected, send])
@@ -150,7 +150,7 @@ function useDemoParty(sessionId: string) {
   // Auto-add questions: every 35s until 5, then every 60s
   useEffect(() => {
     if (!isConnected) return
-    
+
     const scheduleNextQuestion = () => {
       const delay = questionCountRef.current >= 5 ? 60000 : 35000
       autoQuestionRef.current = setTimeout(() => {
@@ -160,7 +160,7 @@ function useDemoParty(sessionId: string) {
         scheduleNextQuestion()
       }, delay)
     }
-    
+
     scheduleNextQuestion()
     return () => clearTimeout(autoQuestionRef.current)
   }, [isConnected, send])
@@ -188,8 +188,8 @@ function AttendeeView({ sessionId }: { sessionId: string }) {
       <header className="border-b border-jsconf-border px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="font-display font-bold text-base tracking-wide">
-            <span className="text-white">Live</span>
-            <span className="text-jsconf-yellow">Wall</span>
+            <span className="text-white">Evo</span>
+            <span className="text-jsconf-yellow">ca</span>
           </span>
           <span className="text-jsconf-muted font-mono text-xs">· {DEMO_TALK.conference}</span>
         </div>
@@ -221,70 +221,13 @@ function AttendeeView({ sessionId }: { sessionId: string }) {
   )
 }
 
-// Phone mockup component - fixed size with scrollable content
-function PhoneMockup({ send, questions, qrUrl }: { send: (m: ClientMessage) => void; questions: AppState["questions"]; qrUrl: string }) {
-  return (
-    <div className="flex items-start gap-6">
-      {/* Phone frame - fixed dimensions */}
-      <div className="flex flex-col items-center gap-3 shrink-0">
-        <p className="font-mono text-xs text-jsconf-muted uppercase tracking-widest">Attendee View</p>
-        <div className="relative w-[260px] h-[520px] rounded-[2.5rem] border-4 border-zinc-700 bg-zinc-900 shadow-2xl overflow-hidden">
-          {/* Top notch */}
-          <div className="absolute top-[10px] left-1/2 -translate-x-1/2 w-[72px] h-[20px] bg-black rounded-full z-10" />
 
-          {/* Screen - scrollable content */}
-          <div className="h-full overflow-y-auto rounded-[2rem] bg-jsconf-bg">
-            {/* Status bar inside phone */}
-            <div className="sticky top-0 z-10 bg-jsconf-bg flex items-center justify-between px-5 pt-8 pb-1">
-              <span className="font-mono text-[10px] text-jsconf-muted">Live Wall</span>
-              <span className="font-mono text-[10px] text-jsconf-yellow">DEMO</span>
-            </div>
-
-            {/* Scaled attendee UI */}
-            <div className="origin-top px-3 pb-8" style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%" /* 100/0.82 */, marginLeft: "-11%" }}>
-              <Tabs defaultValue="react" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-jsconf-surface border border-jsconf-border rounded-none h-auto p-0 mb-3">
-                  <TabsTrigger value="react" className="rounded-none data-[state=active]:bg-jsconf-yellow data-[state=active]:text-black font-display font-bold uppercase tracking-wide py-2.5 text-xs">
-                    React
-                  </TabsTrigger>
-                  <TabsTrigger value="ask" className="rounded-none data-[state=active]:bg-jsconf-yellow data-[state=active]:text-black font-display font-bold uppercase tracking-wide py-2.5 text-xs">
-                    Ask
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="react" className="mt-0">
-                  <ReactTab send={send} />
-                </TabsContent>
-                <TabsContent value="ask" className="mt-0">
-                  <AskTab send={send} questions={questions} />
-                </TabsContent>
-              </Tabs>
-            </div>
-          </div>
-
-          {/* Home bar */}
-          <div className="absolute bottom-[10px] left-1/2 -translate-x-1/2 w-[80px] h-[4px] bg-white/30 rounded-full" />
-        </div>
-      </div>
-
-      {/* QR Code - to the right of phone */}
-      {qrUrl && (
-        <div className="flex flex-col items-center gap-2 pt-8">
-          <div className="bg-white p-2 rounded">
-            <QRCodeSVG value={qrUrl} size={72} />
-          </div>
-          <p className="font-mono text-[10px] text-jsconf-muted leading-relaxed text-center max-w-[80px]">
-            Scan to try on your phone
-          </p>
-        </div>
-      )}
-    </div>
-  )
-}
 
 // Full demo view
 function FullDemoView({ sessionId }: { sessionId: string }) {
   const { state, connectionCount, isConnected, send, visibleReactions, visibleQuestions } = useDemoParty(sessionId)
-  const [wallTab, setWallTab] = useState<"wall" | "qa">("wall")
+  // "wall"/"react" and "qa"/"ask" are linked — one state drives both panels
+  const [activeTab, setActiveTab] = useState<"wall" | "qa">("wall")
   const [qrUrl, setQrUrl] = useState("")
 
   useEffect(() => {
@@ -295,12 +238,9 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
   }, [sessionId])
 
   return (
-    <div className="min-h-screen bg-jsconf-bg text-white flex flex-col">
-      {/* EmojiBurst layer */}
-      <EmojiBurst reactions={state.reactions} isQAMode={wallTab === "qa"} />
-
+    <div className="h-screen bg-jsconf-bg text-white flex flex-col overflow-hidden">
       {/* Slim live banner */}
-      <div className="bg-jsconf-yellow text-black px-4 py-2 flex items-center justify-between gap-3 flex-wrap">
+      {/* <div className="bg-jsconf-yellow text-black px-4 py-2 flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5">
             <span className="relative flex h-2 w-2">
@@ -316,57 +256,69 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
         <Link href="/login" className="font-mono text-xs font-bold bg-black text-jsconf-yellow px-3 py-1.5 hover:bg-zinc-900 transition-colors">
           Start for free
         </Link>
-      </div>
+      </div> */}
 
       {/* Wall header */}
       <header className="border-b border-jsconf-border px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <span className="font-display font-bold text-lg tracking-wide">
-              <span className="text-white">Live</span>
-              <span className="text-jsconf-yellow">Wall</span>
-            </span>
-            <span className="text-jsconf-muted">·</span>
-            <span className="text-jsconf-muted font-mono text-xs">{DEMO_TALK.conference}</span>
-            <span className="font-mono text-xs font-bold text-jsconf-yellow border border-jsconf-yellow px-2 py-0.5 uppercase tracking-widest ml-2">
-              Demo
-            </span>
+        <div className="flex justify-between gap-3 w-[100%]">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="font-display font-bold text-lg tracking-wide">
+                <span className="text-white">Evo</span>
+                <span className="text-jsconf-yellow">ca</span>
+              </span>
+              <span className="text-jsconf-muted">·</span>
+              <span className="text-jsconf-muted font-mono text-xs">{DEMO_TALK.conference}</span>
+              <span className="font-mono text-xs font-bold text-jsconf-yellow border border-jsconf-yellow px-2 py-0.5 uppercase tracking-widest ml-2">
+                Demo
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 ml-2">
+              <span className="relative flex h-2 w-2">
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isConnected ? "bg-green-400" : "bg-jsconf-muted"}`} />
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${isConnected ? "bg-green-400" : "bg-jsconf-muted"}`} />
+              </span>
+              <span className="font-mono text-xs text-jsconf-muted">{connectionCount} online</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 ml-2">
-            <span className="relative flex h-2 w-2">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${isConnected ? "bg-green-400" : "bg-jsconf-muted"}`} />
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${isConnected ? "bg-green-400" : "bg-jsconf-muted"}`} />
-            </span>
-            <span className="font-mono text-xs text-jsconf-muted">{connectionCount} online</span>
+          <div className="bg-jsconf-yellow text-black px-4 py-2 flex items-center justify-between gap-3 flex-wrap h-[100%]">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-600 opacity-40" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600" />
+                </span>
+                <span className="font-mono text-xs font-bold uppercase tracking-widest">Live Demo</span>
+              </span>
+              <span className="font-sans text-xs font-medium hidden sm:inline">
+                Post a reaction and watch it appear on the wall in real time. No sign-up needed.
+              </span>
+            </div>
+            <Link href="/login" className="font-mono text-xs font-bold bg-black text-jsconf-yellow px-3 py-1.5 hover:bg-zinc-900 transition-colors">
+              Start for free
+            </Link>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 bg-jsconf-surface border border-jsconf-border px-3 py-1.5">
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-jsconf-red opacity-75" />
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-jsconf-red" />
-          </span>
-          <span className="font-mono text-xs text-jsconf-muted uppercase tracking-wide">Now</span>
-          <span className="font-sans text-xs text-white">{DEMO_TALK.speaker} — {DEMO_TALK.title}</span>
-        </div>
+
       </header>
 
-      {/* Two-column layout with flex for height management */}
-      <div className="flex-1 flex flex-col lg:flex-row min-h-0">
+      {/* Two-column layout — flex-1 min-h-0 ensures inner panels scroll, not the page */}
+      <div className="flex-1 flex flex-col lg:flex-row min-h-0 overflow-hidden">
         {/* Left: Live Wall feed */}
-        <div className="flex-1 lg:flex-[65] border-b lg:border-b-0 lg:border-r border-jsconf-border flex flex-col min-h-0">
+        <div className="flex-1 lg:flex-[65] border-b lg:border-b-0 lg:border-r border-jsconf-border flex flex-col min-h-0 overflow-hidden">
           {/* Tab switcher */}
           <div className="px-6 py-3 border-b border-jsconf-border shrink-0">
             <div className="flex gap-0 w-fit border border-jsconf-border">
               <button
-                onClick={() => setWallTab("wall")}
-                className={`font-display font-bold text-xs uppercase tracking-widest px-5 py-2.5 transition-colors ${wallTab === "wall" ? "bg-jsconf-yellow text-black" : "bg-transparent text-jsconf-muted hover:text-white"}`}
+                onClick={() => setActiveTab("wall")}
+                className={`font-display font-bold text-xs uppercase tracking-widest px-5 py-2.5 transition-colors ${activeTab === "wall" ? "bg-jsconf-yellow text-black" : "bg-transparent text-jsconf-muted hover:text-white"}`}
               >
                 Reactions
               </button>
               <button
-                onClick={() => setWallTab("qa")}
-                className={`font-display font-bold text-xs uppercase tracking-widest px-5 py-2.5 transition-colors border-l border-jsconf-border ${wallTab === "qa" ? "bg-jsconf-yellow text-black" : "bg-transparent text-jsconf-muted hover:text-white"}`}
+                onClick={() => setActiveTab("qa")}
+                className={`font-display font-bold text-xs uppercase tracking-widest px-5 py-2.5 transition-colors border-l border-jsconf-border ${activeTab === "qa" ? "bg-jsconf-yellow text-black" : "bg-transparent text-jsconf-muted hover:text-white"}`}
               >
                 Q&amp;A
               </button>
@@ -375,7 +327,7 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
 
           {/* Scrollable feed area */}
           <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-3 min-h-0">
-            {wallTab === "wall" ? (
+            {activeTab === "wall" ? (
               visibleReactions.length === 0 ? (
                 <div className="flex items-center justify-center h-40 text-jsconf-muted font-mono text-sm uppercase tracking-wide">
                   Loading reactions...
@@ -400,8 +352,8 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
         </div>
 
         {/* Right: Phone mockup - fixed width, doesn't grow */}
-        <div className="lg:flex-[35] bg-jsconf-surface flex items-start justify-center px-6 py-8 shrink-0">
-          <PhoneMockup send={send} questions={state.questions} qrUrl={qrUrl} />
+        <div className="lg:flex-[35] bg-jsconf-surface flex items-start justify-center px-6 py-8 shrink-0 overflow-y-auto">
+          <DemoPhoneMockup send={send} questions={state.questions} qrUrl={qrUrl} activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
       </div>
 
@@ -437,7 +389,7 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
 function DemoContent() {
   const searchParams = useSearchParams()
   const [sessionId, setSessionId] = useState<string>("")
-  
+
   useEffect(() => {
     setSessionId(getSessionId())
   }, [])

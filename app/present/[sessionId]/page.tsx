@@ -4,10 +4,11 @@ import { useEffect, useRef, useState, useCallback } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { QRCodeSVG } from "qrcode.react"
 import { createClient } from "@/lib/supabase/client"
+import { getSessionById, finishSession } from "@/lib/db"
 import { useParty } from "@/hooks/use-party"
 import { EmojiBurst } from "@/components/wall/emoji-burst"
-import { Pin, PinOff, ExternalLink, Check } from "lucide-react"
-import type { Question } from "@/lib/types"
+import { Pin, PinOff, ExternalLink } from "lucide-react"
+import { PresenterQuestionCard } from "@/components/shared/question-card"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -67,13 +68,9 @@ export default function PresentPage() {
 
     async function load() {
       const supabase = createClient()
-      const { data, error: fetchError } = await supabase
-        .from("sessions")
-        .select("id, partykit_room, ended_at, talks(id, title, slide_url, slide_type)")
-        .eq("id", sessionId)
-        .single()
+      const data = await getSessionById(supabase, sessionId)
 
-      if (fetchError || !data) {
+      if (!data) {
         setError("Session not found")
         setLoading(false)
         return
@@ -92,8 +89,8 @@ export default function PresentPage() {
     iframeRef.current?.contentWindow?.postMessage({ method }, "*")
   }, [])
 
-  const slideNext = useCallback(() => postToIframe("next"), [postToIframe])
-  const slidePrev = useCallback(() => postToIframe("prev"), [postToIframe])
+  const slideNext = useCallback(() => { postToIframe("next"); postToIframe("down") }, [postToIframe])
+  const slidePrev = useCallback(() => { postToIframe("prev"); postToIframe("up") }, [postToIframe])
   const slideUp = useCallback(() => postToIframe("up"), [postToIframe])
   const slideDown = useCallback(() => postToIframe("down"), [postToIframe])
 
@@ -147,8 +144,8 @@ export default function PresentPage() {
       if ((e.target as HTMLElement).tagName === "INPUT") return
       if (e.key === "ArrowRight") { sendSlide("next"); slideNext() }
       else if (e.key === "ArrowLeft") { sendSlide("prev"); slidePrev() }
-      else if (e.key === "ArrowUp") { e.preventDefault(); slideUp() }
-      else if (e.key === "ArrowDown") { e.preventDefault(); slideDown() }
+      else if (e.key === "ArrowUp") { e.preventDefault(); postToIframe("up") }
+      else if (e.key === "ArrowDown") { e.preventDefault(); postToIframe("down") }
       else if (e.key === "q" || e.key === "Q") setQaOpen((v) => !v)
       else if (e.key === "f" || e.key === "F") toggleFullscreen()
       else if (e.key === "Escape") {
@@ -167,8 +164,6 @@ export default function PresentPage() {
 
   const handleSlideNext = () => { sendSlide("next"); slideNext() }
   const handleSlidePrev = () => { sendSlide("prev"); slidePrev() }
-  const handleSlideUp = () => slideUp()
-  const handleSlideDown = () => slideDown()
 
   // ── Fullscreen ──────────────────────────────────────────────────────────────
   const toggleFullscreen = () => {
@@ -185,10 +180,7 @@ export default function PresentPage() {
     const supabase = createClient()
     // Broadcast to all attendees that the session is finished
     send({ type: "session_finished", sessionId })
-    await supabase
-      .from("sessions")
-      .update({ ended_at: new Date().toISOString(), status: "finished" })
-      .eq("id", sessionId)
+    await finishSession(supabase, sessionId)
     router.push("/dashboard")
   }
 
@@ -265,6 +257,13 @@ export default function PresentPage() {
         </div>
       )}
 
+      {/* ── Layer 0.5: transparent capture layer — receives mousemove over iframe ── */}
+      <div
+        className="absolute inset-0"
+        style={{ zIndex: 5, pointerEvents: controlsVisible ? "none" : "auto" }}
+        onMouseMove={resetControlsTimer}
+      />
+
       {/* ── Layer 1: Overlay ── */}
       <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 10 }}>
 
@@ -282,7 +281,7 @@ export default function PresentPage() {
         >
           <div className="flex items-center gap-1.5">
             <ChatBubbleIcon className="w-4 h-4 text-jsconf-yellow" />
-            <span className="font-mono text-xs font-bold text-white tracking-widest uppercase">EVOCA</span>
+            <span className="font-mono text-xs font-bold text-white tracking-widest uppercase">EVOCA.DEV</span>
           </div>
           {appUrl && (
             <div className="bg-white p-1 max-w-[88px] m-auto">
@@ -360,10 +359,10 @@ export default function PresentPage() {
                   </button>
                   {/* Move to Q&A */}
                   <a
-                    href={appUrl}
+                    href={`/qna/${sessionId}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title="Open attendee Q&A in new tab"
+                    title="Open full Q&A in new tab"
                     className="text-jsconf-muted hover:text-white transition-colors"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
@@ -385,29 +384,12 @@ export default function PresentPage() {
                     No questions yet
                   </p>
                 ) : (
-                  topQuestions.map((q: Question) => (
-                    <div
+                  topQuestions.map((q) => (
+                    <PresenterQuestionCard
                       key={q.id}
-                      className="flex flex-col gap-2 p-3"
-                      style={{ border: "1px solid #2a2a2a" }}
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="font-mono text-2xl font-bold text-jsconf-yellow leading-none shrink-0">
-                          {q.votes}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white text-sm font-sans leading-relaxed">{q.text}</p>
-                          <p className="font-mono text-[10px] text-jsconf-muted mt-1">{q.name}</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleDismiss(q.id)}
-                        className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-jsconf-muted border border-[#2a2a2a] px-2 py-1 hover:border-green-500 hover:text-green-400 transition-colors self-start"
-                      >
-                        <Check className="h-3 w-3" />
-                        Mark as read
-                      </button>
-                    </div>
+                      question={q}
+                      onDismiss={handleDismiss}
+                    />
                   ))
                 )}
               </div>
@@ -415,7 +397,7 @@ export default function PresentPage() {
               {/* Footer: link to full Q&A */}
               <div className="border-t border-[#2a2a2a] p-3">
                 <a
-                  href={appUrl}
+                  href={`/qna/${sessionId}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full py-2 font-mono text-xs uppercase tracking-widest text-jsconf-muted border border-[#2a2a2a] hover:text-white hover:border-white transition-colors"
@@ -447,10 +429,8 @@ export default function PresentPage() {
             padding: "8px 16px",
           }}
         >
-          <ControlBtn onClick={handleSlidePrev} title="Previous slide (←)">←</ControlBtn>
-          <ControlBtn onClick={handleSlideNext} title="Next slide (→)">→</ControlBtn>
-          <ControlBtn onClick={handleSlideUp} title="Slide up (↑)">↑</ControlBtn>
-          <ControlBtn onClick={handleSlideDown} title="Slide down (↓)">↓</ControlBtn>
+          <ControlBtn onClick={handleSlidePrev} title="Previous / up (← ↑)">←</ControlBtn>
+          <ControlBtn onClick={handleSlideNext} title="Next / down (→ ↓)">→</ControlBtn>
           <Divider />
           <ControlBtn onClick={toggleFullscreen} title="Toggle fullscreen (F)">⛶</ControlBtn>
           <ControlBtn onClick={() => setQaOpen((v) => !v)} title="Toggle Q&A (Q)">Q</ControlBtn>

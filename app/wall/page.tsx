@@ -96,9 +96,6 @@ export default function WallPage() {
 
   return (
     <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
-      {/* Emoji Burst Layer */}
-      <EmojiBurst reactions={state.reactions} isQAMode={state.mode === "qa"} />
-
       {/* Header */}
       <header className="flex-shrink-0 flex items-center justify-between px-8 py-4 border-b border-jsconf-border">
         <div className="flex items-center gap-4">

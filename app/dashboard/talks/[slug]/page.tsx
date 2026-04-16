@@ -1,7 +1,10 @@
 import { createClient } from "@/lib/supabase/server"
-import { redirect, notFound } from "next/navigation"
+import { requireAuth } from "@/lib/auth"
+import { getTalkBySlug } from "@/lib/db"
+import { notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Radio, Clock, MessageSquare, Zap, ExternalLink, Star } from "lucide-react"
+import React from "react"
+import { ArrowLeft, Radio, Clock, MessageSquare, Zap, ExternalLink, Star, MessageCircleQuestion } from "lucide-react"
 import { StartSessionButton } from "./start-session-button"
 import { DeleteTalkButton } from "@/components/dashboard/delete-talk-button"
 import { SessionFeedbackResults } from "@/components/dashboard/session-feedback-results"
@@ -12,8 +15,8 @@ type SessionRow = {
   scheduled_at: string
   ended_at: string | null
   status: string
-  question_count: number
-  reaction_count: number
+  question_count: number | null  // fix: nullable
+  reaction_count: number | null  // fix: nullable
 }
 
 type TalkRow = {
@@ -42,28 +45,14 @@ export default async function TalkDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
+  await requireAuth()
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect("/login")
-
-  // Fetch talk first — RLS ensures it belongs to this user
-  const { data: talk, error: talkError } = await supabase
-    .from("talks")
-    .select("id, title, description, slug, slide_url, slide_type, created_at")
-    .eq("slug", slug)
-    .single()
-
-  if (talkError || !talk) notFound()
+  const talk = await getTalkBySlug(supabase, slug)
+  if (!talk) notFound()
 
   const talkData = talk as TalkRow
 
-  // Fetch sessions separately — nested selects on RLS-protected related tables
-  // return empty because the embedded relation query doesn't carry the auth
-  // context through the foreign key join.
   const { data: sessionsData } = await supabase
     .from("sessions")
     .select("id, partykit_room, scheduled_at, ended_at, status, question_count, reaction_count")
@@ -72,7 +61,6 @@ export default async function TalkDetailPage({
 
   const sessions = (sessionsData ?? []) as SessionRow[]
 
-  // Check if speaker has PRO
   const { data: speakerProfile } = await supabase
     .from("speakers")
     .select("is_pro")
@@ -105,7 +93,6 @@ export default async function TalkDetailPage({
               </p>
             )}
           </div>
-
           <div className="flex items-center gap-2 shrink-0">
             <DeleteTalkButton
               talkId={talkData.id}
@@ -168,79 +155,89 @@ export default async function TalkDetailPage({
                 hour: "2-digit",
                 minute: "2-digit",
               })
-              const isLive = !session.ended_at && session.status !== "finished"
+
+              // fix: only sessions explicitly marked "live" are live
+              const isLive = session.status === "live"
               const duration = formatDuration(session.scheduled_at, session.ended_at)
 
               return (
-                <div
-                  key={session.id}
-                  className="bg-jsconf-surface border border-jsconf-border p-5 flex flex-col sm:flex-row sm:items-center gap-4"
-                >
-                  <div className="flex items-center gap-3 shrink-0">
-                    <span className="font-mono text-xs text-jsconf-muted w-6 text-right">
-                      #{sessions.length - index}
-                    </span>
-                    {isLive ? (
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-jsconf-yellow-dim border border-jsconf-yellow/30 font-mono text-[10px] text-jsconf-yellow uppercase tracking-wider">
-                        <span className="relative flex h-1.5 w-1.5">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-jsconf-yellow opacity-75" />
-                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-jsconf-yellow" />
+                // fix: Fragment with key wraps both nodes; feedback moved inside card
+                <React.Fragment key={session.id}>
+                  <div className="bg-jsconf-surface border border-jsconf-border p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="font-mono text-xs text-jsconf-muted w-6 text-right">
+                        #{sessions.length - index}
+                      </span>
+                      {isLive ? (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-jsconf-yellow-dim border border-jsconf-yellow/30 font-mono text-[10px] text-jsconf-yellow uppercase tracking-wider">
+                          <span className="relative flex h-1.5 w-1.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-jsconf-yellow opacity-75" />
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-jsconf-yellow" />
+                          </span>
+                          Live
                         </span>
-                        Live
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2 py-0.5 border border-jsconf-border font-mono text-[10px] text-jsconf-muted uppercase tracking-wider">
-                        Ended
-                      </span>
-                    )}
-                  </div>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 border border-jsconf-border font-mono text-[10px] text-jsconf-muted uppercase tracking-wider">
+                          Ended
+                        </span>
+                      )}
+                    </div>
 
-                  <div className="flex-1 min-w-0 flex flex-wrap gap-4">
-                    <span className="font-mono text-xs text-white">
-                      {date} · {time}
-                    </span>
-                    <span className="font-mono text-xs text-jsconf-muted flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {duration}
-                    </span>
-                    <span className="font-mono text-xs text-jsconf-muted flex items-center gap-1">
-                      <MessageSquare className="h-3 w-3" />
-                      {session.question_count} Q&A
-                    </span>
-                    <span className="font-mono text-xs text-jsconf-muted flex items-center gap-1">
-                      <Zap className="h-3 w-3" />
-                      {session.reaction_count} reactions
-                    </span>
-                  </div>
+                    <div className="flex-1 min-w-0 flex flex-wrap gap-4">
+                      <span className="font-mono text-xs text-white">
+                        {date} · {time}
+                      </span>
+                      <span className="font-mono text-xs text-jsconf-muted flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {duration}
+                      </span>
+                      <span className="font-mono text-xs text-jsconf-muted flex items-center gap-1">
+                        <MessageSquare className="h-3 w-3" />
+                        {/* fix: null-coalesce counts */}
+                        {session.question_count ?? 0} Q&A
+                      </span>
+                      <span className="font-mono text-xs text-jsconf-muted flex items-center gap-1">
+                        <Zap className="h-3 w-3" />
+                        {session.reaction_count ?? 0} reactions
+                      </span>
+                    </div>
 
-                  <div className="shrink-0">
-                    {isLive ? (
+                    <div className="flex items-center gap-2 shrink-0">
                       <Link
-                        href={`/present/${session.id}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 bg-jsconf-yellow text-black font-mono text-xs font-bold uppercase tracking-wider hover:bg-jsconf-yellow/90 transition-all duration-150"
+                        href={`/qna/${session.id}`}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-white hover:border-white transition-all duration-150"
                       >
-                        <Radio className="h-3 w-3" />
-                        Rejoin
+                        <MessageCircleQuestion className="h-3 w-3" />
+                        Q&A
                       </Link>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted">
-                        <Star className="h-3 w-3" />
-                        Finished
-                      </span>
+                      {isLive ? (
+                        <Link
+                          href={`/present/${session.id}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 bg-jsconf-yellow text-black font-mono text-xs font-bold uppercase tracking-wider hover:bg-jsconf-yellow/90 transition-all duration-150"
+                        >
+                          <Radio className="h-3 w-3" />
+                          Rejoin
+                        </Link>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted">
+                          <Star className="h-3 w-3" />
+                          Finished
+                        </span>
+                      )}
+                    </div>
+
+                    {/* fix: feedback section is now INSIDE the card div */}
+                    {!isLive && (
+                      <div className="mt-4 pt-4 border-t border-jsconf-border w-full">
+                        <p className="font-mono text-[10px] text-jsconf-muted uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                          <Star className="h-3 w-3" />
+                          Feedback
+                        </p>
+                        <SessionFeedbackResults sessionId={session.id} />
+                      </div>
                     )}
                   </div>
-                </div>
-
-                {/* Feedback results — only shown for ended sessions */}
-                {!isLive && (
-                  <div className="mt-4 pt-4 border-t border-jsconf-border">
-                    <p className="font-mono text-[10px] text-jsconf-muted uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                      <Star className="h-3 w-3" />
-                      Feedback
-                    </p>
-                    <SessionFeedbackResults sessionId={session.id} />
-                  </div>
-                )}
+                </React.Fragment>
               )
             })}
           </div>

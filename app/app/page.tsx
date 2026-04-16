@@ -9,6 +9,7 @@ import { ScheduleTab } from "@/components/attendee/schedule-tab"
 import { FeedbackScreen } from "@/components/attendee/feedback-screen"
 import { Header } from "@/components/shared/header"
 import { useParty } from "@/hooks/use-party"
+import { STORAGE_KEYS } from "@/lib/storage-keys"
 import { Zap, MessageCircleQuestion, Calendar, Share2, X } from "lucide-react"
 
 function LiveBanner() {
@@ -16,12 +17,12 @@ function LiveBanner() {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    const dismissed = localStorage.getItem("jsconf-banner-dismissed")
+    const dismissed = localStorage.getItem(STORAGE_KEYS.bannerDismissed)
     if (!dismissed) setVisible(true)
   }, [])
 
   const handleDismiss = () => {
-    localStorage.setItem("jsconf-banner-dismissed", "true")
+    localStorage.setItem(STORAGE_KEYS.bannerDismissed, "true")
     setVisible(false)
   }
 
@@ -80,10 +81,10 @@ function LiveBanner() {
 // Get or create a persistent anonymous token for this attendee
 function getAttendeeToken(): string {
   if (typeof window === "undefined") return ""
-  let token = localStorage.getItem("evoca-attendee-token")
+  let token = localStorage.getItem(STORAGE_KEYS.attendeeToken)
   if (!token) {
     token = `anon_${Math.random().toString(36).slice(2, 11)}_${Date.now().toString(36)}`
-    localStorage.setItem("evoca-attendee-token", token)
+    localStorage.setItem(STORAGE_KEYS.attendeeToken, token)
   }
   return token
 }
@@ -187,7 +188,7 @@ function AttendeePageInner() {
             </TabsContent>
 
             <TabsContent value="ask" className="mt-0">
-              <AskTab send={send} questions={state.questions} />
+              <AskTab send={send} questions={state.questions} sessionId={sessionId} />
             </TabsContent>
 
             <TabsContent value="schedule" className="mt-0">
