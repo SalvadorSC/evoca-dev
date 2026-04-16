@@ -181,7 +181,6 @@ export function HeroBackground({ items, accentColor = "#F7E018" }: { items: Live
 
 function FloatingItem({ item, paused }: { item: LiveItem; paused: boolean }) {
   const [visible, setVisible] = useState(false)
-  const [hovered, setHovered] = useState(false)
   const [popped, setPopped] = useState(false)
   const animName = `hero-float-${item.ltr ? "ltr" : "rtl"}`
   const delay = `${(item.ts % 1000) / 1000}s`
@@ -197,8 +196,6 @@ function FloatingItem({ item, paused }: { item: LiveItem; paused: boolean }) {
     const t = setTimeout(() => setPopped(false), 600)
     return () => clearTimeout(t)
   }, [popped])
-
-  const duration = hovered ? "120s" : "18s"
 
   return (
     <>
@@ -228,7 +225,7 @@ function FloatingItem({ item, paused }: { item: LiveItem; paused: boolean }) {
           top: `${item.y}%`,
           left: 0,
           right: 0,
-          animation: visible ? `${animName} ${duration} linear ${item.persistent ? "infinite" : "forwards"}` : undefined,
+          animation: visible ? `${animName} 18s linear ${item.persistent ? "infinite" : "forwards"}` : undefined,
           animationDelay: visible ? delay : undefined,
           animationPlayState: paused ? "paused" : "running",
           opacity: visible ? undefined : 0,
@@ -236,9 +233,8 @@ function FloatingItem({ item, paused }: { item: LiveItem; paused: boolean }) {
       >
         {item.kind === "reaction" ? (
           <div
-            className="flex items-center gap-2 bg-black/40 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-full shrink-0 cursor-pointer select-none transition-colors hover:border-white/30 hover:bg-black/60"
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
+            className="flex items-center gap-2 bg-black/40 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-full shrink-0 cursor-pointer select-none transition-colors hover:border-white/30 hover:bg-black/60 hover:scale-105"
+            style={{ transition: "border-color 150ms, background-color 150ms, transform 150ms" }}
             onClick={() => setPopped(true)}
           >
             <span
@@ -254,9 +250,8 @@ function FloatingItem({ item, paused }: { item: LiveItem; paused: boolean }) {
           </div>
         ) : (
           <div
-            className="bg-black/50 border border-white/10 px-4 py-2.5 rounded-xl backdrop-blur-sm shrink-0 max-w-[280px] cursor-pointer select-none hover:border-white/30 hover:bg-black/60"
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
+            className="bg-black/50 border border-white/10 px-4 py-2.5 rounded-xl backdrop-blur-sm shrink-0 max-w-[280px] cursor-pointer select-none hover:border-white/30 hover:bg-black/60 hover:scale-105"
+            style={{ transition: "border-color 150ms, background-color 150ms, transform 150ms" }}
             onClick={() => setPopped(true)}
           >
             <p
