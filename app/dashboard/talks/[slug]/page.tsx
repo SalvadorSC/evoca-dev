@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { redirect, notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Radio, Clock, MessageSquare, Zap, ExternalLink, Star } from "lucide-react"
+import { ArrowLeft, Radio, Clock, MessageSquare, Zap, ExternalLink, Star, MessageCircleQuestion } from "lucide-react"
 import { StartSessionButton } from "./start-session-button"
 import { DeleteTalkButton } from "@/components/dashboard/delete-talk-button"
 import { SessionFeedbackResults } from "@/components/dashboard/session-feedback-results"
@@ -213,7 +213,14 @@ export default async function TalkDetailPage({
                     </span>
                   </div>
 
-                  <div className="shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Link
+                      href={`/qna/${session.id}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-white hover:border-white transition-all duration-150"
+                    >
+                      <MessageCircleQuestion className="h-3 w-3" />
+                      Q&A
+                    </Link>
                     {isLive ? (
                       <Link
                         href={`/present/${session.id}`}

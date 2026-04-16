@@ -360,10 +360,10 @@ export default function PresentPage() {
                   </button>
                   {/* Move to Q&A */}
                   <a
-                    href={appUrl}
+                    href={`/qna/${sessionId}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title="Open attendee Q&A in new tab"
+                    title="Open full Q&A in new tab"
                     className="text-jsconf-muted hover:text-white transition-colors"
                   >
                     <ExternalLink className="h-3.5 w-3.5" />
@@ -415,7 +415,7 @@ export default function PresentPage() {
               {/* Footer: link to full Q&A */}
               <div className="border-t border-[#2a2a2a] p-3">
                 <a
-                  href={appUrl}
+                  href={`/qna/${sessionId}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 w-full py-2 font-mono text-xs uppercase tracking-widest text-jsconf-muted border border-[#2a2a2a] hover:text-white hover:border-white transition-colors"
