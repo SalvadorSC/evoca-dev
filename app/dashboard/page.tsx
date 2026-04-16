@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
+import { requireAuth } from "@/lib/auth"
+import { getUserTalks, getSessionsForTalks } from "@/lib/db"
 import Link from "next/link"
 import { Plus, Radio, Settings, CalendarDays } from "lucide-react"
 import { DeleteTalkButton } from "@/components/dashboard/delete-talk-button"
@@ -7,35 +8,18 @@ import { DeleteTalkButton } from "@/components/dashboard/delete-talk-button"
 const FREE_TALK_LIMIT = 5
 
 export default async function DashboardPage() {
+  await requireAuth()
   const supabase = await createClient()
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect("/login")
-
-  // Fetch talks and sessions separately — nested selects on RLS-protected
-  // related tables return empty because the embedded relation query doesn't
-  // carry auth context through the foreign key join.
-  const { data: talks, error: talksError } = await supabase
-    .from("talks")
-    .select("id, title, slug, created_at")
-    .order("created_at", { ascending: false })
-
-  const talkList = talks ?? []
+  // Fetch talks and sessions via shared db helpers.
+  // Nested selects on RLS-protected related tables return empty because the
+  // embedded relation query doesn't carry auth context through the FK join,
+  // so we fetch them separately.
+  const talkList = await getUserTalks(supabase)
   const talkIds = talkList.map((t) => t.id)
+  const sessions = await getSessionsForTalks(supabase, talkIds)
 
-  // Only fetch sessions if we have talks
-  const { data: sessions } = talkIds.length > 0
-    ? await supabase
-        .from("sessions")
-        .select("id, talk_id, scheduled_at")
-        .in("talk_id", talkIds)
-        .order("scheduled_at", { ascending: false })
-    : { data: [] }
-
-  const sessionsByTalkId = (sessions ?? []).reduce<
+  const sessionsByTalkId = sessions.reduce<
     Record<string, { id: string; scheduled_at: string }[]>
   >((acc, s) => {
     if (!acc[s.talk_id]) acc[s.talk_id] = []

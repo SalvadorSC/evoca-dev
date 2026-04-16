@@ -20,6 +20,7 @@ import {
 import { Check, HelpCircle, X, Share2, Download, AlertTriangle, Users, ChevronDown } from "lucide-react"
 import { SESSIONS } from "@/lib/sessions"
 import type { Session, AttendanceRecord, AttendeeInfo, ClientMessage } from "@/lib/types"
+import { STORAGE_KEYS } from "@/lib/storage-keys"
 
 type Filter = "all" | "talk" | "workshop" | "lightning"
 
@@ -31,22 +32,22 @@ interface ScheduleTabProps {
 
 function getUserId(): string {
   if (typeof window === "undefined") return ""
-  let userId = localStorage.getItem("evoca-user-id")
+  let userId = localStorage.getItem(STORAGE_KEYS.userId)
   if (!userId) {
     userId = `user_${Math.random().toString(36).substring(2, 11)}`
-    localStorage.setItem("evoca-user-id", userId)
+    localStorage.setItem(STORAGE_KEYS.userId, userId)
   }
   return userId
 }
 
 function getDisplayName(): string | null {
   if (typeof window === "undefined") return null
-  return localStorage.getItem("evoca-display-name")
+  return localStorage.getItem(STORAGE_KEYS.displayName)
 }
 
 function setDisplayNameStorage(name: string): void {
   if (typeof window === "undefined") return
-  localStorage.setItem("evoca-display-name", name)
+  localStorage.setItem(STORAGE_KEYS.displayName, name)
 }
 
 function timeToMinutes(time: string): number {

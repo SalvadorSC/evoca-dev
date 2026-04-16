@@ -4,10 +4,11 @@ import { useEffect, useRef, useState, useCallback } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { QRCodeSVG } from "qrcode.react"
 import { createClient } from "@/lib/supabase/client"
+import { getSessionById, finishSession } from "@/lib/db"
 import { useParty } from "@/hooks/use-party"
 import { EmojiBurst } from "@/components/wall/emoji-burst"
-import { Pin, PinOff, ExternalLink, Check } from "lucide-react"
-import type { Question } from "@/lib/types"
+import { Pin, PinOff, ExternalLink } from "lucide-react"
+import { PresenterQuestionCard } from "@/components/shared/question-card"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -67,13 +68,9 @@ export default function PresentPage() {
 
     async function load() {
       const supabase = createClient()
-      const { data, error: fetchError } = await supabase
-        .from("sessions")
-        .select("id, partykit_room, ended_at, talks(id, title, slide_url, slide_type)")
-        .eq("id", sessionId)
-        .single()
+      const data = await getSessionById(supabase, sessionId)
 
-      if (fetchError || !data) {
+      if (!data) {
         setError("Session not found")
         setLoading(false)
         return
@@ -185,10 +182,7 @@ export default function PresentPage() {
     const supabase = createClient()
     // Broadcast to all attendees that the session is finished
     send({ type: "session_finished", sessionId })
-    await supabase
-      .from("sessions")
-      .update({ ended_at: new Date().toISOString(), status: "finished" })
-      .eq("id", sessionId)
+    await finishSession(supabase, sessionId)
     router.push("/dashboard")
   }
 
@@ -385,29 +379,12 @@ export default function PresentPage() {
                     No questions yet
                   </p>
                 ) : (
-                  topQuestions.map((q: Question) => (
-                    <div
+                  topQuestions.map((q) => (
+                    <PresenterQuestionCard
                       key={q.id}
-                      className="flex flex-col gap-2 p-3"
-                      style={{ border: "1px solid #2a2a2a" }}
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className="font-mono text-2xl font-bold text-jsconf-yellow leading-none shrink-0">
-                          {q.votes}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white text-sm font-sans leading-relaxed">{q.text}</p>
-                          <p className="font-mono text-[10px] text-jsconf-muted mt-1">{q.name}</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleDismiss(q.id)}
-                        className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-jsconf-muted border border-[#2a2a2a] px-2 py-1 hover:border-green-500 hover:text-green-400 transition-colors self-start"
-                      >
-                        <Check className="h-3 w-3" />
-                        Mark as read
-                      </button>
-                    </div>
+                      question={q}
+                      onDismiss={handleDismiss}
+                    />
                   ))
                 )}
               </div>

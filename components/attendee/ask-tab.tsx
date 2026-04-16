@@ -4,8 +4,9 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { ChevronUp, Check } from "lucide-react"
 import type { ClientMessage, Question } from "@/lib/types"
+import { STORAGE_KEYS } from "@/lib/storage-keys"
+import { AttendeeQuestionCard } from "@/components/shared/question-card"
 
 interface AskTabProps {
   send: (message: ClientMessage) => void
@@ -19,7 +20,7 @@ export function AskTab({ send, questions }: AskTabProps) {
   const [votedQuestions, setVotedQuestions] = useState<Set<string>>(new Set())
 
   useEffect(() => {
-    const stored = localStorage.getItem("evoca-voted-questions")
+    const stored = localStorage.getItem(STORAGE_KEYS.votedQuestions)
     if (stored) {
       try {
         setVotedQuestions(new Set(JSON.parse(stored)))
@@ -56,7 +57,7 @@ export function AskTab({ send, questions }: AskTabProps) {
     const newVoted = new Set(votedQuestions)
     newVoted.add(questionId)
     setVotedQuestions(newVoted)
-    localStorage.setItem("evoca-voted-questions", JSON.stringify([...newVoted]))
+    localStorage.setItem(STORAGE_KEYS.votedQuestions, JSON.stringify([...newVoted]))
   }
 
   const sortedQuestions = [...questions].sort((a, b) => b.votes - a.votes)
@@ -114,39 +115,12 @@ export function AskTab({ send, questions }: AskTabProps) {
         ) : (
           <div className="flex flex-col gap-2">
             {sortedQuestions.map((question) => (
-              <div
+              <AttendeeQuestionCard
                 key={question.id}
-                className={`bg-jsconf-surface border border-jsconf-border p-3 flex gap-3 items-start transition-opacity duration-150 ${
-                  question.answered ? "opacity-50" : ""
-                }`}
-              >
-                <button
-                  onClick={() => handleVote(question.id)}
-                  disabled={votedQuestions.has(question.id)}
-                  className={`flex flex-col items-center gap-0.5 p-2 border transition-all duration-150 ${
-                    votedQuestions.has(question.id)
-                      ? "text-jsconf-yellow bg-jsconf-yellow-dim border-jsconf-yellow"
-                      : "text-jsconf-muted border-jsconf-border hover:text-jsconf-yellow hover:border-jsconf-yellow"
-                  }`}
-                >
-                  <ChevronUp className="h-4 w-4" />
-                  <span className="font-mono text-sm font-bold">{question.votes}</span>
-                </button>
-
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-white font-sans">{question.text}</p>
-                  <p className="font-mono text-xs text-jsconf-muted mt-1">
-                    {question.name}
-                  </p>
-                </div>
-
-                {question.answered && (
-                  <span className="flex items-center gap-1 font-mono text-xs text-green-500 bg-green-500/10 px-2 py-1 uppercase tracking-wide">
-                    <Check className="h-3 w-3" />
-                    Answered
-                  </span>
-                )}
-              </div>
+                question={question}
+                voted={votedQuestions.has(question.id)}
+                onVote={handleVote}
+              />
             ))}
           </div>
         )}

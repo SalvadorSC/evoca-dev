@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
 import { useParty } from "@/hooks/use-party"
+import { usePartyRoom } from "@/hooks/use-party-room"
 import { Header } from "@/components/shared/header"
 import { Button } from "@/components/ui/button"
 import { ChevronUp, Check, Play, Pause, RotateCcw, ChevronDown } from "lucide-react"
@@ -15,33 +15,13 @@ export default function QnAPage() {
   const params = useParams()
   const sessionId = params.sessionId as string
 
-  const [roomName, setRoomName] = useState<string | null>(null)
-  const [loadError, setLoadError] = useState<string | null>(null)
+  const { room: roomName, loading: roomLoading, error: loadError } = usePartyRoom(undefined, sessionId)
 
   // Timer state
   const [selectedMinutes, setSelectedMinutes] = useState(DEFAULT_TIMER_MINUTES)
   const [timerSeconds, setTimerSeconds] = useState(DEFAULT_TIMER_MINUTES * 60)
   const [isTimerRunning, setIsTimerRunning] = useState(false)
   const [showAnswered, setShowAnswered] = useState(false)
-
-  // Fetch the partykit_room for this session
-  useEffect(() => {
-    async function loadRoom() {
-      const supabase = createClient()
-      const { data, error } = await supabase
-        .from("sessions")
-        .select("partykit_room")
-        .eq("id", sessionId)
-        .single()
-
-      if (error || !data) {
-        setLoadError("Session not found")
-        return
-      }
-      setRoomName(data.partykit_room)
-    }
-    loadRoom()
-  }, [sessionId])
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null
@@ -95,7 +75,7 @@ export default function QnAPage() {
     )
   }
 
-  if (!roomName) {
+  if (roomLoading) {
     return (
       <div className="min-h-screen bg-jsconf-bg flex items-center justify-center">
         <p className="font-mono text-sm text-jsconf-muted uppercase tracking-widest animate-pulse">

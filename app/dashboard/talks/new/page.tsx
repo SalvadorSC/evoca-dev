@@ -99,10 +99,7 @@ export default function NewTalkPage() {
       const supabase = createClient()
 
       const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user) {
-        router.push("/login")
-        return
-      }
+      if (!session?.user) { router.push("/login"); return }
 
       // Build the slug locally — do NOT rely on .select() after insert
       // because RLS blocks the read-back and returns empty data silently.
