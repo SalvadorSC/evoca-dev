@@ -266,7 +266,7 @@ function PhoneMockup({ send, questions, qrUrl, activeTab, onTabChange }: {
                 </div>
               </TabsContent>
               {/* Ask tab: scrollable */}
-              <TabsContent value="ask" className="mt-0 flex-1 min-h-0 overflow-y-auto">
+              <TabsContent value="ask" className="mt-0 flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <div style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }} className="pb-8">
                   <AskTab send={send} questions={questions} />
                 </div>
