@@ -181,7 +181,6 @@ export function HeroBackground({ items, accentColor = "#F7E018" }: { items: Live
 
 function FloatingItem({ item, paused }: { item: LiveItem; paused: boolean }) {
   const [visible, setVisible] = useState(false)
-  const [popped, setPopped] = useState(false)
   const animName = `hero-float-${item.ltr ? "ltr" : "rtl"}`
   const delay = `${(item.ts % 1000) / 1000}s`
 
@@ -189,13 +188,6 @@ function FloatingItem({ item, paused }: { item: LiveItem; paused: boolean }) {
     const id = requestAnimationFrame(() => setVisible(true))
     return () => cancelAnimationFrame(id)
   }, [])
-
-  // When popped, auto-reset after the pop animation completes
-  useEffect(() => {
-    if (!popped) return
-    const t = setTimeout(() => setPopped(false), 600)
-    return () => clearTimeout(t)
-  }, [popped])
 
   return (
     <>
@@ -212,12 +204,6 @@ function FloatingItem({ item, paused }: { item: LiveItem; paused: boolean }) {
           88%  { opacity: 1; }
           100% { transform: translateX(-240px); opacity: 0; }
         }
-        @keyframes pop-burst {
-          0%   { transform: scale(1); }
-          30%  { transform: scale(1.6); }
-          60%  { transform: scale(0.9); }
-          100% { transform: scale(1); }
-        }
       `}</style>
       <div
         className="absolute flex items-center gap-2"
@@ -232,34 +218,16 @@ function FloatingItem({ item, paused }: { item: LiveItem; paused: boolean }) {
         }}
       >
         {item.kind === "reaction" ? (
-          <div
-            className="flex items-center gap-2 bg-black/40 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-full shrink-0 cursor-pointer select-none transition-colors hover:border-white/30 hover:bg-black/60 hover:scale-105"
-            style={{ transition: "border-color 150ms, background-color 150ms, transform 150ms" }}
-            onClick={() => setPopped(true)}
-          >
-            <span
-              className="text-3xl leading-none"
-              style={popped ? { animation: "pop-burst 0.6s ease-out forwards" } : undefined}
-            >
-              {item.emoji}
-            </span>
+          <div className="flex items-center gap-2 bg-black/40 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-full shrink-0">
+            <span className="text-3xl leading-none">{item.emoji}</span>
             {item.text && (
               <span className="font-sans text-sm text-white/80 whitespace-nowrap">{item.text}</span>
             )}
             <span className="font-mono text-xs text-white/40 whitespace-nowrap">{item.name}</span>
           </div>
         ) : (
-          <div
-            className="bg-black/50 border border-white/10 px-4 py-2.5 rounded-xl backdrop-blur-sm shrink-0 max-w-[280px] cursor-pointer select-none hover:border-white/30 hover:bg-black/60 hover:scale-105"
-            style={{ transition: "border-color 150ms, background-color 150ms, transform 150ms" }}
-            onClick={() => setPopped(true)}
-          >
-            <p
-              className="font-sans text-sm text-white/80 leading-snug mb-1"
-              style={popped ? { animation: "pop-burst 0.6s ease-out forwards" } : undefined}
-            >
-              {item.text}
-            </p>
+          <div className="bg-black/50 border border-white/10 px-4 py-2.5 rounded-xl backdrop-blur-sm shrink-0 max-w-[280px]">
+            <p className="font-sans text-sm text-white/80 leading-snug mb-1">{item.text}</p>
             <p className="font-mono text-xs text-white/40">{item.name}</p>
           </div>
         )}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, Suspense, useRef } from "react"
+import { useState, useEffect, useCallback, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { ChevronDown, QrCode } from "lucide-react"
@@ -58,8 +58,6 @@ function Logo({ className = "" }: { className?: string }) {
 
 // ─── Split Hero ───────────────────────────────────────────────────────────────
 function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
-  const [hovered, setHovered] = useState<Role | null>(null)
-
   return (
     <div className="min-h-screen flex flex-col lg:flex-row relative">
       {/* Center logo - absolutely positioned */}
@@ -73,13 +71,7 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
       </div>
 
       {/* Speaker side */}
-      <div
-        className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-[#2a2a2a] relative transition-colors duration-300 cursor-pointer"
-        style={{ backgroundColor: hovered === "speaker" ? "rgba(247, 224, 24, 0.04)" : "transparent" }}
-        onMouseEnter={() => setHovered("speaker")}
-        onMouseLeave={() => setHovered(null)}
-        onClick={() => onSelectRole("speaker")}
-      >
+      <div className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-[#2a2a2a] relative">
         <div className="max-w-md text-center lg:text-left">
           <p className="font-mono text-xs text-[#666] uppercase tracking-widest mb-2">I&apos;m a</p>
           <h1 className="font-display font-bold text-white text-5xl lg:text-6xl xl:text-7xl mb-4">Speaker</h1>
@@ -87,7 +79,7 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
             Turn any talk into a live experience
           </p>
           <button
-            onClick={(e) => { e.stopPropagation(); onSelectRole("speaker") }}
+            onClick={() => onSelectRole("speaker")}
             className="font-mono text-sm font-bold uppercase tracking-wide px-6 py-3 border-2 border-[#F7E018] text-[#F7E018] hover:bg-[#F7E018] hover:text-black transition-colors"
           >
             Get started free →
@@ -96,13 +88,7 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
       </div>
 
       {/* Organizer side */}
-      <div
-        className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12 relative transition-colors duration-300 cursor-pointer"
-        style={{ backgroundColor: hovered === "organizer" ? "rgba(0, 232, 135, 0.04)" : "transparent" }}
-        onMouseEnter={() => setHovered("organizer")}
-        onMouseLeave={() => setHovered(null)}
-        onClick={() => onSelectRole("organizer")}
-      >
+      <div className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12 relative">
         <div className="max-w-md text-center lg:text-left">
           <p className="font-mono text-xs text-[#666] uppercase tracking-widest mb-2">I&apos;m an</p>
           <h1 className="font-display font-bold text-white text-5xl lg:text-6xl xl:text-7xl mb-4">Organizer</h1>
@@ -110,7 +96,7 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
             One platform for your schedule, speakers and live engagement
           </p>
           <button
-            onClick={(e) => { e.stopPropagation(); onSelectRole("organizer") }}
+            onClick={() => onSelectRole("organizer")}
             className="font-mono text-sm font-bold uppercase tracking-wide px-6 py-3 border-2 border-[#00E887] text-[#00E887] hover:bg-[#00E887] hover:text-black transition-colors"
           >
             Get started free →
@@ -168,49 +154,24 @@ function FeatureCard({ icon, title, description, badge }: { icon: string; title:
 }
 
 // ─── FAQ Accordion ────────────────────────────────────────────────────────────
-function FAQItem({ item, isOpen, onToggle }: { item: { q: string; a: string }; isOpen: boolean; onToggle: () => void }) {
-  const contentRef = useRef<HTMLDivElement>(null)
-  const [height, setHeight] = useState(0)
-
-  useEffect(() => {
-    if (contentRef.current) {
-      setHeight(isOpen ? contentRef.current.scrollHeight : 0)
-    }
-  }, [isOpen])
-
-  return (
-    <div>
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between py-4 text-left cursor-pointer group"
-        aria-expanded={isOpen}
-      >
-        <span className="font-sans text-white group-hover:text-white/80 transition-colors">{item.q}</span>
-        <ChevronDown className={`w-5 h-5 text-[#666] transition-transform duration-300 shrink-0 ml-4 ${isOpen ? "rotate-180" : ""}`} />
-      </button>
-      <div
-        style={{ height, overflow: "hidden", transition: "height 280ms cubic-bezier(0.4, 0, 0.2, 1)" }}
-      >
-        <div ref={contentRef}>
-          <p className="font-sans text-[#888] text-sm pb-4 leading-relaxed">{item.a}</p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function FAQ({ items }: { items: { q: string; a: string }[] }) {
   const [open, setOpen] = useState<number | null>(null)
 
   return (
     <div className="divide-y divide-[#2a2a2a]">
       {items.map((item, i) => (
-        <FAQItem
-          key={i}
-          item={item}
-          isOpen={open === i}
-          onToggle={() => setOpen(open === i ? null : i)}
-        />
+        <div key={i}>
+          <button
+            onClick={() => setOpen(open === i ? null : i)}
+            className="w-full flex items-center justify-between py-4 text-left cursor-pointer"
+          >
+            <span className="font-sans text-white">{item.q}</span>
+            <ChevronDown className={`w-5 h-5 text-[#666] transition-transform shrink-0 ml-4 ${open === i ? "rotate-180" : ""}`} />
+          </button>
+          {open === i && (
+            <p className="font-sans text-[#888] text-sm pb-4 leading-relaxed">{item.a}</p>
+          )}
+        </div>
       ))}
     </div>
   )
@@ -484,71 +445,7 @@ function DevColorToggle({ onColorChange }: { onColorChange: (color: string) => v
   )
 }
 
-// ─── Wipe Animation Overlay ───────────────────────────────────────────────────
-function WipeOverlay({
-  active,
-  color,
-  direction,
-  onComplete
-}: {
-  active: boolean
-  color: string
-  direction: "left" | "right"
-  onComplete: () => void
-}) {
-  const [phase, setPhase] = useState<"idle" | "enter" | "visible" | "exit">("idle")
-  const onCompleteRef = useRef(onComplete)
-  useEffect(() => { onCompleteRef.current = onComplete }, [onComplete])
 
-  useEffect(() => {
-    if (!active) return
-    // Start offscreen, then on next frame slide in
-    setPhase("enter")
-    const t1 = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setPhase("visible")
-      })
-    })
-    // Hold visible, then slide out
-    const t2 = setTimeout(() => {
-      setPhase("exit")
-    }, 380)
-    const t3 = setTimeout(() => {
-      setPhase("idle")
-      onCompleteRef.current()
-    }, 700)
-    return () => {
-      cancelAnimationFrame(t1)
-      clearTimeout(t2)
-      clearTimeout(t3)
-    }
-  }, [active])
-
-  if (phase === "idle") return null
-
-  const isFromLeft = direction === "left"
-
-  // enter: starts offscreen (initial position before transition)
-  // visible: fully covering screen
-  // exit: slides off to the opposite side
-  const translateX =
-    phase === "enter"
-      ? isFromLeft ? "-100%" : "100%"
-      : phase === "visible"
-        ? "0%"
-        : isFromLeft ? "100%" : "-100%"
-
-  return (
-    <div
-      className="fixed inset-0 z-[100] pointer-events-none will-change-transform"
-      style={{
-        backgroundColor: color,
-        transition: phase === "enter" ? "none" : "transform 320ms cubic-bezier(0.76, 0, 0.24, 1)",
-        transform: `translateX(${translateX})`,
-      }}
-    />
-  )
-}
 
 // ─── Main Landing Content ─────────────────────────────────────────────────────
 function LandingContent() {
@@ -556,10 +453,6 @@ function LandingContent() {
   const router = useRouter()
 
   const [role, setRole] = useState<Role | null>(null)
-  const [wipeActive, setWipeActive] = useState(false)
-  const [wipeColor, setWipeColor] = useState("#F7E018")
-  const [wipeDirection, setWipeDirection] = useState<"left" | "right">("left")
-  const [pendingRole, setPendingRole] = useState<Role | null>(null)
   const [organizerAccent, setOrganizerAccent] = useState(ORGANIZER_ACCENTS[0].value)
 
   // Check URL and localStorage on mount
@@ -591,23 +484,11 @@ function LandingContent() {
   }, [])
 
   const handleSelectRole = useCallback((newRole: Role) => {
-    const tokens = ROLES[newRole]
-    setWipeColor(newRole === "organizer" ? organizerAccent : tokens.accent)
-    setWipeDirection(tokens.wipeDirection)
-    setPendingRole(newRole)
-    setWipeActive(true)
-  }, [organizerAccent])
-
-  const handleWipeComplete = useCallback(() => {
-    if (pendingRole) {
-      setRole(pendingRole)
-      localStorage.setItem(STORAGE_KEYS.role, pendingRole)
-      router.push(`/?role=${pendingRole}`, { scroll: false })
-      applyAccent(pendingRole, pendingRole === "organizer" ? organizerAccent : undefined)
-      setPendingRole(null)
-    }
-    setWipeActive(false)
-  }, [pendingRole, router, applyAccent, organizerAccent])
+    setRole(newRole)
+    localStorage.setItem(STORAGE_KEYS.role, newRole)
+    router.push(`/?role=${newRole}`, { scroll: false })
+    applyAccent(newRole, newRole === "organizer" ? organizerAccent : undefined)
+  }, [organizerAccent, router, applyAccent])
 
   const handleSwitchRole = useCallback(() => {
     const newRole = role === "speaker" ? "organizer" : "speaker"
@@ -627,13 +508,6 @@ function LandingContent() {
 
   return (
     <div className="min-h-screen bg-[#080808] text-white">
-      <WipeOverlay
-        active={wipeActive}
-        color={wipeColor}
-        direction={wipeDirection}
-        onComplete={handleWipeComplete}
-      />
-
       {!role ? (
         <SplitHero onSelectRole={handleSelectRole} />
       ) : (

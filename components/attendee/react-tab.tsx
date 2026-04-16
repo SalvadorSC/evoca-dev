@@ -78,7 +78,7 @@ export function ReactTab({ send }: ReactTabProps) {
         </label>
         <Textarea
           id="reaction"
-          placeholder="Add a thought to go with your emoji..."
+          placeholder="Share your thoughts"
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, 160))}
           maxLength={160}
@@ -102,8 +102,8 @@ export function ReactTab({ send }: ReactTabProps) {
           </span>
         </label>
         <div className={`flex gap-2 flex-wrap p-2 border transition-colors ${showValidation && missingEmoji
-            ? "border-jsconf-red bg-jsconf-red/5"
-            : "border-transparent"
+          ? "border-jsconf-red bg-jsconf-red/5"
+          : "border-transparent"
           }`}>
           {EMOJI_OPTIONS.map((emoji) => (
             <button
@@ -114,8 +114,8 @@ export function ReactTab({ send }: ReactTabProps) {
                 if (showValidation) setShowValidation(false)
               }}
               className={`text-3xl p-3 rounded-none border transition-all duration-150 ${selectedEmoji === emoji
-                  ? "bg-jsconf-yellow-dim border-jsconf-yellow scale-110"
-                  : "bg-jsconf-surface border-jsconf-border hover:border-jsconf-yellow/50"
+                ? "bg-jsconf-yellow-dim border-jsconf-yellow scale-110"
+                : "bg-jsconf-surface border-jsconf-border hover:border-jsconf-yellow/50"
                 }`}
             >
               {emoji}
