@@ -188,8 +188,8 @@ function AttendeeView({ sessionId }: { sessionId: string }) {
       <header className="border-b border-jsconf-border px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="font-display font-bold text-base tracking-wide">
-            <span className="text-white">Live</span>
-            <span className="text-jsconf-yellow">Wall</span>
+            <span className="text-white">Evo</span>
+            <span className="text-jsconf-yellow">ca</span>
           </span>
           <span className="text-jsconf-muted font-mono text-xs">· {DEMO_TALK.conference}</span>
         </div>
@@ -233,11 +233,11 @@ function PhoneMockup({ send, questions, qrUrl }: { send: (m: ClientMessage) => v
           <div className="absolute top-[10px] left-1/2 -translate-x-1/2 w-[72px] h-[20px] bg-black rounded-full z-10" />
 
           {/* Screen */}
-          <div className="h-full flex flex-col rounded-[2rem] bg-jsconf-bg overflow-hidden">
+          <div className="h-full flex flex-col rounded-[2rem] bg-jsconf-bg overflow-hidden p-2">
             {/* Status bar inside phone */}
-            <div className="shrink-0 bg-jsconf-bg flex items-center justify-between px-5 pt-8 pb-1 z-10">
-              <span className="font-mono text-[10px] text-jsconf-muted">Live Wall</span>
-              <span className="font-mono text-[10px] text-jsconf-yellow">DEMO</span>
+            <div className="shrink-0 bg-jsconf-bg flex items-center justify-between px-5 pt-6 pb-1 z-10">
+              {/* <span className="font-mono text-[10px] text-jsconf-muted">Live Wall</span>
+              <span className="font-mono text-[10px] text-jsconf-yellow">DEMO</span> */}
             </div>
 
             {/* Scaled attendee UI — React tab fixed, Ask tab scrollable */}
