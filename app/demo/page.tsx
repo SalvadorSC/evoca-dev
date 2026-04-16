@@ -132,7 +132,7 @@ function useDemoParty(sessionId: string) {
   // Auto-add reactions: every 15s until 7, then every 60s
   useEffect(() => {
     if (!isConnected) return
-    
+
     const scheduleNextReaction = () => {
       const delay = reactionCountRef.current >= 7 ? 60000 : 15000
       autoReactionRef.current = setTimeout(() => {
@@ -142,7 +142,7 @@ function useDemoParty(sessionId: string) {
         scheduleNextReaction()
       }, delay)
     }
-    
+
     scheduleNextReaction()
     return () => clearTimeout(autoReactionRef.current)
   }, [isConnected, send])
@@ -150,7 +150,7 @@ function useDemoParty(sessionId: string) {
   // Auto-add questions: every 35s until 5, then every 60s
   useEffect(() => {
     if (!isConnected) return
-    
+
     const scheduleNextQuestion = () => {
       const delay = questionCountRef.current >= 5 ? 60000 : 35000
       autoQuestionRef.current = setTimeout(() => {
@@ -160,7 +160,7 @@ function useDemoParty(sessionId: string) {
         scheduleNextQuestion()
       }, delay)
     }
-    
+
     scheduleNextQuestion()
     return () => clearTimeout(autoQuestionRef.current)
   }, [isConnected, send])
@@ -296,9 +296,6 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
 
   return (
     <div className="min-h-screen bg-jsconf-bg text-white flex flex-col">
-      {/* EmojiBurst layer */}
-      <EmojiBurst reactions={state.reactions} isQAMode={wallTab === "qa"} />
-
       {/* Slim live banner */}
       <div className="bg-jsconf-yellow text-black px-4 py-2 flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
@@ -437,7 +434,7 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
 function DemoContent() {
   const searchParams = useSearchParams()
   const [sessionId, setSessionId] = useState<string>("")
-  
+
   useEffect(() => {
     setSessionId(getSessionId())
   }, [])
