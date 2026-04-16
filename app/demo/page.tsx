@@ -115,7 +115,7 @@ function useDemoParty(sessionId: string) {
         setTimeout(() => {
           send({ type: "reaction", id: crypto.randomUUID(), name: r.name, text: r.text, emoji: r.emoji, ts: Date.now() - (4 - i) * 15000 })
           reactionCountRef.current++
-        }, i * 600)
+        }, i * 1000)
       })
       // Seed 2 questions
       DEMO_QUESTIONS.slice(0, 2).forEach((q, i) => {

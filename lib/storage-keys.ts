@@ -26,6 +26,9 @@ export const STORAGE_KEYS = {
 
   /** Display name chosen by the attendee for attendance visibility. */
   displayName: "evoca-display-name",
+
+  /** Organizer accent color override. */
+  organizerAccent: "evoca-organizer-accent",
 } as const
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS]

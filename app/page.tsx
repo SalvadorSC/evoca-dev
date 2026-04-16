@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { QRCodeSVG } from "qrcode.react"
 import { ChevronDown, QrCode } from "lucide-react"
+import { STORAGE_KEYS } from "@/lib/storage-keys"
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const ROLES = {
@@ -771,11 +772,11 @@ function LandingContent() {
       return
     }
 
-    const storedRole = localStorage.getItem("evoca-role") as Role | null
+    const storedRole = localStorage.getItem(STORAGE_KEYS.role) as Role | null
     if (storedRole && (storedRole === "speaker" || storedRole === "organizer")) {
       setRole(storedRole)
       const storedAccent = storedRole === "organizer"
-        ? localStorage.getItem("evoca-organizer-accent") || ROLES.organizer.accent
+        ? localStorage.getItem(STORAGE_KEYS.organizerAccent) || ROLES.organizer.accent
         : ROLES.speaker.accent
       if (storedRole === "organizer") setOrganizerAccent(storedAccent)
       applyAccent(storedRole, storedAccent)
@@ -801,7 +802,7 @@ function LandingContent() {
   const handleWipeComplete = useCallback(() => {
     if (pendingRole) {
       setRole(pendingRole)
-      localStorage.setItem("evoca-role", pendingRole)
+      localStorage.setItem(STORAGE_KEYS.role, pendingRole)
       router.push(`/?role=${pendingRole}`, { scroll: false })
       applyAccent(pendingRole, pendingRole === "organizer" ? organizerAccent : undefined)
       setPendingRole(null)
@@ -816,7 +817,7 @@ function LandingContent() {
 
   const handleOrganizerColorChange = useCallback((color: string) => {
     setOrganizerAccent(color)
-    localStorage.setItem("evoca-organizer-accent", color)
+    localStorage.setItem(STORAGE_KEYS.organizerAccent, color)
     if (role === "organizer") {
       applyAccent("organizer", color)
     }

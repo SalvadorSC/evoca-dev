@@ -276,7 +276,7 @@ export default function PresentPage() {
         >
           <div className="flex items-center gap-1.5">
             <ChatBubbleIcon className="w-4 h-4 text-jsconf-yellow" />
-            <span className="font-mono text-xs font-bold text-white tracking-widest uppercase">EVOCA</span>
+            <span className="font-mono text-xs font-bold text-white tracking-widest uppercase">EVOCA.DEV</span>
           </div>
           {appUrl && (
             <div className="bg-white p-1 max-w-[88px] m-auto">
