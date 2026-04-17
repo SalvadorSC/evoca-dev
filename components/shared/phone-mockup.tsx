@@ -128,22 +128,20 @@ export interface LiveItem {
 
 const MAX_VISIBLE = 10
 
-export type WaveAnimation = "none" | "slow-drift" | "cursor" | "drift-cursor"
+import { WaveBackground } from "@/components/shared/wave-background"
+import type { WaveAnimation } from "@/components/shared/wave-background"
+export type { WaveAnimation }
 
 export function HeroBackground({
   items,
   accentColor = "#F7E018",
-  waveAnimation = "slow-drift",
+  waveAnimation = "drift-cursor",
 }: {
   items: LiveItem[]
   accentColor?: string
   waveAnimation?: WaveAnimation
 }) {
   const [paused, setPaused] = useState(false)
-  const [cursor, setCursor] = useState({ x: 0.5, y: 0.5 })
-  const targetCursor = useRef({ x: 0.5, y: 0.5 })
-  const currentCursor = useRef({ x: 0.5, y: 0.5 })
-  const rafRef = useRef<number | null>(null)
 
   useEffect(() => {
     const onVisibility = () => setPaused(document.hidden)
@@ -151,178 +149,14 @@ export function HeroBackground({
     return () => document.removeEventListener("visibilitychange", onVisibility)
   }, [])
 
-  useEffect(() => {
-    if (waveAnimation !== "cursor" && waveAnimation !== "drift-cursor") {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-      return
-    }
-
-    const onMove = (e: MouseEvent) => {
-      targetCursor.current = {
-        x: e.clientX / window.innerWidth,
-        y: e.clientY / window.innerHeight,
-      }
-    }
-    window.addEventListener("mousemove", onMove)
-
-    const LERP = 0.04 // lower = smoother/slower follow
-    const tick = () => {
-      const cur = currentCursor.current
-      const tgt = targetCursor.current
-      const nx = cur.x + (tgt.x - cur.x) * LERP
-      const ny = cur.y + (tgt.y - cur.y) * LERP
-      currentCursor.current = { x: nx, y: ny }
-      setCursor({ x: nx, y: ny })
-      rafRef.current = requestAnimationFrame(tick)
-    }
-    rafRef.current = requestAnimationFrame(tick)
-
-    return () => {
-      window.removeEventListener("mousemove", onMove)
-      if (rafRef.current) cancelAnimationFrame(rafRef.current)
-    }
-  }, [waveAnimation])
-
   const visible = items.slice(-MAX_VISIBLE)
-
-  // Compute per-animation styles
-  const shouldAnimate = !paused && waveAnimation !== "none"
-
-  const layer1Anim = (() => {
-    if (!shouldAnimate) return "none"
-    if (waveAnimation === "slow-drift" || waveAnimation === "drift-cursor") return "wave-drift-left 18s linear infinite"
-    return "none"
-  })()
-
-  // Cursor: layer Y is nudged by cursor position
-  const useCursor = waveAnimation === "cursor" || waveAnimation === "drift-cursor"
-  const layer1Transform = useCursor
-    ? `translateY(${(cursor.y - 0.5) * -30}px) translateX(${(cursor.x - 0.5) * -20}px)`
-    : undefined
 
   return (
     <div className="absolute inset-0 overflow-hidden" aria-hidden>
-      <svg
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        xmlns="http://www.w3.org/2000/svg"
-        preserveAspectRatio="xMidYMid slice"
-      >
-        <defs>
-          <style>{`
-            @keyframes wave-drift-left {
-              from { transform: translateX(0); }
-              to   { transform: translateX(-120px); }
-            }
-          `}</style>
-
-          <pattern id="wave-pattern" x="0" y="0" width="120" height="60" patternUnits="userSpaceOnUse">
-            <path
-              d="M0 30 Q30 10 60 30 Q90 50 120 30"
-              fill="none"
-              stroke={accentColor}
-              strokeWidth="2"
-              strokeOpacity="0.10"
-            />
-          </pattern>
-
-        </defs>
-
-        {/* Outer g: cursor nudge — inner g: drift animation. Kept separate so CSS
-            animation doesn't override the inline transform on the same element. */}
-        <g style={{
-          transform: layer1Transform,
-          willChange: "transform",
-        }}>
-          <g style={{ animation: layer1Anim, willChange: "transform" }}>
-            <rect x="-120" width="calc(100% + 240px)" height="100%" fill="url(#wave-pattern)" />
-          </g>
-        </g>
-      </svg>
-
+      <WaveBackground accentColor={accentColor} waveAnimation={waveAnimation} />
       {visible.map((item) => (
         <FloatingItem key={item.id} item={item} paused={paused} />
       ))}
-    </div>
-  )
-}
-
-// ─── Wave Animation Picker (dev helper) ───────────────────────────────────────
-const WAVE_OPTIONS: { value: WaveAnimation; label: string }[] = [
-  { value: "none",         label: "No animation" },
-  { value: "slow-drift",   label: "Slow drift" },
-  { value: "cursor",       label: "Follow cursor" },
-  { value: "drift-cursor", label: "Drift + cursor" },
-]
-
-export function WaveAnimationPicker({
-  value,
-  onChange,
-}: {
-  value: WaveAnimation
-  onChange: (v: WaveAnimation) => void
-}) {
-  const [minimized, setMinimized] = useState(false)
-
-  return (
-    <div
-      style={{
-        position: "fixed",
-        bottom: 16,
-        right: 16,
-        zIndex: 9999,
-        fontFamily: "monospace",
-        fontSize: 11,
-        background: "rgba(10,10,10,0.92)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        backdropFilter: "blur(8px)",
-        minWidth: 172,
-        userSelect: "none",
-      }}
-    >
-      {/* Title bar */}
-      <div
-        onClick={() => setMinimized((v) => !v)}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "6px 10px",
-          cursor: "pointer",
-          borderBottom: minimized ? "none" : "1px solid rgba(255,255,255,0.08)",
-        }}
-      >
-        <span style={{ color: "#888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-          Wave FX
-        </span>
-        <span style={{ color: "#555", fontSize: 10 }}>{minimized ? "▲" : "▼"}</span>
-      </div>
-
-      {!minimized && (
-        <div style={{ padding: "6px 0" }}>
-          {WAVE_OPTIONS.map((opt) => (
-            <div
-              key={opt.value}
-              onClick={() => onChange(opt.value)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "5px 10px",
-                cursor: "pointer",
-                color: value === opt.value ? "#fff" : "#666",
-                background: value === opt.value ? "rgba(255,255,255,0.06)" : "transparent",
-              }}
-            >
-              <span style={{
-                width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
-                background: value === opt.value ? "#F7E018" : "transparent",
-                border: `1.5px solid ${value === opt.value ? "#F7E018" : "#444"}`,
-              }} />
-              {opt.label}
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   )
 }

@@ -5,8 +5,9 @@ import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { ChevronDown, QrCode } from "lucide-react"
 import { STORAGE_KEYS } from "@/lib/storage-keys"
-import { InteractivePhoneMockup, HeroBackground, WaveAnimationPicker } from "@/components/shared/phone-mockup"
+import { InteractivePhoneMockup, HeroBackground } from "@/components/shared/phone-mockup"
 import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
+import { ReducedMotionToggle } from "@/components/shared/wave-background"
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const ROLES = {
@@ -520,7 +521,7 @@ function LandingContent() {
 
   const [role, setRole] = useState<Role | null>(null)
   const [organizerAccent, setOrganizerAccent] = useState(ORGANIZER_ACCENTS[0].value)
-  const [waveAnimation, setWaveAnimation] = useState<WaveAnimation>("slow-drift")
+  const [waveAnimation, setWaveAnimation] = useState<WaveAnimation>("drift-cursor")
 
   // Check URL and localStorage on mount
   useEffect(() => {
@@ -588,9 +589,9 @@ function LandingContent() {
           {showDevToggle && role === "organizer" && (
             <DevColorToggle onColorChange={handleOrganizerColorChange} />
           )}
-          {showDevToggle && role && (
-            <WaveAnimationPicker value={waveAnimation} onChange={setWaveAnimation} />
-          )}
+      {showDevToggle && role && (
+        <ReducedMotionToggle value={waveAnimation} onChange={setWaveAnimation} />
+      )}
 
           {showDevToggle && role === "organizer" && (
             <DevColorToggle onColorChange={handleOrganizerColorChange} />

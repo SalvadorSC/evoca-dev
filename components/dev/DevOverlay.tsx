@@ -94,7 +94,7 @@ function ItemRow({
         >
           {done ? "✓" : ""}
         </span>
-        <span style={{ fontSize: 11, color: "#888", minWidth: 54 }}>{item.name}</span>
+        <span style={{ fontSize: 11, color: "#888", minWidth: 54 }}>{item.id}</span>
         <span
           style={{
             flex: 1,
@@ -180,7 +180,12 @@ function DevOverlayInner() {
 
   const isDone = (item: Item) => doneOverrides[item.id] !== undefined ? doneOverrides[item.id] : item.complete;
   const pending = (features as Item[]).filter((f) => !isDone(f)).length;
-  const items = tab === "features" ? (features as Item[]) : (ideas as Item[]);
+  const rawItems = tab === "features" ? (features as Item[]) : (ideas as Item[]);
+  const items = [...rawItems].sort((a, b) => {
+    const aDone = isDone(a) ? 1 : 0;
+    const bDone = isDone(b) ? 1 : 0;
+    return aDone - bDone;
+  });
 
   if (!visible) {
     return (
