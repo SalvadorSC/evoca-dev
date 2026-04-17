@@ -197,19 +197,19 @@ function ProWaitlistForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-      <div className="flex">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-full">
+      <div className="flex flex-col sm:flex-row gap-2 w-full">
         <input
           type="email"
           value={email}
           onChange={(e) => { setEmail(e.target.value); if (state === "error") setState("idle") }}
           placeholder="your@email.com"
-          className="flex-1 bg-[#111] border border-[#2a2a2a] border-r-0 text-white font-sans text-sm placeholder:text-[#555] px-3 h-9 focus:outline-none focus:border-[#555] transition-colors"
+          className="flex-1 min-w-0 bg-[#111] border border-[#2a2a2a] text-white font-sans text-sm placeholder:text-[#555] px-3 h-9 focus:outline-none focus:border-[#555] transition-colors sm:border-r-0"
         />
         <button
           type="submit"
           disabled={state === "loading"}
-          className="font-mono text-xs text-[#666] border border-[#2a2a2a] px-4 h-9 hover:text-white hover:border-[#666] transition-colors disabled:opacity-50 whitespace-nowrap"
+          className="font-mono text-xs text-[#666] border border-[#2a2a2a] px-4 h-9 hover:text-white hover:border-[#666] transition-colors disabled:opacity-50 whitespace-nowrap shrink-0"
         >
           {state === "loading" ? "..." : "Notify me"}
         </button>
