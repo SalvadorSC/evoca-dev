@@ -180,29 +180,23 @@ export function HeroBackground({ items, accentColor = "#F7E018" }: { items: Live
 }
 
 function FloatingItem({ item, paused }: { item: LiveItem; paused: boolean }) {
-  const [visible, setVisible] = useState(false)
   const animName = `hero-float-${item.ltr ? "ltr" : "rtl"}`
   const delay = `${(item.ts % 1000) / 1000}s`
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setVisible(true))
-    return () => cancelAnimationFrame(id)
-  }, [])
 
   return (
     <>
       <style>{`
         @keyframes hero-float-ltr {
-          0%   { transform: translateX(-240px); opacity: 0; }
+          0%   { transform: translateX(-300px); opacity: 0; }
           6%   { opacity: 1; }
           88%  { opacity: 1; }
-          100% { transform: translateX(calc(100vw + 240px)); opacity: 0; }
+          100% { transform: translateX(calc(100vw + 300px)); opacity: 0; }
         }
         @keyframes hero-float-rtl {
-          0%   { transform: translateX(calc(100vw + 240px)); opacity: 0; }
+          0%   { transform: translateX(calc(100vw + 300px)); opacity: 0; }
           6%   { opacity: 1; }
           88%  { opacity: 1; }
-          100% { transform: translateX(-240px); opacity: 0; }
+          100% { transform: translateX(-300px); opacity: 0; }
         }
       `}</style>
       <div
@@ -211,10 +205,9 @@ function FloatingItem({ item, paused }: { item: LiveItem; paused: boolean }) {
           top: `${item.y}%`,
           left: 0,
           right: 0,
-          // Pre-position off-screen before animation starts so it never flashes at left:0
-          transform: visible ? undefined : item.ltr ? "translateX(-300px)" : "translateX(calc(100vw + 300px))",
-          animation: visible ? `${animName} 18s linear ${item.persistent ? "infinite" : "forwards"}` : undefined,
-          animationDelay: visible ? delay : undefined,
+          animation: `${animName} 18s linear ${item.persistent ? "infinite" : "both"}`,
+          animationDelay: delay,
+          animationFillMode: "both",
           animationPlayState: paused ? "paused" : "running",
         }}
       >
