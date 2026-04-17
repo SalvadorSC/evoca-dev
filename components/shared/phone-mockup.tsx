@@ -128,8 +128,19 @@ export interface LiveItem {
 
 const MAX_VISIBLE = 10
 
-export function HeroBackground({ items, accentColor = "#F7E018" }: { items: LiveItem[]; accentColor?: string }) {
+export type WaveAnimation = "none" | "slow-drift" | "pulse" | "phase-shift" | "cursor"
+
+export function HeroBackground({
+  items,
+  accentColor = "#F7E018",
+  waveAnimation = "slow-drift",
+}: {
+  items: LiveItem[]
+  accentColor?: string
+  waveAnimation?: WaveAnimation
+}) {
   const [paused, setPaused] = useState(false)
+  const [cursor, setCursor] = useState({ x: 0.5, y: 0.5 })
 
   useEffect(() => {
     const onVisibility = () => setPaused(document.hidden)
@@ -137,12 +148,49 @@ export function HeroBackground({ items, accentColor = "#F7E018" }: { items: Live
     return () => document.removeEventListener("visibilitychange", onVisibility)
   }, [])
 
-  // Only render the most recent MAX_VISIBLE items to prevent bursts
+  useEffect(() => {
+    if (waveAnimation !== "cursor") return
+    const onMove = (e: MouseEvent) => {
+      setCursor({
+        x: e.clientX / window.innerWidth,
+        y: e.clientY / window.innerHeight,
+      })
+    }
+    window.addEventListener("mousemove", onMove)
+    return () => window.removeEventListener("mousemove", onMove)
+  }, [waveAnimation])
+
   const visible = items.slice(-MAX_VISIBLE)
+
+  // Compute per-animation styles
+  const shouldAnimate = !paused && waveAnimation !== "none"
+
+  const layer1Anim = (() => {
+    if (!shouldAnimate) return "none"
+    if (waveAnimation === "slow-drift") return "wave-drift-left 18s linear infinite"
+    if (waveAnimation === "pulse") return "wave-pulse-1 4s ease-in-out infinite"
+    if (waveAnimation === "phase-shift") return "wave-phase-1 12s linear infinite"
+    return "none"
+  })()
+
+  const layer2Anim = (() => {
+    if (!shouldAnimate) return "none"
+    if (waveAnimation === "slow-drift") return "wave-drift-right 30s linear infinite"
+    if (waveAnimation === "pulse") return "wave-pulse-2 4s ease-in-out infinite"
+    if (waveAnimation === "phase-shift") return "wave-phase-2 20s linear infinite"
+    return "none"
+  })()
+
+  // Cursor: each layer Y is nudged by cursor position
+  const layer1Transform = waveAnimation === "cursor"
+    ? `translateY(${(cursor.y - 0.5) * -30}px) translateX(${(cursor.x - 0.5) * -20}px)`
+    : undefined
+  const layer2Transform = waveAnimation === "cursor"
+    ? `translateY(${(cursor.y - 0.5) * -18}px) translateX(${(cursor.x - 0.5) * -10}px)`
+    : undefined
 
   return (
     <div className="absolute inset-0 overflow-hidden" aria-hidden>
-      {/* Wavy line background — pointer-events-none so it doesn't block content */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
         xmlns="http://www.w3.org/2000/svg"
@@ -158,9 +206,24 @@ export function HeroBackground({ items, accentColor = "#F7E018" }: { items: Live
               from { transform: translateX(-60px); }
               to   { transform: translateX(60px); }
             }
+            @keyframes wave-pulse-1 {
+              0%, 100% { transform: scaleY(1); }
+              50%       { transform: scaleY(2.2); }
+            }
+            @keyframes wave-pulse-2 {
+              0%, 100% { transform: scaleY(1.4); }
+              50%       { transform: scaleY(0.5); }
+            }
+            @keyframes wave-phase-1 {
+              from { transform: translateX(0); }
+              to   { transform: translateX(-240px); }
+            }
+            @keyframes wave-phase-2 {
+              from { transform: translateX(-120px); }
+              to   { transform: translateX(120px); }
+            }
           `}</style>
 
-          {/* Layer 1 — drifts left, 18s */}
           <pattern id="wave-pattern" x="0" y="0" width="120" height="60" patternUnits="userSpaceOnUse">
             <path
               d="M0 30 Q30 10 60 30 Q90 50 120 30"
@@ -171,7 +234,6 @@ export function HeroBackground({ items, accentColor = "#F7E018" }: { items: Live
             />
           </pattern>
 
-          {/* Layer 2 — drifts right, 30s (slower, opposite direction) */}
           <pattern id="wave-pattern-2" x="60" y="20" width="120" height="60" patternUnits="userSpaceOnUse">
             <path
               d="M0 30 Q30 10 60 30 Q90 50 120 30"
@@ -183,15 +245,18 @@ export function HeroBackground({ items, accentColor = "#F7E018" }: { items: Live
           </pattern>
         </defs>
 
-        {/* Each layer wrapped in a <g> so transform animates the pattern fill */}
         <g style={{
-          animation: paused ? "none" : "wave-drift-left 18s linear infinite",
+          animation: layer1Anim,
+          transform: layer1Transform,
+          transition: waveAnimation === "cursor" ? "transform 0.15s ease-out" : undefined,
           willChange: "transform",
         }}>
           <rect x="-120" width="calc(100% + 240px)" height="100%" fill="url(#wave-pattern)" />
         </g>
         <g style={{
-          animation: paused ? "none" : "wave-drift-right 30s linear infinite",
+          animation: layer2Anim,
+          transform: layer2Transform,
+          transition: waveAnimation === "cursor" ? "transform 0.25s ease-out" : undefined,
           willChange: "transform",
         }}>
           <rect x="-120" width="calc(100% + 240px)" height="100%" fill="url(#wave-pattern-2)" />
@@ -201,6 +266,88 @@ export function HeroBackground({ items, accentColor = "#F7E018" }: { items: Live
       {visible.map((item) => (
         <FloatingItem key={item.id} item={item} paused={paused} />
       ))}
+    </div>
+  )
+}
+
+// ─── Wave Animation Picker (dev helper) ───────────────────────────────────────
+const WAVE_OPTIONS: { value: WaveAnimation; label: string }[] = [
+  { value: "none",        label: "No animation" },
+  { value: "slow-drift",  label: "Slow drift" },
+  { value: "pulse",       label: "Pulse & breathe" },
+  { value: "phase-shift", label: "Phase shift" },
+  { value: "cursor",      label: "Follow cursor" },
+]
+
+export function WaveAnimationPicker({
+  value,
+  onChange,
+}: {
+  value: WaveAnimation
+  onChange: (v: WaveAnimation) => void
+}) {
+  const [minimized, setMinimized] = useState(false)
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        bottom: 16,
+        right: 16,
+        zIndex: 9999,
+        fontFamily: "monospace",
+        fontSize: 11,
+        background: "rgba(10,10,10,0.92)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        backdropFilter: "blur(8px)",
+        minWidth: 172,
+        userSelect: "none",
+      }}
+    >
+      {/* Title bar */}
+      <div
+        onClick={() => setMinimized((v) => !v)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "6px 10px",
+          cursor: "pointer",
+          borderBottom: minimized ? "none" : "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        <span style={{ color: "#888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+          Wave FX
+        </span>
+        <span style={{ color: "#555", fontSize: 10 }}>{minimized ? "▲" : "▼"}</span>
+      </div>
+
+      {!minimized && (
+        <div style={{ padding: "6px 0" }}>
+          {WAVE_OPTIONS.map((opt) => (
+            <div
+              key={opt.value}
+              onClick={() => onChange(opt.value)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "5px 10px",
+                cursor: "pointer",
+                color: value === opt.value ? "#fff" : "#666",
+                background: value === opt.value ? "rgba(255,255,255,0.06)" : "transparent",
+              }}
+            >
+              <span style={{
+                width: 7, height: 7, borderRadius: "50%", flexShrink: 0,
+                background: value === opt.value ? "#F7E018" : "transparent",
+                border: `1.5px solid ${value === opt.value ? "#F7E018" : "#444"}`,
+              }} />
+              {opt.label}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

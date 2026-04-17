@@ -5,8 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { ChevronDown, QrCode } from "lucide-react"
 import { STORAGE_KEYS } from "@/lib/storage-keys"
-import { InteractivePhoneMockup, HeroBackground } from "@/components/shared/phone-mockup"
-import type { LiveItem } from "@/components/shared/phone-mockup"
+import { InteractivePhoneMockup, HeroBackground, WaveAnimationPicker } from "@/components/shared/phone-mockup"
+import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const ROLES = {
@@ -246,7 +246,7 @@ function FAQ({ items }: { items: { q: string; a: string }[] }) {
 }
 
 // ─── Speaker Experience ───────────────────────────────────────────────────────
-function SpeakerExperience() {
+function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) {
   const [heroItems, setHeroItems] = useState<LiveItem[]>([])
 
   const handleActivity = useCallback((item: LiveItem) => {
@@ -264,7 +264,7 @@ function SpeakerExperience() {
     <div>
       {/* Hero */}
       <section className="relative px-6 py-4 lg:py-12 overflow-hidden min-h-[480px]">
-        <HeroBackground items={heroItems} accentColor="var(--accent)" />
+        <HeroBackground items={heroItems} accentColor="var(--accent)" waveAnimation={waveAnimation} />
         <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
             <h1 className="font-display font-bold text-white text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
@@ -366,7 +366,7 @@ function SpeakerExperience() {
 }
 
 // ─── Organizer Experience ─────────────────────────────────────────────────────
-function OrganizerExperience() {
+function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) {
   const [heroItems, setHeroItems] = useState<LiveItem[]>([])
 
   const handleActivity = useCallback((item: LiveItem) => {
@@ -384,7 +384,7 @@ function OrganizerExperience() {
     <div>
       {/* Hero */}
       <section className="relative px-6 py-16 lg:py-12 overflow-hidden min-h-[480px]">
-        <HeroBackground items={heroItems} accentColor="var(--accent)" />
+        <HeroBackground items={heroItems} accentColor="var(--accent)" waveAnimation={waveAnimation} />
         <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
             <h1 className="font-display font-bold text-white text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
@@ -520,6 +520,7 @@ function LandingContent() {
 
   const [role, setRole] = useState<Role | null>(null)
   const [organizerAccent, setOrganizerAccent] = useState(ORGANIZER_ACCENTS[0].value)
+  const [waveAnimation, setWaveAnimation] = useState<WaveAnimation>("slow-drift")
 
   // Check URL and localStorage on mount
   useEffect(() => {
@@ -579,9 +580,15 @@ function LandingContent() {
       ) : (
         <>
           <Nav role={role} onSwitchRole={handleSwitchRole} />
-          {role === "speaker" ? <SpeakerExperience /> : <OrganizerExperience />}
-          <Footer />
-        </>
+          {role === "speaker"
+            ? <SpeakerExperience waveAnimation={waveAnimation} />
+            : <OrganizerExperience waveAnimation={waveAnimation} />}
+
+      {showDevToggle && role === "organizer" && (
+        <DevColorToggle onColorChange={handleOrganizerColorChange} />
+      )}
+      {showDevToggle && role && (
+        <WaveAnimationPicker value={waveAnimation} onChange={setWaveAnimation} />
       )}
 
       {showDevToggle && role === "organizer" && (
