@@ -128,7 +128,7 @@ export interface LiveItem {
 
 const MAX_VISIBLE = 10
 
-export type WaveAnimation = "none" | "slow-drift" | "pulse" | "phase-shift" | "cursor"
+export type WaveAnimation = "none" | "slow-drift" | "cursor" | "drift-cursor"
 
 export function HeroBackground({
   items,
@@ -149,7 +149,7 @@ export function HeroBackground({
   }, [])
 
   useEffect(() => {
-    if (waveAnimation !== "cursor") return
+    if (waveAnimation !== "cursor" && waveAnimation !== "drift-cursor") return
     const onMove = (e: MouseEvent) => {
       setCursor({
         x: e.clientX / window.innerWidth,
@@ -167,26 +167,14 @@ export function HeroBackground({
 
   const layer1Anim = (() => {
     if (!shouldAnimate) return "none"
-    if (waveAnimation === "slow-drift") return "wave-drift-left 18s linear infinite"
-    if (waveAnimation === "pulse") return "wave-pulse-1 4s ease-in-out infinite"
-    if (waveAnimation === "phase-shift") return "wave-phase-1 12s linear infinite"
+    if (waveAnimation === "slow-drift" || waveAnimation === "drift-cursor") return "wave-drift-left 18s linear infinite"
     return "none"
   })()
 
-  const layer2Anim = (() => {
-    if (!shouldAnimate) return "none"
-    if (waveAnimation === "slow-drift") return "wave-drift-right 30s linear infinite"
-    if (waveAnimation === "pulse") return "wave-pulse-2 4s ease-in-out infinite"
-    if (waveAnimation === "phase-shift") return "wave-phase-2 20s linear infinite"
-    return "none"
-  })()
-
-  // Cursor: each layer Y is nudged by cursor position
-  const layer1Transform = waveAnimation === "cursor"
+  // Cursor: layer Y is nudged by cursor position
+  const useCursor = waveAnimation === "cursor" || waveAnimation === "drift-cursor"
+  const layer1Transform = useCursor
     ? `translateY(${(cursor.y - 0.5) * -30}px) translateX(${(cursor.x - 0.5) * -20}px)`
-    : undefined
-  const layer2Transform = waveAnimation === "cursor"
-    ? `translateY(${(cursor.y - 0.5) * -18}px) translateX(${(cursor.x - 0.5) * -10}px)`
     : undefined
 
   return (
@@ -202,26 +190,6 @@ export function HeroBackground({
               from { transform: translateX(0); }
               to   { transform: translateX(-120px); }
             }
-            @keyframes wave-drift-right {
-              from { transform: translateX(-60px); }
-              to   { transform: translateX(60px); }
-            }
-            @keyframes wave-pulse-1 {
-              0%, 100% { transform: scaleY(1); }
-              50%       { transform: scaleY(2.2); }
-            }
-            @keyframes wave-pulse-2 {
-              0%, 100% { transform: scaleY(1.4); }
-              50%       { transform: scaleY(0.5); }
-            }
-            @keyframes wave-phase-1 {
-              from { transform: translateX(0); }
-              to   { transform: translateX(-240px); }
-            }
-            @keyframes wave-phase-2 {
-              from { transform: translateX(-120px); }
-              to   { transform: translateX(120px); }
-            }
           `}</style>
 
           <pattern id="wave-pattern" x="0" y="0" width="120" height="60" patternUnits="userSpaceOnUse">
@@ -234,35 +202,16 @@ export function HeroBackground({
             />
           </pattern>
 
-          <pattern id="wave-pattern-2" x="60" y="20" width="120" height="60" patternUnits="userSpaceOnUse">
-            <path
-              d="M0 30 Q30 10 60 30 Q90 50 120 30"
-              fill="none"
-              stroke={accentColor}
-              strokeWidth="1.6"
-              strokeOpacity="0.06"
-            />
-          </pattern>
         </defs>
 
         <g style={{
           animation: layer1Anim,
           transform: layer1Transform,
-          transition: waveAnimation === "cursor" ? "transform 0.15s ease-out" : undefined,
+          transition: useCursor ? "transform 0.15s ease-out" : undefined,
           willChange: "transform",
         }}>
           <rect x="-120" width="calc(100% + 240px)" height="100%" fill="url(#wave-pattern)" />
         </g>
-        {/* Layer 2 commented out for testing
-        <g style={{
-          animation: layer2Anim,
-          transform: layer2Transform,
-          transition: waveAnimation === "cursor" ? "transform 0.25s ease-out" : undefined,
-          willChange: "transform",
-        }}>
-          <rect x="-120" width="calc(100% + 240px)" height="100%" fill="url(#wave-pattern-2)" />
-        </g>
-        */}
       </svg>
 
       {visible.map((item) => (
@@ -274,11 +223,10 @@ export function HeroBackground({
 
 // ─── Wave Animation Picker (dev helper) ───────────────────────────────────────
 const WAVE_OPTIONS: { value: WaveAnimation; label: string }[] = [
-  { value: "none",        label: "No animation" },
-  { value: "slow-drift",  label: "Slow drift" },
-  { value: "pulse",       label: "Pulse & breathe" },
-  { value: "phase-shift", label: "Phase shift" },
-  { value: "cursor",      label: "Follow cursor" },
+  { value: "none",         label: "No animation" },
+  { value: "slow-drift",   label: "Slow drift" },
+  { value: "cursor",       label: "Follow cursor" },
+  { value: "drift-cursor", label: "Drift + cursor" },
 ]
 
 export function WaveAnimationPicker({
