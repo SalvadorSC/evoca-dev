@@ -44,14 +44,22 @@ function Badge({ label, color }: { label: string; color: string }) {
   );
 }
 
-function ItemRow({ item }: { item: Item }) {
+function ItemRow({
+  item,
+  done,
+  onToggleDone,
+}: {
+  item: Item;
+  done: boolean;
+  onToggleDone: (id: string) => void;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <div
       style={{
         borderBottom: "0.5px solid rgba(0,0,0,0.08)",
         padding: "6px 0",
-        opacity: item.complete ? 0.45 : 1,
+        opacity: done ? 0.45 : 1,
       }}
     >
       <div
@@ -64,13 +72,35 @@ function ItemRow({ item }: { item: Item }) {
         }}
         onClick={() => setOpen((v) => !v)}
       >
-        <span style={{ fontSize: 11, color: "#888", minWidth: 60 }}>{item.id}</span>
+        {/* Done checkbox */}
+        <span
+          title={done ? "Mark as pending" : "Mark as done"}
+          onClick={(e) => { e.stopPropagation(); onToggleDone(item.id); }}
+          style={{
+            width: 14,
+            height: 14,
+            borderRadius: 3,
+            border: `1.5px solid ${done ? "#639922" : "#ccc"}`,
+            background: done ? "#639922" : "transparent",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            cursor: "pointer",
+            color: "#fff",
+            fontSize: 9,
+            lineHeight: 1,
+          }}
+        >
+          {done ? "✓" : ""}
+        </span>
+        <span style={{ fontSize: 11, color: "#888", minWidth: 54 }}>{item.id}</span>
         <span
           style={{
             flex: 1,
             fontSize: 12,
             fontWeight: 500,
-            textDecoration: item.complete ? "line-through" : "none",
+            textDecoration: done ? "line-through" : "none",
           }}
         >
           {item.name}
@@ -89,7 +119,7 @@ function ItemRow({ item }: { item: Item }) {
           style={{
             fontSize: 11,
             color: "#555",
-            margin: "4px 0 0 66px",
+            margin: "4px 0 0 80px",
             lineHeight: 1.5,
           }}
         >
@@ -106,14 +136,27 @@ export function DevOverlay() {
   return <DevOverlayInner />;
 }
 
+const STORAGE_KEY = "devtracker:done";
+
 function DevOverlayInner() {
   const [visible, setVisible] = useState(true);
   const [minimized, setMinimized] = useState(false);
   const [tab, setTab] = useState<"features" | "ideas">("features");
   const [pos, setPos] = useState({ x: 16, y: 80 });
+  const [doneOverrides, setDoneOverrides] = useState<Record<string, boolean>>(() => {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}"); } catch { return {}; }
+  });
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
   const panelRef = useRef<HTMLDivElement>(null);
+
+  const toggleDone = useCallback((id: string) => {
+    setDoneOverrides((prev) => {
+      const next = { ...prev, [id]: !prev[id] };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     dragging.current = true;
@@ -135,7 +178,8 @@ function DevOverlayInner() {
     };
   }, []);
 
-  const pending = (features as Item[]).filter((f) => !f.complete).length;
+  const isDone = (item: Item) => doneOverrides[item.id] !== undefined ? doneOverrides[item.id] : item.complete;
+  const pending = (features as Item[]).filter((f) => !isDone(f)).length;
   const items = tab === "features" ? (features as Item[]) : (ideas as Item[]);
 
   if (!visible) {
@@ -241,7 +285,7 @@ function DevOverlayInner() {
           {/* List */}
           <div style={{ overflowY: "auto", padding: "4px 10px 8px", flex: 1 }}>
             {items.map((item) => (
-              <ItemRow key={item.id} item={item} />
+              <ItemRow key={item.id} item={item} done={isDone(item)} onToggleDone={toggleDone} />
             ))}
           </div>
 
