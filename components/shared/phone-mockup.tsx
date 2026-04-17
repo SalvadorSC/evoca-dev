@@ -204,13 +204,16 @@ export function HeroBackground({
 
         </defs>
 
+        {/* Outer g: cursor nudge — inner g: drift animation. Kept separate so CSS
+            animation doesn't override the inline transform on the same element. */}
         <g style={{
-          animation: layer1Anim,
           transform: layer1Transform,
           transition: useCursor ? "transform 0.15s ease-out" : undefined,
           willChange: "transform",
         }}>
-          <rect x="-120" width="calc(100% + 240px)" height="100%" fill="url(#wave-pattern)" />
+          <g style={{ animation: layer1Anim, willChange: "transform" }}>
+            <rect x="-120" width="calc(100% + 240px)" height="100%" fill="url(#wave-pattern)" />
+          </g>
         </g>
       </svg>
 
