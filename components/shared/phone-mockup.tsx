@@ -141,7 +141,7 @@ export function HeroBackground({ items, accentColor = "#F7E018" }: { items: Live
   const visible = items.slice(-MAX_VISIBLE)
 
   return (
-    <div className="absolute inset-0 overflow-hidden" aria-hidden style={{ animationPlayState: paused ? "paused" : "running" }}>
+    <div className="absolute inset-0 overflow-hidden" aria-hidden>
       {/* Wavy line background — pointer-events-none so it doesn't block content */}
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none"
@@ -149,27 +149,53 @@ export function HeroBackground({ items, accentColor = "#F7E018" }: { items: Live
         preserveAspectRatio="xMidYMid slice"
       >
         <defs>
+          <style>{`
+            @keyframes wave-drift-left {
+              from { transform: translateX(0); }
+              to   { transform: translateX(-120px); }
+            }
+            @keyframes wave-drift-right {
+              from { transform: translateX(-60px); }
+              to   { transform: translateX(60px); }
+            }
+          `}</style>
+
+          {/* Layer 1 — drifts left, 18s */}
           <pattern id="wave-pattern" x="0" y="0" width="120" height="60" patternUnits="userSpaceOnUse">
             <path
               d="M0 30 Q30 10 60 30 Q90 50 120 30"
               fill="none"
               stroke={accentColor}
-              strokeWidth="1"
+              strokeWidth="2"
               strokeOpacity="0.10"
             />
           </pattern>
+
+          {/* Layer 2 — drifts right, 30s (slower, opposite direction) */}
           <pattern id="wave-pattern-2" x="60" y="20" width="120" height="60" patternUnits="userSpaceOnUse">
             <path
               d="M0 30 Q30 10 60 30 Q90 50 120 30"
               fill="none"
               stroke={accentColor}
-              strokeWidth="0.6"
+              strokeWidth="1.6"
               strokeOpacity="0.06"
             />
           </pattern>
         </defs>
-        <rect width="100%" height="100%" fill="url(#wave-pattern)" />
-        <rect width="100%" height="100%" fill="url(#wave-pattern-2)" />
+
+        {/* Each layer wrapped in a <g> so transform animates the pattern fill */}
+        <g style={{
+          animation: paused ? "none" : "wave-drift-left 18s linear infinite",
+          willChange: "transform",
+        }}>
+          <rect x="-120" width="calc(100% + 240px)" height="100%" fill="url(#wave-pattern)" />
+        </g>
+        <g style={{
+          animation: paused ? "none" : "wave-drift-right 30s linear infinite",
+          willChange: "transform",
+        }}>
+          <rect x="-120" width="calc(100% + 240px)" height="100%" fill="url(#wave-pattern-2)" />
+        </g>
       </svg>
 
       {visible.map((item) => (

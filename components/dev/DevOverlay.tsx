@@ -94,7 +94,7 @@ function ItemRow({
         >
           {done ? "✓" : ""}
         </span>
-        <span style={{ fontSize: 11, color: "#888", minWidth: 54 }}>{item.id}</span>
+        <span style={{ fontSize: 11, color: "#888", minWidth: 54 }}>{item.name}</span>
         <span
           style={{
             flex: 1,

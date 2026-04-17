@@ -6,7 +6,7 @@
     "complexity": "low",
     "priority": "high",
     "status": "pending",
-    "complete": false
+    "complete": true
   },
   {
     "id": "feat-002",
