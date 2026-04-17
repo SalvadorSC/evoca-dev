@@ -169,5 +169,14 @@
     "priority": "high",
     "status": "pending",
     "complete": false
+  },
+  {
+    "id": "feat-020",
+    "name": "Pro waitlist — email capture from landing page",
+    "description": "Store visitor emails from the 'Notify me' button on the Pro pricing card of the landing page. Emails are saved to the pro_waitlist table in Supabase. Duplicate emails return a graceful message. Once the Pro plan is live via Stripe, the list is used to contact interested users.",
+    "complexity": "low",
+    "priority": "high",
+    "status": "pending",
+    "complete": false
   }
 ]

@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { User, Twitter, Linkedin, Github, Globe, Save, Sparkles } from "lucide-react"
+import { User, Twitter, Linkedin, Github, Globe, Save, Sparkles, AtSign } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
 interface Profile {
   id?: string
   user_id?: string
   display_name: string
+  username: string
   bio: string
   twitter: string
   linkedin: string
@@ -19,12 +20,22 @@ interface Profile {
 
 const EMPTY: Profile = {
   display_name: "",
+  username: "",
   bio: "",
   twitter: "",
   linkedin: "",
   github: "",
   website: "",
   is_pro: false,
+}
+
+const USERNAME_RE = /^[a-z0-9_-]{3,32}$/
+
+function validate(profile: Profile): string | null {
+  if (!profile.display_name.trim()) return "Display name is required."
+  if (profile.username && !USERNAME_RE.test(profile.username))
+    return "Username must be 3–32 characters and only contain lowercase letters, numbers, hyphens, or underscores."
+  return null
 }
 
 function FieldRow({
@@ -34,6 +45,8 @@ function FieldRow({
   onChange,
   placeholder,
   prefix,
+  error,
+  hint,
 }: {
   icon: React.ReactNode
   label: string
@@ -41,6 +54,8 @@ function FieldRow({
   onChange: (v: string) => void
   placeholder?: string
   prefix?: string
+  error?: string | null
+  hint?: string
 }) {
   return (
     <div className="flex flex-col gap-1.5">
@@ -48,7 +63,7 @@ function FieldRow({
         {icon}
         {label}
       </label>
-      <div className="flex items-center border border-jsconf-border bg-jsconf-surface focus-within:border-jsconf-yellow transition-colors">
+      <div className={`flex items-center border bg-jsconf-surface focus-within:border-jsconf-yellow transition-colors ${error ? "border-red-500" : "border-jsconf-border"}`}>
         {prefix && (
           <span className="font-mono text-xs text-jsconf-muted px-3 border-r border-jsconf-border bg-jsconf-bg h-10 flex items-center select-none">
             {prefix}
@@ -61,16 +76,20 @@ function FieldRow({
           className="rounded-none border-0 bg-transparent text-white font-sans text-sm placeholder:text-jsconf-muted focus-visible:ring-0 focus-visible:ring-offset-0 h-10"
         />
       </div>
+      {error && <p className="font-mono text-[11px] text-red-400">{error}</p>}
+      {hint && !error && <p className="font-mono text-[11px] text-jsconf-muted">{hint}</p>}
     </div>
   )
 }
 
+type SaveState = "idle" | "saving" | "saved" | "error"
+
 export default function AccountPage() {
   const [profile, setProfile] = useState<Profile>(EMPTY)
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [saveState, setSaveState] = useState<SaveState>("idle")
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [serverError, setServerError] = useState<string | null>(null)
 
   useEffect(() => {
     async function load() {
@@ -84,27 +103,62 @@ export default function AccountPage() {
         .eq("user_id", session.user.id)
         .single()
 
-      if (data) setProfile(data as Profile)
+      if (data) setProfile({ ...EMPTY, ...data })
       setLoading(false)
     }
     load()
   }, [])
 
-  const set = (key: keyof Profile) => (v: string) =>
+  const set = (key: keyof Profile) => (v: string) => {
     setProfile((p) => ({ ...p, [key]: v }))
+    // Clear field error on change
+    setFieldErrors((e) => { const n = { ...e }; delete n[key]; return n })
+    if (saveState === "saved" || saveState === "error") setSaveState("idle")
+    setServerError(null)
+  }
 
   async function handleSave() {
-    setSaving(true)
-    setError(null)
-    setSaved(false)
+    const validationError = validate(profile)
+    if (validationError) {
+      if (validationError.includes("Display name")) {
+        setFieldErrors({ display_name: validationError })
+      } else if (validationError.includes("Username")) {
+        setFieldErrors({ username: validationError })
+      }
+      return
+    }
+
+    setSaveState("saving")
+    setServerError(null)
+    setFieldErrors({})
+
     try {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) return
 
+      const username = profile.username.trim().toLowerCase() || null
+
+      // Check username uniqueness (only if changed)
+      if (username) {
+        const { data: existing } = await supabase
+          .from("speakers")
+          .select("user_id")
+          .eq("username", username)
+          .neq("user_id", session.user.id)
+          .maybeSingle()
+
+        if (existing) {
+          setFieldErrors({ username: "This username is already taken." })
+          setSaveState("idle")
+          return
+        }
+      }
+
       const payload = {
         user_id: session.user.id,
         display_name: profile.display_name.trim(),
+        username,
         bio: profile.bio.trim(),
         twitter: profile.twitter.trim(),
         linkedin: profile.linkedin.trim(),
@@ -116,13 +170,17 @@ export default function AccountPage() {
         .from("speakers")
         .upsert(payload, { onConflict: "user_id" })
 
-      if (upsertError) { setError(upsertError.message); return }
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2500)
+      if (upsertError) {
+        setServerError(upsertError.message)
+        setSaveState("error")
+        return
+      }
+
+      setSaveState("saved")
+      setTimeout(() => setSaveState("idle"), 3000)
     } catch {
-      setError("Something went wrong.")
-    } finally {
-      setSaving(false)
+      setServerError("Something went wrong.")
+      setSaveState("error")
     }
   }
 
@@ -136,7 +194,7 @@ export default function AccountPage() {
 
   return (
     <div className="max-w-xl">
-      {/* Pro badge */}
+      {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-display font-bold text-2xl text-white uppercase tracking-wide">Account</h1>
@@ -159,14 +217,28 @@ export default function AccountPage() {
       </div>
 
       <div className="flex flex-col gap-5">
+        {/* Identity */}
         <FieldRow
           icon={<User className="h-3.5 w-3.5" />}
           label="Display name"
           value={profile.display_name}
           onChange={set("display_name")}
           placeholder="Your name as shown to attendees"
+          error={fieldErrors.display_name}
         />
 
+        <FieldRow
+          icon={<AtSign className="h-3.5 w-3.5" />}
+          label="Username"
+          value={profile.username ?? ""}
+          onChange={set("username")}
+          placeholder="your-handle"
+          prefix="evoca.live/"
+          error={fieldErrors.username}
+          hint="3–32 chars. Lowercase letters, numbers, hyphens, underscores."
+        />
+
+        {/* Bio */}
         <div className="flex flex-col gap-1.5">
           <label className="font-mono text-xs text-jsconf-muted uppercase tracking-wider">Bio</label>
           <textarea
@@ -178,6 +250,7 @@ export default function AccountPage() {
           />
         </div>
 
+        {/* Socials */}
         <div className="border-t border-jsconf-border pt-5">
           <p className="font-mono text-[10px] text-jsconf-muted uppercase tracking-widest mb-4">
             Socials — shown on the post-session feedback screen (PRO)
@@ -223,20 +296,24 @@ export default function AccountPage() {
         </div>
       </div>
 
+      {/* Save row */}
       <div className="flex items-center gap-3 mt-8">
         <button
           onClick={handleSave}
-          disabled={saving}
+          disabled={saveState === "saving"}
           className="inline-flex items-center gap-2 px-5 py-3 bg-jsconf-yellow text-black font-mono text-xs font-bold uppercase tracking-wider hover:bg-jsconf-yellow/90 disabled:opacity-60 transition-colors"
         >
           <Save className="h-4 w-4" />
-          {saving ? "Saving..." : "Save profile"}
+          {saveState === "saving" ? "Saving..." : "Save profile"}
         </button>
-        {saved && (
-          <span className="font-mono text-xs text-green-400 uppercase tracking-wider">Saved.</span>
+
+        {saveState === "saved" && (
+          <span className="font-mono text-xs text-green-400 uppercase tracking-wider">
+            Profile saved.
+          </span>
         )}
-        {error && (
-          <span className="font-mono text-xs text-red-400">{error}</span>
+        {(saveState === "error" || serverError) && (
+          <span className="font-mono text-xs text-red-400">{serverError ?? "Something went wrong."}</span>
         )}
       </div>
     </div>

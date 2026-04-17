@@ -153,6 +153,74 @@ function FeatureCard({ icon, title, description, badge }: { icon: string; title:
   )
 }
 
+// ─── Pro Waitlist Form ────────────────────────────────────────────────────────
+function ProWaitlistForm() {
+  const [email, setEmail] = useState("")
+  const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle")
+  const [errorMsg, setErrorMsg] = useState("")
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const trimmed = email.trim()
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setErrorMsg("Please enter a valid email address.")
+      setState("error")
+      return
+    }
+    setState("loading")
+    setErrorMsg("")
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      })
+      if (res.ok) {
+        setState("done")
+      } else {
+        const body = await res.json().catch(() => ({}))
+        setErrorMsg(body.error ?? "Something went wrong.")
+        setState("error")
+      }
+    } catch {
+      setErrorMsg("Something went wrong.")
+      setState("error")
+    }
+  }
+
+  if (state === "done") {
+    return (
+      <p className="font-mono text-xs text-[#00E887] uppercase tracking-wider">
+        You&apos;re on the list. We&apos;ll reach out when Pro launches.
+      </p>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+      <div className="flex">
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => { setEmail(e.target.value); if (state === "error") setState("idle") }}
+          placeholder="your@email.com"
+          className="flex-1 bg-[#111] border border-[#2a2a2a] border-r-0 text-white font-sans text-sm placeholder:text-[#555] px-3 h-9 focus:outline-none focus:border-[#555] transition-colors"
+        />
+        <button
+          type="submit"
+          disabled={state === "loading"}
+          className="font-mono text-xs text-[#666] border border-[#2a2a2a] px-4 h-9 hover:text-white hover:border-[#666] transition-colors disabled:opacity-50 whitespace-nowrap"
+        >
+          {state === "loading" ? "..." : "Notify me"}
+        </button>
+      </div>
+      {state === "error" && (
+        <p className="font-mono text-[11px] text-red-400">{errorMsg}</p>
+      )}
+    </form>
+  )
+}
+
 // ─── FAQ Accordion ────────────────────────────────────────────────────────────
 function FAQ({ items }: { items: { q: string; a: string }[] }) {
   const [open, setOpen] = useState<number | null>(null)
@@ -281,9 +349,7 @@ function SpeakerExperience() {
             <p className="font-sans text-[#888] text-sm leading-relaxed mb-4">
               Coming soon — unlimited talks, analytics, no watermark
             </p>
-            <button className="font-mono text-xs text-[#666] border border-[#2a2a2a] px-4 py-2 hover:text-white hover:border-[#666] transition-colors">
-              Notify me
-            </button>
+            <ProWaitlistForm />
           </div>
         </div>
       </section>
