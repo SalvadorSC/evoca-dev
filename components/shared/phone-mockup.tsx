@@ -141,6 +141,9 @@ export function HeroBackground({
 }) {
   const [paused, setPaused] = useState(false)
   const [cursor, setCursor] = useState({ x: 0.5, y: 0.5 })
+  const targetCursor = useRef({ x: 0.5, y: 0.5 })
+  const currentCursor = useRef({ x: 0.5, y: 0.5 })
+  const rafRef = useRef<number | null>(null)
 
   useEffect(() => {
     const onVisibility = () => setPaused(document.hidden)
@@ -149,15 +152,35 @@ export function HeroBackground({
   }, [])
 
   useEffect(() => {
-    if (waveAnimation !== "cursor" && waveAnimation !== "drift-cursor") return
+    if (waveAnimation !== "cursor" && waveAnimation !== "drift-cursor") {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      return
+    }
+
     const onMove = (e: MouseEvent) => {
-      setCursor({
+      targetCursor.current = {
         x: e.clientX / window.innerWidth,
         y: e.clientY / window.innerHeight,
-      })
+      }
     }
     window.addEventListener("mousemove", onMove)
-    return () => window.removeEventListener("mousemove", onMove)
+
+    const LERP = 0.04 // lower = smoother/slower follow
+    const tick = () => {
+      const cur = currentCursor.current
+      const tgt = targetCursor.current
+      const nx = cur.x + (tgt.x - cur.x) * LERP
+      const ny = cur.y + (tgt.y - cur.y) * LERP
+      currentCursor.current = { x: nx, y: ny }
+      setCursor({ x: nx, y: ny })
+      rafRef.current = requestAnimationFrame(tick)
+    }
+    rafRef.current = requestAnimationFrame(tick)
+
+    return () => {
+      window.removeEventListener("mousemove", onMove)
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
   }, [waveAnimation])
 
   const visible = items.slice(-MAX_VISIBLE)
@@ -208,7 +231,6 @@ export function HeroBackground({
             animation doesn't override the inline transform on the same element. */}
         <g style={{
           transform: layer1Transform,
-          transition: useCursor ? "transform 0.15s ease-out" : undefined,
           willChange: "transform",
         }}>
           <g style={{ animation: layer1Anim, willChange: "transform" }}>
