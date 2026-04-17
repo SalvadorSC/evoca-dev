@@ -584,16 +584,18 @@ function LandingContent() {
             ? <SpeakerExperience waveAnimation={waveAnimation} />
             : <OrganizerExperience waveAnimation={waveAnimation} />}
 
-      {showDevToggle && role === "organizer" && (
-        <DevColorToggle onColorChange={handleOrganizerColorChange} />
-      )}
-      {showDevToggle && role && (
-        <WaveAnimationPicker value={waveAnimation} onChange={setWaveAnimation} />
-      )}
 
-      {showDevToggle && role === "organizer" && (
-        <DevColorToggle onColorChange={handleOrganizerColorChange} />
-      )}
+          {showDevToggle && role === "organizer" && (
+            <DevColorToggle onColorChange={handleOrganizerColorChange} />
+          )}
+          {showDevToggle && role && (
+            <WaveAnimationPicker value={waveAnimation} onChange={setWaveAnimation} />
+          )}
+
+          {showDevToggle && role === "organizer" && (
+            <DevColorToggle onColorChange={handleOrganizerColorChange} />
+          )}
+        </>)}
     </div>
   )
 }

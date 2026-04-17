@@ -253,6 +253,7 @@ export function HeroBackground({
         }}>
           <rect x="-120" width="calc(100% + 240px)" height="100%" fill="url(#wave-pattern)" />
         </g>
+        {/* Layer 2 commented out for testing
         <g style={{
           animation: layer2Anim,
           transform: layer2Transform,
@@ -261,6 +262,7 @@ export function HeroBackground({
         }}>
           <rect x="-120" width="calc(100% + 240px)" height="100%" fill="url(#wave-pattern-2)" />
         </g>
+        */}
       </svg>
 
       {visible.map((item) => (
