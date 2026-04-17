@@ -211,10 +211,11 @@ function FloatingItem({ item, paused }: { item: LiveItem; paused: boolean }) {
           top: `${item.y}%`,
           left: 0,
           right: 0,
+          // Pre-position off-screen before animation starts so it never flashes at left:0
+          transform: visible ? undefined : item.ltr ? "translateX(-300px)" : "translateX(calc(100vw + 300px))",
           animation: visible ? `${animName} 18s linear ${item.persistent ? "infinite" : "forwards"}` : undefined,
           animationDelay: visible ? delay : undefined,
           animationPlayState: paused ? "paused" : "running",
-          opacity: visible ? undefined : 0,
         }}
       >
         {item.kind === "reaction" ? (
