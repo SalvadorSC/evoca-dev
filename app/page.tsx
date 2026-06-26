@@ -6,7 +6,8 @@ import Link from "next/link"
 import { ChevronDown, QrCode } from "lucide-react"
 import { STORAGE_KEYS } from "@/lib/storage-keys"
 import { InteractivePhoneMockup, HeroBackground } from "@/components/shared/phone-mockup"
-import type { LiveItem } from "@/components/shared/phone-mockup"
+import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
+import { ReducedMotionToggle } from "@/components/shared/wave-background"
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const ROLES = {
@@ -58,8 +59,6 @@ function Logo({ className = "" }: { className?: string }) {
 
 // ─── Split Hero ───────────────────────────────────────────────────────────────
 function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
-  const [hovered, setHovered] = useState<Role | null>(null)
-
   return (
     <div className="min-h-screen flex flex-col lg:flex-row relative">
       {/* Center logo - absolutely positioned */}
@@ -73,12 +72,7 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
       </div>
 
       {/* Speaker side */}
-      <div
-        className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-[#2a2a2a] relative transition-colors duration-300"
-        style={{ backgroundColor: hovered === "speaker" ? "rgba(247, 224, 24, 0.04)" : "transparent" }}
-        onMouseEnter={() => setHovered("speaker")}
-        onMouseLeave={() => setHovered(null)}
-      >
+      <div className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-[#2a2a2a] relative">
         <div className="max-w-md text-center lg:text-left">
           <p className="font-mono text-xs text-[#666] uppercase tracking-widest mb-2">I&apos;m a</p>
           <h1 className="font-display font-bold text-white text-5xl lg:text-6xl xl:text-7xl mb-4">Speaker</h1>
@@ -95,12 +89,7 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
       </div>
 
       {/* Organizer side */}
-      <div
-        className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12 relative transition-colors duration-300"
-        style={{ backgroundColor: hovered === "organizer" ? "rgba(0, 232, 135, 0.04)" : "transparent" }}
-        onMouseEnter={() => setHovered("organizer")}
-        onMouseLeave={() => setHovered(null)}
-      >
+      <div className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12 relative">
         <div className="max-w-md text-center lg:text-left">
           <p className="font-mono text-xs text-[#666] uppercase tracking-widest mb-2">I&apos;m an</p>
           <h1 className="font-display font-bold text-white text-5xl lg:text-6xl xl:text-7xl mb-4">Organizer</h1>
@@ -165,6 +154,74 @@ function FeatureCard({ icon, title, description, badge }: { icon: string; title:
   )
 }
 
+// ─── Pro Waitlist Form ────────────────────────────────────────────────────────
+function ProWaitlistForm() {
+  const [email, setEmail] = useState("")
+  const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle")
+  const [errorMsg, setErrorMsg] = useState("")
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const trimmed = email.trim()
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setErrorMsg("Please enter a valid email address.")
+      setState("error")
+      return
+    }
+    setState("loading")
+    setErrorMsg("")
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      })
+      if (res.ok) {
+        setState("done")
+      } else {
+        const body = await res.json().catch(() => ({}))
+        setErrorMsg(body.error ?? "Something went wrong.")
+        setState("error")
+      }
+    } catch {
+      setErrorMsg("Something went wrong.")
+      setState("error")
+    }
+  }
+
+  if (state === "done") {
+    return (
+      <p className="font-mono text-xs text-[#00E887] uppercase tracking-wider">
+        You&apos;re on the list. We&apos;ll reach out when Pro launches.
+      </p>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2 w-full">
+      <div className="flex flex-col sm:flex-row w-full">
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => { setEmail(e.target.value); if (state === "error") setState("idle") }}
+          placeholder="your@email.com"
+          className="flex-1 min-w-0 bg-[#111] border border-[#2a2a2a] text-white font-sans text-sm placeholder:text-[#555] px-3 h-9 focus:outline-none focus:border-[#555] transition-colors sm:border-r-0"
+        />
+        <button
+          type="submit"
+          disabled={state === "loading"}
+          className="font-mono text-xs text-[#666] border border-[#2a2a2a] px-4 h-9 hover:text-white hover:border-[#666] transition-colors disabled:opacity-50 whitespace-nowrap shrink-0"
+        >
+          {state === "loading" ? "..." : "Notify me"}
+        </button>
+      </div>
+      {state === "error" && (
+        <p className="font-mono text-[11px] text-red-400">{errorMsg}</p>
+      )}
+    </form>
+  )
+}
+
 // ─── FAQ Accordion ────────────────────────────────────────────────────────────
 function FAQ({ items }: { items: { q: string; a: string }[] }) {
   const [open, setOpen] = useState<number | null>(null)
@@ -178,7 +235,7 @@ function FAQ({ items }: { items: { q: string; a: string }[] }) {
             className="w-full flex items-center justify-between py-4 text-left cursor-pointer"
           >
             <span className="font-sans text-white">{item.q}</span>
-            <ChevronDown className={`w-5 h-5 text-[#666] transition-transform ${open === i ? "rotate-180" : ""}`} />
+            <ChevronDown className={`w-5 h-5 text-[#666] transition-transform shrink-0 ml-4 ${open === i ? "rotate-180" : ""}`} />
           </button>
           {open === i && (
             <p className="font-sans text-[#888] text-sm pb-4 leading-relaxed">{item.a}</p>
@@ -190,7 +247,7 @@ function FAQ({ items }: { items: { q: string; a: string }[] }) {
 }
 
 // ─── Speaker Experience ───────────────────────────────────────────────────────
-function SpeakerExperience() {
+function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) {
   const [heroItems, setHeroItems] = useState<LiveItem[]>([])
 
   const handleActivity = useCallback((item: LiveItem) => {
@@ -208,7 +265,7 @@ function SpeakerExperience() {
     <div>
       {/* Hero */}
       <section className="relative px-6 py-4 lg:py-12 overflow-hidden min-h-[480px]">
-        <HeroBackground items={heroItems} accentColor="var(--accent)" />
+        <HeroBackground items={heroItems} accentColor="var(--accent)" waveAnimation={waveAnimation} />
         <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
             <h1 className="font-display font-bold text-white text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
@@ -293,9 +350,7 @@ function SpeakerExperience() {
             <p className="font-sans text-[#888] text-sm leading-relaxed mb-4">
               Coming soon — unlimited talks, analytics, no watermark
             </p>
-            <button className="font-mono text-xs text-[#666] border border-[#2a2a2a] px-4 py-2 hover:text-white hover:border-[#666] transition-colors">
-              Notify me
-            </button>
+            <ProWaitlistForm />
           </div>
         </div>
       </section>
@@ -312,7 +367,7 @@ function SpeakerExperience() {
 }
 
 // ─── Organizer Experience ─────────────────────────────────────────────────────
-function OrganizerExperience() {
+function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) {
   const [heroItems, setHeroItems] = useState<LiveItem[]>([])
 
   const handleActivity = useCallback((item: LiveItem) => {
@@ -330,7 +385,7 @@ function OrganizerExperience() {
     <div>
       {/* Hero */}
       <section className="relative px-6 py-16 lg:py-12 overflow-hidden min-h-[480px]">
-        <HeroBackground items={heroItems} accentColor="var(--accent)" />
+        <HeroBackground items={heroItems} accentColor="var(--accent)" waveAnimation={waveAnimation} />
         <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
             <h1 className="font-display font-bold text-white text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
@@ -457,54 +512,7 @@ function DevColorToggle({ onColorChange }: { onColorChange: (color: string) => v
   )
 }
 
-// ─── Wipe Animation Overlay ───────────────────────────────────────────────────
-function WipeOverlay({
-  active,
-  color,
-  direction,
-  onComplete
-}: {
-  active: boolean
-  color: string
-  direction: "left" | "right"
-  onComplete: () => void
-}) {
-  const [phase, setPhase] = useState<"idle" | "in" | "out">("idle")
 
-  useEffect(() => {
-    if (active) {
-      setPhase("in")
-      const inTimer = setTimeout(() => {
-        setPhase("out")
-        const outTimer = setTimeout(() => {
-          setPhase("idle")
-          onComplete()
-        }, 300)
-        return () => clearTimeout(outTimer)
-      }, 300)
-      return () => clearTimeout(inTimer)
-    }
-  }, [active, onComplete])
-
-  if (phase === "idle" && !active) return null
-
-  const isFromLeft = direction === "left"
-
-  return (
-    <div
-      className="fixed inset-0 z-[100] pointer-events-none"
-      style={{
-        backgroundColor: color,
-        transition: "transform 300ms ease-in-out",
-        transform: phase === "in"
-          ? "translateX(0)"
-          : phase === "out"
-            ? isFromLeft ? "translateX(100%)" : "translateX(-100%)"
-            : isFromLeft ? "translateX(-100%)" : "translateX(100%)",
-      }}
-    />
-  )
-}
 
 // ─── Main Landing Content ─────────────────────────────────────────────────────
 function LandingContent() {
@@ -512,11 +520,8 @@ function LandingContent() {
   const router = useRouter()
 
   const [role, setRole] = useState<Role | null>(null)
-  const [wipeActive, setWipeActive] = useState(false)
-  const [wipeColor, setWipeColor] = useState("#F7E018")
-  const [wipeDirection, setWipeDirection] = useState<"left" | "right">("left")
-  const [pendingRole, setPendingRole] = useState<Role | null>(null)
   const [organizerAccent, setOrganizerAccent] = useState(ORGANIZER_ACCENTS[0].value)
+  const [waveAnimation, setWaveAnimation] = useState<WaveAnimation>("drift-cursor")
 
   // Check URL and localStorage on mount
   useEffect(() => {
@@ -547,23 +552,11 @@ function LandingContent() {
   }, [])
 
   const handleSelectRole = useCallback((newRole: Role) => {
-    const tokens = ROLES[newRole]
-    setWipeColor(newRole === "organizer" ? organizerAccent : tokens.accent)
-    setWipeDirection(tokens.wipeDirection)
-    setPendingRole(newRole)
-    setWipeActive(true)
-  }, [organizerAccent])
-
-  const handleWipeComplete = useCallback(() => {
-    if (pendingRole) {
-      setRole(pendingRole)
-      localStorage.setItem(STORAGE_KEYS.role, pendingRole)
-      router.push(`/?role=${pendingRole}`, { scroll: false })
-      applyAccent(pendingRole, pendingRole === "organizer" ? organizerAccent : undefined)
-      setPendingRole(null)
-    }
-    setWipeActive(false)
-  }, [pendingRole, router, applyAccent, organizerAccent])
+    setRole(newRole)
+    localStorage.setItem(STORAGE_KEYS.role, newRole)
+    router.push(`/?role=${newRole}`, { scroll: false })
+    applyAccent(newRole, newRole === "organizer" ? organizerAccent : undefined)
+  }, [organizerAccent, router, applyAccent])
 
   const handleSwitchRole = useCallback(() => {
     const newRole = role === "speaker" ? "organizer" : "speaker"
@@ -583,26 +576,27 @@ function LandingContent() {
 
   return (
     <div className="min-h-screen bg-[#080808] text-white">
-      <WipeOverlay
-        active={wipeActive}
-        color={wipeColor}
-        direction={wipeDirection}
-        onComplete={handleWipeComplete}
-      />
-
       {!role ? (
         <SplitHero onSelectRole={handleSelectRole} />
       ) : (
         <>
           <Nav role={role} onSwitchRole={handleSwitchRole} />
-          {role === "speaker" ? <SpeakerExperience /> : <OrganizerExperience />}
-          <Footer />
-        </>
+          {role === "speaker"
+            ? <SpeakerExperience waveAnimation={waveAnimation} />
+            : <OrganizerExperience waveAnimation={waveAnimation} />}
+
+
+          {showDevToggle && role === "organizer" && (
+            <DevColorToggle onColorChange={handleOrganizerColorChange} />
+          )}
+      {showDevToggle && role && (
+        <ReducedMotionToggle value={waveAnimation} onChange={setWaveAnimation} />
       )}
 
-      {showDevToggle && role === "organizer" && (
-        <DevColorToggle onColorChange={handleOrganizerColorChange} />
-      )}
+          {showDevToggle && role === "organizer" && (
+            <DevColorToggle onColorChange={handleOrganizerColorChange} />
+          )}
+        </>)}
     </div>
   )
 }
