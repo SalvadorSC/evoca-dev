@@ -10,8 +10,15 @@ type Item = {
   description: string;
   complexity: string;
   priority: string;
+  category?: string;
   status: string;
   complete: boolean;
+};
+
+const CATEGORY_ORDER: Record<string, number> = {
+  "core": 0,
+  "nice-to-have": 1,
+  "ui": 2,
 };
 
 const priorityColor: Record<string, string> = {
@@ -94,7 +101,7 @@ function ItemRow({
         >
           {done ? "✓" : ""}
         </span>
-        <span style={{ fontSize: 11, color: "#888", minWidth: 54 }}>{item.name}</span>
+        <span style={{ fontSize: 11, color: "#888", minWidth: 54 }}>{item.id}</span>
         <span
           style={{
             flex: 1,
@@ -105,6 +112,12 @@ function ItemRow({
         >
           {item.name}
         </span>
+        {item.category && (
+          <Badge
+            label={item.category === "nice-to-have" ? "nice" : item.category}
+            color={item.category === "core" ? "#3b82f6" : item.category === "nice-to-have" ? "#a855f7" : "#64748b"}
+          />
+        )}
         <Badge label={complexityLabel[item.complexity] ?? item.complexity} color="#888" />
         <Badge
           label={item.priority}
@@ -184,7 +197,11 @@ function DevOverlayInner() {
   const items = [...rawItems].sort((a, b) => {
     const aDone = isDone(a) ? 1 : 0;
     const bDone = isDone(b) ? 1 : 0;
-    return aDone - bDone;
+    if (aDone !== bDone) return aDone - bDone;
+    // Within same done-state, sort by category
+    const aCat = CATEGORY_ORDER[a.category ?? ""] ?? 99;
+    const bCat = CATEGORY_ORDER[b.category ?? ""] ?? 99;
+    return aCat - bCat;
   });
 
   if (!visible) {
