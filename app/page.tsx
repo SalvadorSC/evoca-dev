@@ -154,7 +154,7 @@ function FeatureCard({ icon, title, description, badge }: { icon: string; title:
   )
 }
 
-// ─── Pro Waitlist Form ────────────────────────────────────────────────────────
+// ─── Pro Waitlist Form ─────────────────────────────���──────────────────────────
 function ProWaitlistForm() {
   const [email, setEmail] = useState("")
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle")
@@ -336,21 +336,63 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
         </div>
       </section>
 
-      {/* Pricing teaser */}
-      <section className="px-6 py-16">
-        <div className="max-w-2xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border p-6" style={{ borderColor: "var(--accent)" }}>
-            <h3 className="font-display font-bold text-white text-xl mb-3">Free</h3>
-            <p className="font-sans text-[#888] text-sm leading-relaxed">
-              5 talks · Live Wall watermark · Core features
-            </p>
-          </div>
-          <div className="border border-[#2a2a2a] p-6">
-            <h3 className="font-display font-bold text-white text-xl mb-3">Pro</h3>
-            <p className="font-sans text-[#888] text-sm leading-relaxed mb-4">
-              Coming soon — unlimited talks, analytics, no watermark
-            </p>
-            <ProWaitlistForm />
+      {/* Pricing */}
+      <section className="px-6 py-16 border-t border-[#1f1f1f]">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="font-display font-bold text-white text-2xl mb-2">Simple pricing for speakers</h2>
+          <p className="font-sans text-[#888] text-sm mb-10">Evoca is free for speakers. Always.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Free */}
+            <div className="border p-6 flex flex-col gap-4" style={{ borderColor: "var(--accent)" }}>
+              <div>
+                <p className="font-mono text-xs uppercase tracking-widest mb-1" style={{ color: "var(--accent)" }}>Free forever</p>
+                <div className="flex items-end gap-1">
+                  <span className="font-display font-bold text-white text-5xl">€0</span>
+                </div>
+                <p className="font-mono text-xs text-[#555] mt-1">No credit card required</p>
+              </div>
+              <Link
+                href="/login"
+                className="font-mono text-sm font-bold py-3 text-center transition-colors"
+                style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
+              >
+                Get started free
+              </Link>
+              <div>
+                <p className="font-sans text-xs font-bold text-white uppercase tracking-wider mb-3">Includes</p>
+                <ul className="flex flex-col gap-2">
+                  {["Up to 5 active talks", "Live Wall with reactions", "Audience Q&A", "QR code for every session", "No sign-up for attendees"].map(f => (
+                    <li key={f} className="flex items-start gap-2">
+                      <span className="mt-0.5 shrink-0" style={{ color: "var(--accent)" }}>✓</span>
+                      <span className="font-sans text-sm text-[#888]">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Pro — coming soon */}
+            <div className="border border-[#2a2a2a] p-6 flex flex-col gap-4">
+              <div>
+                <p className="font-mono text-xs uppercase tracking-widest text-[#555] mb-1">Coming soon</p>
+                <div className="flex items-end gap-1">
+                  <span className="font-display font-bold text-white text-5xl">Pro</span>
+                </div>
+                <p className="font-mono text-xs text-[#555] mt-1">Be the first to know</p>
+              </div>
+              <ProWaitlistForm />
+              <div>
+                <p className="font-sans text-xs font-bold text-white uppercase tracking-wider mb-3">Everything in Free, plus</p>
+                <ul className="flex flex-col gap-2">
+                  {["Unlimited talks", "Remove Evoca watermark", "Custom branding on Live Wall", "Engagement analytics", "Priority support"].map(f => (
+                    <li key={f} className="flex items-start gap-2">
+                      <span className="mt-0.5 text-[#555] shrink-0">✓</span>
+                      <span className="font-sans text-sm text-[#666]">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -455,6 +497,9 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
         </div>
       </section>
 
+      {/* Pricing */}
+      <OrganizerPricing />
+
       {/* FAQ */}
       <section className="px-6 py-16 border-t border-[#1f1f1f]">
         <div className="max-w-2xl mx-auto">
@@ -463,6 +508,215 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
         </div>
       </section>
     </div>
+  )
+}
+
+// ─── Organizer Pricing ────────────────────────────────────────────────────────
+const ORGANIZER_TIERS = {
+  "one-time": [
+    {
+      name: "Starter",
+      price: "€0",
+      cadence: "free forever",
+      recommended: false,
+      cta: "Get started free",
+      ctaHref: "/login",
+      note: "No credit card required",
+      intro: "Includes",
+      features: [
+        "Up to 3 speakers",
+        "Up to 100 attendees per session",
+        "Live Wall & Q&A",
+        "Event schedule page",
+        "QR codes for all sessions",
+      ],
+    },
+    {
+      name: "Growth",
+      price: "€49",
+      cadence: "/ event",
+      recommended: false,
+      cta: "Notify me",
+      ctaHref: null,
+      note: "Coming soon",
+      intro: "Everything in Starter, plus",
+      features: [
+        "Up to 20 speakers",
+        "Up to 500 attendees per session",
+        "Moderation of Q&A",
+        "Remove Evoca branding",
+        "Basic engagement analytics",
+      ],
+    },
+    {
+      name: "Scale",
+      price: "€149",
+      cadence: "/ event",
+      recommended: true,
+      cta: "Notify me",
+      ctaHref: null,
+      note: "Coming soon",
+      intro: "Everything in Growth, plus",
+      features: [
+        "Unlimited speakers",
+        "Up to 2,000 attendees per session",
+        "Custom branding & colors",
+        "Advanced analytics & exports",
+        "Dedicated support",
+      ],
+    },
+  ],
+  "annual": [
+    {
+      name: "Starter",
+      price: "€0",
+      cadence: "free forever",
+      recommended: false,
+      cta: "Get started free",
+      ctaHref: "/login",
+      note: "No credit card required",
+      intro: "Includes",
+      features: [
+        "Up to 3 speakers",
+        "Up to 100 attendees per session",
+        "Live Wall & Q&A",
+        "Event schedule page",
+        "QR codes for all sessions",
+      ],
+    },
+    {
+      name: "Growth",
+      price: "€29",
+      cadence: "/ month",
+      recommended: false,
+      cta: "Notify me",
+      ctaHref: null,
+      note: "Billed €348 annually",
+      intro: "Everything in Starter, plus",
+      features: [
+        "Unlimited events per year",
+        "Up to 500 attendees per session",
+        "Moderation of Q&A",
+        "Remove Evoca branding",
+        "Basic engagement analytics",
+      ],
+    },
+    {
+      name: "Scale",
+      price: "€89",
+      cadence: "/ month",
+      recommended: true,
+      cta: "Notify me",
+      ctaHref: null,
+      note: "Billed €1,068 annually",
+      intro: "Everything in Growth, plus",
+      features: [
+        "Unlimited speakers & events",
+        "Up to 2,000 attendees per session",
+        "Custom branding & colors",
+        "Advanced analytics & exports",
+        "Dedicated support",
+      ],
+    },
+  ],
+}
+
+function OrganizerPricing() {
+  const [billing, setBilling] = useState<"one-time" | "annual">("one-time")
+  const tiers = ORGANIZER_TIERS[billing]
+
+  return (
+    <section className="px-6 py-16 border-t border-[#1f1f1f]">
+      <div className="max-w-5xl mx-auto">
+        {/* Header row */}
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+          <div>
+            <h2 className="font-display font-bold text-white text-2xl mb-1">Conference organiser plans</h2>
+            <p className="font-sans text-[#888] text-sm">Scale your event engagement. Pay for what you need.</p>
+          </div>
+          {/* Billing toggle */}
+          <div className="flex items-center border border-[#2a2a2a] p-0.5 self-start sm:self-auto">
+            {(["one-time", "annual"] as const).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setBilling(mode)}
+                className="font-mono text-xs px-4 py-1.5 transition-colors"
+                style={{
+                  background: billing === mode ? "var(--accent)" : "transparent",
+                  color: billing === mode ? "var(--accent-text)" : "#666",
+                }}
+              >
+                {mode === "one-time" ? "One-time" : "Annual"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Tier cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {tiers.map((tier) => (
+            <div
+              key={tier.name}
+              className="border flex flex-col overflow-hidden"
+              style={{ borderColor: tier.recommended ? "var(--accent)" : "#2a2a2a" }}
+            >
+              {tier.recommended && (
+                <div
+                  className="font-mono text-xs font-bold uppercase tracking-widest text-center py-1.5"
+                  style={{ background: "var(--accent)", color: "var(--accent-text)" }}
+                >
+                  Recommended
+                </div>
+              )}
+              <div className="p-6 flex flex-col gap-5 flex-1">
+                {/* Name + price */}
+                <div>
+                  <p
+                    className="font-display font-bold text-xl mb-3"
+                    style={{ color: tier.recommended ? "var(--accent)" : "white" }}
+                  >
+                    {tier.name}
+                  </p>
+                  <div className="flex items-end gap-1.5">
+                    <span className="font-display font-bold text-white text-4xl leading-none">{tier.price}</span>
+                    {tier.cadence !== "free forever" && (
+                      <span className="font-sans text-[#666] text-sm pb-0.5">{tier.cadence}</span>
+                    )}
+                  </div>
+                  <p className="font-mono text-xs text-[#555] mt-1">{tier.note}</p>
+                </div>
+
+                {/* CTA */}
+                {tier.ctaHref ? (
+                  <Link
+                    href={tier.ctaHref}
+                    className="font-mono text-sm font-bold py-2.5 text-center transition-colors"
+                    style={{ background: "var(--accent)", color: "var(--accent-text)" }}
+                  >
+                    {tier.cta}
+                  </Link>
+                ) : (
+                  <ProWaitlistForm />
+                )}
+
+                {/* Features */}
+                <div className="flex-1">
+                  <p className="font-sans text-xs font-bold text-white uppercase tracking-wider mb-3">{tier.intro}</p>
+                  <ul className="flex flex-col gap-2">
+                    {tier.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2">
+                        <span className="mt-0.5 shrink-0" style={{ color: tier.recommended ? "var(--accent)" : "#555" }}>✓</span>
+                        <span className="font-sans text-sm text-[#888]">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   )
 }
 
