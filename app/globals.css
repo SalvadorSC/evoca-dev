@@ -103,8 +103,8 @@
   --jsconf-surface: #F5F5F5;
   --jsconf-surface-2: #EBEBEB;
   --jsconf-border: #D9D9D9;
-  --jsconf-yellow: #E0C800;
-  --jsconf-yellow-dim: rgba(224, 200, 0, 0.12);
+  --jsconf-yellow: #F7E018;
+  --jsconf-yellow-dim: rgba(247, 224, 24, 0.12);
   --jsconf-white: #080808;
   --jsconf-muted: #5C5C5C;
   --jsconf-red: #DC2626;
@@ -119,7 +119,7 @@
   --card-foreground: #0A0A0A;
   --popover: #F5F5F5;
   --popover-foreground: #0A0A0A;
-  --primary: #E0C800;
+  --primary: #F7E018;
   --primary-foreground: #0A0A0A;
   --secondary: #EBEBEB;
   --secondary-foreground: #0A0A0A;
@@ -131,7 +131,7 @@
   --destructive-foreground: #FFFFFF;
   --border: #D9D9D9;
   --input: #EBEBEB;
-  --ring: #E0C800;
+  --ring: #F7E018;
 }
 
 @theme inline {
