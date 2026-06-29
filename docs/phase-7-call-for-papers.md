@@ -24,6 +24,7 @@ affiliation system (Phase 2).
 | Submission review dashboard (list, filter, rate, accept/reject) | TBD |
 | Accept → create slot + speaker affiliation | TBD |
 | Submitter notifications (accepted / rejected / waitlisted) | TBD |
+| **Wire transactional email provider** (also backfills Phase 2 invite emails) | TBD |
 
 ---
 
@@ -49,23 +50,43 @@ affiliation system (Phase 2).
    have an Evoca account first?
 2. **Gating:** Is CFP an organizer feature gated behind LIVE/PREP access, or
    available to any paying organizer regardless of event window?
-3. **Review model:** Single organizer, or multiple reviewers with roles +
-   scoring? (Affects schema and RLS.)
+3. ~~**Review model:** Single organizer, or multiple reviewers?~~ **Decided:**
+   ship **single-reviewer** (the organizer) for v1. **Multi-reviewer with roles +
+   scoring is a desired future enhancement** — see "Future suggestions" below.
+   Design the schema so it can extend to multi-reviewer without a breaking change.
 4. **Accept → schedule:** Auto-create an unscheduled slot, or just create the
    affiliation and let the organizer place it manually on the timeline?
-5. **Notifications:** Requires the transactional email provider that Phase 2
-   stubbed. Does Phase 7 own wiring that up, or is it a separate prerequisite?
+5. ~~**Notifications:** separate prerequisite?~~ **Decided:** **Phase 7 owns
+   wiring the transactional email provider.** Submitter notifications (accepted /
+   rejected / waitlisted) and the Phase 2 speaker-invite emails (currently
+   stubbed) will both be sent through it.
 6. **Public page hosting:** New public route (e.g. `/cfp/[conferenceId]`) vs. a
    shareable slug. Spam/abuse protection (captcha, rate limit)?
 7. **Custom questions:** Fixed fields only, or organizer-defined custom fields?
 
 ---
 
+## Future suggestions (revisit in later phases — not in v1)
+
+- **Multi-reviewer scoring.** Allow the organizer to invite co-reviewers, each
+  scoring submissions independently, with an aggregate/average rating and
+  per-reviewer notes. Requires a `cfp_reviewers` table and a `cfp_reviews` table
+  (reviewer_id × submission_id), plus RLS that lets invited reviewers see only
+  submissions for conferences they're assigned to. v1 schema should leave room
+  for this (e.g. keep ratings/notes in a separate concept rather than a single
+  column hard-bound to the organizer).
+- **Reviewer roles/permissions** (e.g. lead reviewer vs. reviewer; tie-break /
+  final-decision authority).
+- **Blind review** (hide submitter identity from reviewers to reduce bias).
+
+---
+
 ## Dependencies
 
 - Phase 2 schedule + affiliation system (done).
-- Transactional email provider (currently stubbed — see Phase 2 notes). Likely a
-  hard prerequisite for the notifications feature.
+- **Transactional email provider — now in scope for Phase 7** (see decision #5).
+  Phase 7 wires it and backfills the Phase 2 speaker-invite emails that are
+  currently stubbed.
 
 ---
 
