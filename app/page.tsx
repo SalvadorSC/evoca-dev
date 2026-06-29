@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { ChevronDown, QrCode } from "lucide-react"
+import { ChevronDown, QrCode, Trophy } from "lucide-react"
 import { STORAGE_KEYS } from "@/lib/storage-keys"
 import { InteractivePhoneMockup, HeroBackground } from "@/components/shared/phone-mockup"
 import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
@@ -118,9 +118,15 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
     <nav className="sticky top-0 z-50 bg-jsconf-bg/95 backdrop-blur border-b border-jsconf-border px-6 py-4 flex items-center justify-between">
       <Logo />
       <div className="flex items-center gap-4">
+        <Link
+          href="/pricing"
+          className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors"
+        >
+          Pricing
+        </Link>
         <button
           onClick={onSwitchRole}
-          className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors"
+          className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors hidden sm:inline"
         >
           Switch to {otherRole}
         </button>
@@ -258,9 +264,9 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
 
   const speakerFAQ = [
     { q: "Do attendees need an account?", a: "No, they scan a QR and they're in." },
-    { q: "What happens to Q&A after the talk?", a: "Saved to your dashboard." },
+    { q: "What happens to Q&A after the talk?", a: "When you end a session, the questions are saved to your dashboard under the talk's Q&A History." },
     { q: "Does it work with my existing slides?", a: "Yes — PPTX, PDF, or Slides.com link." },
-    { q: "Is it really free?", a: "Yes, 5 talks free forever. No credit card needed." },
+    { q: "Is it really free?", a: "Yes, 5 talks free forever. No credit card needed. See full pricing for what's included." },
   ]
 
   return (
@@ -331,8 +337,12 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
       {/* Social proof */}
       <section className="px-6 py-8 bg-jsconf-surface border-y border-jsconf-border">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
-          <span className="font-mono text-sm font-bold px-3 py-1 border" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>
-            🏆 Winner — JSConf Espana 2026 Hackathon
+          <span
+            className="inline-flex items-center gap-1.5 font-mono text-sm font-bold px-3 py-1"
+            style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
+          >
+            <Trophy className="h-3.5 w-3.5" aria-hidden="true" />
+            Winner — JSConf España 2026 Hackathon
           </span>
           <span className="font-sans text-sm text-jsconf-muted">Built at JSConf. Loved by the community.</span>
         </div>
@@ -340,19 +350,30 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
 
       {/* Pricing teaser */}
       <section className="px-6 py-16">
-        <div className="max-w-2xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border p-6" style={{ borderColor: "var(--accent)" }}>
-            <h3 className="font-display font-bold text-foreground text-xl mb-3">Free</h3>
-            <p className="font-sans text-jsconf-muted text-sm leading-relaxed">
-              5 talks · Live Wall watermark · Core features
-            </p>
+        <div className="max-w-2xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="border p-6" style={{ borderColor: "var(--accent)" }}>
+              <h3 className="font-display font-bold text-foreground text-xl mb-3">Free</h3>
+              <p className="font-sans text-jsconf-muted text-sm leading-relaxed">
+                5 talks · Live Wall watermark · Core features
+              </p>
+            </div>
+            <div className="border border-jsconf-border p-6">
+              <h3 className="font-display font-bold text-foreground text-xl mb-3">Speaker Pro</h3>
+              <p className="font-sans text-jsconf-muted text-sm leading-relaxed mb-4">
+                Coming soon — unlimited talks, analytics, no watermark
+              </p>
+              <ProWaitlistForm />
+            </div>
           </div>
-          <div className="border border-jsconf-border p-6">
-            <h3 className="font-display font-bold text-foreground text-xl mb-3">Pro</h3>
-            <p className="font-sans text-jsconf-muted text-sm leading-relaxed mb-4">
-              Coming soon — unlimited talks, analytics, no watermark
-            </p>
-            <ProWaitlistForm />
+          <div className="mt-6 text-center">
+            <Link
+              href="/pricing"
+              className="font-mono text-sm font-bold uppercase tracking-wider text-foreground border-b-2 pb-0.5 hover:opacity-70 transition-opacity"
+              style={{ borderColor: "var(--accent)" }}
+            >
+              See full pricing →
+            </Link>
           </div>
         </div>
       </section>
@@ -450,8 +471,12 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
       {/* Social proof */}
       <section className="px-6 py-8 bg-jsconf-surface border-y border-jsconf-border">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
-          <span className="font-mono text-sm font-bold px-3 py-1 border" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>
-            🏆 Winner — JSConf Espana 2026 Hackathon
+          <span
+            className="inline-flex items-center gap-1.5 font-mono text-sm font-bold px-3 py-1"
+            style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
+          >
+            <Trophy className="h-3.5 w-3.5" aria-hidden="true" />
+            Winner — JSConf España 2026 Hackathon
           </span>
           <span className="font-sans text-sm text-jsconf-muted">Built at JSConf. Loved by the community.</span>
         </div>

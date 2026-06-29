@@ -46,6 +46,51 @@
   color-scheme: dark;
 }
 
+/*
+ * Live "stage" screens (wall, presenter, phone remote, attendee live views, demo)
+ * are designed for projection and must stay dark regardless of the user's theme.
+ * Applying `.force-dark` to their root re-declares the dark token values so any
+ * themed token (bg-jsconf-bg, text-foreground, border-jsconf-border, ...) used
+ * inside resolves to dark even when <html> is in light mode.
+ */
+.force-dark {
+  color-scheme: dark;
+
+  --wave-color: var(--accent);
+  --jsconf-bg: #080808;
+  --jsconf-surface: #111111;
+  --jsconf-surface-2: #1a1a1a;
+  --jsconf-border: #2a2a2a;
+  --jsconf-yellow: #F7E018;
+  --jsconf-yellow-dim: rgba(247, 224, 24, 0.12);
+  --jsconf-white: #FFFFFF;
+  --jsconf-muted: #888888;
+  --jsconf-red: #FF3B3B;
+  --jsconf-purple: #9B5CF6;
+  --jsconf-blue: #3B82F6;
+  --jsconf-orange: #F97316;
+
+  --background: #080808;
+  --foreground: #FFFFFF;
+  --card: #111111;
+  --card-foreground: #FFFFFF;
+  --popover: #111111;
+  --popover-foreground: #FFFFFF;
+  --primary: #F7E018;
+  --primary-foreground: #080808;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #FFFFFF;
+  --muted: #1a1a1a;
+  --muted-foreground: #888888;
+  --accent: #1a1a1a;
+  --accent-foreground: #FFFFFF;
+  --destructive: #FF3B3B;
+  --destructive-foreground: #FFFFFF;
+  --border: #2a2a2a;
+  --input: #2a2a2a;
+  --ring: #F7E018;
+}
+
 /* Light theme — applied via the `.light` class on <html> by ThemeProvider. */
 .light {
   color-scheme: light;
