@@ -53,19 +53,26 @@ parallel workers hit `/api/dev-login` for the same email.
 | ------------------------------ | ------------ |
 | `e2e/auth.setup.ts`            | Authenticates `organizer-live`, `free`, `affiliated-speaker`; saves storage state |
 | `e2e/public.spec.ts`          | Landing page, login page + dev-account panel, public conference page, unknown slug → 404 |
-| `e2e/features-public.spec.ts` | Public conference page (stream/schedule/track switch), theme switcher (feat-011), pricing + Pro waitlist (feat-020/023), unpublished slug 404 |
+| `e2e/features-public.spec.ts` | Public conference page (stream/schedule/track switch), theme switcher (feat-011), pricing (feat-023), Pro waitlist real flow — empty/valid/duplicate states (feat-020), CFP public submission real flow — renders/validation/confirmation (feat-021) |
 | `e2e/features-authed.spec.ts` | Account profile + plan (feat-004/005), Stripe upgrade (feat-010, smoke), conference scheduling/slots/speakers (feat-006/007/008), speaker portal (feat-009), slides upload + embed (feat-013/014), CFP organizer area (feat-021), Q&A history (feat-022) |
-| `e2e/features-live.spec.ts`   | Phone remote expired-state (feat-015), Q&A attendee shell (feat-016), live wall (feat-016) — realtime smoke depth |
+| `e2e/features-live.spec.ts`   | Phone remote invalid-token gate (feat-015). Realtime moderation (feat-016/017/018) is intentionally **not** here — it needs two synchronized PartyKit clients and is tracked as Manual |
 | `e2e/dashboard.spec.ts`       | Dashboard navigation, protected-route redirect, free-account upgrade affordance |
-| `e2e/helpers.ts`              | Account keys, `statePath()`, `devLogin()` (setup-only), seeded public conference slug |
+| `e2e/helpers.ts`              | Account keys, `statePath()`, `devLogin()` (setup-only), seeded public conference + open CFP slugs |
 
 E2E tests depend on the **dev server** (`NODE_ENV=development`, for the
 dev-login bypass) and **seeded test accounts** (`scripts/seed-test-accounts.mjs`)
-plus the seeded published conference.
+plus the seeded published conference and an open CFP (`e2e-open-cfp`).
 
-These map to the areas tracked in `docs/evoca-test-plan.xlsx`. The manual test
-plan and browser QA still cover deeper flows, RLS, realtime (PartyKit), and
-Stripe webhooks.
+Where a flow's success path would otherwise write to the database (waitlist
+sign-up, CFP proposal), the test drives the **real form and client-side
+validation** but mocks only the final `POST` response via `page.route`, so every
+UI state (error / success / duplicate) is asserted deterministically without
+polluting data.
+
+These map to the areas tracked in `docs/evoca-test-plan.xlsx`. Features were
+evaluated case-by-case: realtime multi-client moderation, live presenter
+rendering, Stripe completion, and visual/responsive/a11y judgment remain
+**Manual** because a single-browser assertion would give false confidence.
 
 ## Conventions
 

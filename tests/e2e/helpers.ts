@@ -33,3 +33,6 @@ export function statePath(account: Account): string {
 
 /** The stable seeded public conference (created for QA). */
 export const PUBLIC_CONFERENCE_SLUG = "test-conference-2026"
+
+/** A stable seeded CFP that is open for submissions (created for QA). */
+export const OPEN_CFP_SLUG = "e2e-open-cfp"

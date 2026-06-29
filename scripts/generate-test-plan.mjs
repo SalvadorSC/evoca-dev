@@ -58,7 +58,7 @@ const AUTOMATION = {
 
   // Call for Papers
   "TC-019": ["E2E", "features-authed.spec.ts › CFP organizer area"],
-  "TC-020": ["Manual", "CFP public submission (manual QA)"],
+  "TC-020": ["E2E", "features-public.spec.ts › CFP public submission (renders, validation, confirm)"],
   "TC-021": ["Manual", "CFP review board (manual QA)"],
   "TC-022": ["Manual", "CFP reject/waitlist (manual QA)"],
 
@@ -70,14 +70,14 @@ const AUTOMATION = {
 
   // Presentation & Remote
   "TC-027": ["Manual", "Presenter slide render (manual QA — needs live session)"],
-  "TC-028": ["E2E (smoke)", "features-live.spec.ts › Speaker phone remote"],
+  "TC-028": ["E2E (smoke)", "features-live.spec.ts › invalid token gate (valid load needs live session)"],
   "TC-029": ["Unit + E2E", "remote-token.test.ts + features-live.spec.ts (remote token)"],
 
   // Live Q&A & Wall
-  "TC-030": ["E2E (smoke)", "features-live.spec.ts › Q&A attendee view"],
+  "TC-030": ["Manual", "Q&A submit (manual QA — needs live PartyKit client round-trip)"],
   "TC-031": ["Unit", "anon-id.test.ts / lib-misc.test.ts (reaction identity)"],
   "TC-032": ["Manual", "Q&A moderation propagation (manual QA — needs 2 clients)"],
-  "TC-033": ["E2E (smoke)", "features-live.spec.ts › Live wall"],
+  "TC-033": ["Manual", "Live wall (manual QA — needs live PartyKit broadcast)"],
 
   // Streams & Public Page
   "TC-034": ["Unit", "dailymotion.test.ts (URL/ID parsing for add-stream)"],
@@ -94,6 +94,9 @@ const AUTOMATION = {
   "TC-043": ["Manual", "Keyboard navigation (manual QA)"],
   "TC-044": ["Manual", "Hover/cursor states (manual QA)"],
   "TC-045": ["E2E", "features-public.spec.ts › Theme switcher (feat-011)"],
+
+  // Pro waitlist (feat-020)
+  "TC-046": ["E2E", "features-public.spec.ts › Pro waitlist (empty/valid/duplicate states)"],
 }
 
 function autoFill(kind) {
@@ -167,6 +170,9 @@ const CASES = [
   ["Responsive & A11y", "Keyboard", "Keyboard navigation", "Tab through forms, dialogs, schedule", "All controls reachable + operable", "any", "various", "Medium"],
   ["Responsive & A11y", "Buttons", "Cursor + hover states", "Hover action buttons in light & dark", "Pointer cursor + visible hover; good contrast", "any", "various", "Low"],
   ["Responsive & A11y", "Theme", "Light/dark contrast", "Toggle theme; review yellow buttons/badges", "Text legible on yellow in both themes", "any", "various", "Low"],
+
+  // Pro waitlist (feat-020) — not in the original plan; added to track its E2E coverage
+  ["Billing & Paywall", "Pro waitlist", "Speaker Pro waitlist capture", "On /pricing (Speakers), submit empty / valid / duplicate email", "Inline error on empty; success state on valid; duplicate message on 409", "—", "/pricing", "Medium"],
 ]
 
 function styleHeader(row) {
