@@ -1,18 +1,17 @@
 import { test, expect } from "@playwright/test"
-import { devLogin } from "./helpers"
+import { statePath } from "./helpers"
 
 // ─── Authentication + dashboard navigation ────────────────────────────────────
 //
-// These depend on seeded dev accounts (scripts/seed-test-accounts.mjs) and the
-// dev-login bypass (development only). If the bypass redirect fails, the
-// beforeEach waitForURL throws and the test reports clearly.
+// Auth comes from pre-saved storage state (auth.setup.ts), so no test performs
+// a live login. This avoids the dev-login magic-link token race under parallel
+// workers.
 
 test.describe("Authenticated dashboard (organizer-live)", () => {
-  test.beforeEach(async ({ page }) => {
-    await devLogin(page, "organizer-live")
-  })
+  test.use({ storageState: statePath("organizer-live") })
 
   test("lands on the dashboard with primary navigation", async ({ page }) => {
+    await page.goto("/dashboard")
     await expect(page).toHaveURL(/\/dashboard/)
     // Nav links are identified by href (label text is transformed via CSS).
     await expect(page.locator('a[href="/dashboard"]').first()).toBeVisible()
@@ -21,11 +20,9 @@ test.describe("Authenticated dashboard (organizer-live)", () => {
   })
 
   test("can open the Events (conferences) area", async ({ page }) => {
-    // Navigate via the link's href. (A dev-only floating overlay can intercept
-    // direct clicks in this environment, so we follow the route directly.)
     await page.goto("/dashboard/conference")
     await expect(page).toHaveURL(/\/dashboard\/conference/)
-    await expect(page.locator("body")).toBeVisible()
+    await expect(page.locator("main, nav, h1, h2").first()).toBeVisible({ timeout: 15_000 })
   })
 
   test("can open the Account page and see profile fields", async ({ page }) => {
@@ -36,6 +33,9 @@ test.describe("Authenticated dashboard (organizer-live)", () => {
 })
 
 test.describe("Protected routes", () => {
+  // Explicitly no auth state for this block.
+  test.use({ storageState: { cookies: [], origins: [] } })
+
   test("dashboard redirects unauthenticated visitors to login", async ({ page }) => {
     await page.goto("/dashboard")
     await expect(page).toHaveURL(/\/login/)
@@ -43,11 +43,13 @@ test.describe("Protected routes", () => {
 })
 
 test.describe("Free account paywall", () => {
+  test.use({ storageState: statePath("free") })
+
   test("free speaker is signed in and reaches the dashboard", async ({ page }) => {
-    await devLogin(page, "free")
+    await page.goto("/dashboard")
     await expect(page).toHaveURL(/\/dashboard/)
     // Upgrade affordance is present for non-paying users (label uses split
-    // letter spans, so match by href + aria-label instead of text).
+    // letter spans, so match by href instead of text).
     await expect(page.locator('a[href="/dashboard/upgrade"]').first()).toBeVisible()
   })
 })

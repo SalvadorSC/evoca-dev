@@ -19,6 +19,90 @@ const BLOCK = "FFFFE9C7"
 
 const STATUSES = ["Not Started", "Pass", "Fail", "Blocked", "N/A"]
 
+// Coverage tier colors for the "Automated" column.
+const AUTO_E2E = "FFD7F5DD" // green — exercised by Playwright
+const AUTO_UNIT = "FFDDEBFF" // blue — covered by Vitest unit tests
+const AUTO_PARTIAL = "FFFFF3C7" // amber — partially/smoke covered
+const AUTO_MANUAL = "FFF0F0F0" // grey — manual only
+
+/**
+ * Maps each test case (by TC id) to its automated coverage.
+ *   kind: "E2E" | "Unit" | "E2E (smoke)" | "Unit + E2E" | "Manual"
+ *   ref:  the spec/test that exercises it
+ * Anything not listed defaults to Manual.
+ */
+const AUTOMATION = {
+  // Auth & Access
+  "TC-001": ["E2E", "dashboard.spec.ts › auth setup + dashboard"],
+  "TC-002": ["E2E", "auth.setup.ts (dev-login via URL)"],
+  "TC-003": ["E2E", "dashboard.spec.ts › Protected routes"],
+  "TC-004": ["E2E", "dashboard.spec.ts › Free account paywall"],
+  "TC-005": ["E2E", "features-authed.spec.ts › Conference scheduling"],
+  "TC-006": ["Unit", "billing.test.ts (PREP access window)"],
+  "TC-007": ["Unit", "billing.test.ts (expired → none)"],
+  "TC-008": ["Unit", "billing.test.ts (grace → prep)"],
+
+  // Billing & Paywall
+  "TC-009": ["E2E", "features-public.spec.ts › Pricing page (feat-023)"],
+  "TC-010": ["Unit + E2E", "locale.test.ts + features-authed.spec.ts (pricing currency)"],
+  "TC-011": ["E2E (smoke)", "features-authed.spec.ts › Stripe upgrade flow"],
+  "TC-012": ["E2E", "features-authed.spec.ts › Account page (plan section)"],
+  "TC-013": ["Unit", "plans.test.ts (plan catalog / paywall tiers)"],
+
+  // Conference Management
+  "TC-014": ["E2E", "features-authed.spec.ts › Conference scheduling"],
+  "TC-015": ["E2E", "features-authed.spec.ts › Conference scheduling"],
+  "TC-016": ["E2E", "features-authed.spec.ts › Conference scheduling"],
+  "TC-017": ["E2E", "features-authed.spec.ts › Conference scheduling"],
+  "TC-018": ["E2E", "features-authed.spec.ts › Speaker conference talk portal"],
+
+  // Call for Papers
+  "TC-019": ["E2E", "features-authed.spec.ts › CFP organizer area"],
+  "TC-020": ["Manual", "CFP public submission (manual QA)"],
+  "TC-021": ["Manual", "CFP review board (manual QA)"],
+  "TC-022": ["Manual", "CFP reject/waitlist (manual QA)"],
+
+  // Talks & Slides
+  "TC-023": ["E2E", "features-authed.spec.ts › Talk slides (new-talk flow)"],
+  "TC-024": ["E2E", "features-authed.spec.ts › Talk slides (embed URL)"],
+  "TC-025": ["E2E", "features-authed.spec.ts › Talk slides (PDF/PPTX upload)"],
+  "TC-026": ["Manual", "Slide confirm-step preview (manual QA)"],
+
+  // Presentation & Remote
+  "TC-027": ["Manual", "Presenter slide render (manual QA — needs live session)"],
+  "TC-028": ["E2E (smoke)", "features-live.spec.ts › Speaker phone remote"],
+  "TC-029": ["Unit + E2E", "remote-token.test.ts + features-live.spec.ts (remote token)"],
+
+  // Live Q&A & Wall
+  "TC-030": ["E2E (smoke)", "features-live.spec.ts › Q&A attendee view"],
+  "TC-031": ["Unit", "anon-id.test.ts / lib-misc.test.ts (reaction identity)"],
+  "TC-032": ["Manual", "Q&A moderation propagation (manual QA — needs 2 clients)"],
+  "TC-033": ["E2E (smoke)", "features-live.spec.ts › Live wall"],
+
+  // Streams & Public Page
+  "TC-034": ["Unit", "dailymotion.test.ts (URL/ID parsing for add-stream)"],
+  "TC-035": ["Unit", "dailymotion.test.ts (rejects invalid URL)"],
+  "TC-036": ["Manual", "Featured-stream toggle (manual QA)"],
+  "TC-037": ["E2E", "features-public.spec.ts › Public conference page"],
+  "TC-038": ["E2E", "features-public.spec.ts › Public conference page (renders)"],
+  "TC-039": ["E2E", "features-public.spec.ts › Public conference page (track switch)"],
+  "TC-040": ["E2E", "features-public.spec.ts › Public conference page (schedule)"],
+  "TC-041": ["E2E", "features-public.spec.ts › unpublished slug 404"],
+
+  // Responsive & A11y
+  "TC-042": ["Manual", "Responsive sweep (manual QA)"],
+  "TC-043": ["Manual", "Keyboard navigation (manual QA)"],
+  "TC-044": ["Manual", "Hover/cursor states (manual QA)"],
+  "TC-045": ["E2E", "features-public.spec.ts › Theme switcher (feat-011)"],
+}
+
+function autoFill(kind) {
+  if (kind === "Manual") return AUTO_MANUAL
+  if (kind.includes("smoke")) return AUTO_PARTIAL
+  if (kind === "Unit") return AUTO_UNIT
+  return AUTO_E2E // E2E or Unit + E2E
+}
+
 /** Test cases: [Area, Feature, Test Case, Steps, Expected Result, Test Account, Route, Priority] */
 const CASES = [
   // Auth & Access
@@ -109,6 +193,9 @@ async function main() {
     ["How to use", "Work through the 'Test Plan' sheet top to bottom. For each row, sign in with the listed Test Account, go to the Route, follow the Steps, and compare against Expected Result."],
     ["Recording", "Set Status from the dropdown. Add Actual Result (esp. on Fail), your name in Tester, and the Date."],
     ["Status legend", "Not Started · Pass · Fail · Blocked · N/A"],
+    ["Automated column", "Shows how each case is automated: E2E (Playwright), Unit (Vitest), Unit + E2E, E2E (smoke = shell/initiation only), or Manual. 'Test Ref' names the exact spec/test."],
+    ["Run automation", "Unit: pnpm test (or pnpm test:coverage, 80% gate on lib/). E2E: pnpm test:e2e. See tests/README.md."],
+    ["Coverage", "See the Summary sheet for execution status AND the automation breakdown (how much of the plan is automated vs manual-only)."],
     ["Dev login", "Use /login Dev only panel, or GET /api/dev-login?as=<key>. Dev shortcuts are disabled in production."],
     ["Manual QA account", "ssc2324@proton.me owns 'Test Conference 2026' (published, with stream + schedule) and a talk 'Building Realtime Apps'."],
     ["Companion doc", "See docs/testing-guide.md for full walkthroughs and known limitations."],
@@ -130,29 +217,34 @@ async function main() {
     properties: { tabColor: { argb: DARK } },
     views: [{ state: "frozen", ySplit: 1 }],
   })
-  const headers = ["ID", "Area", "Feature", "Test Case", "Steps", "Expected Result", "Test Account", "Route", "Priority", "Status", "Actual Result", "Tester", "Date"]
+  const headers = ["ID", "Area", "Feature", "Test Case", "Steps", "Expected Result", "Test Account", "Route", "Priority", "Automated", "Test Ref", "Status", "Actual Result", "Tester", "Date"]
   ws.columns = [
     { width: 7 }, { width: 20 }, { width: 16 }, { width: 26 }, { width: 40 },
     { width: 40 }, { width: 22 }, { width: 28 }, { width: 9 }, { width: 13 },
-    { width: 32 }, { width: 12 }, { width: 12 },
+    { width: 42 }, { width: 13 }, { width: 32 }, { width: 12 }, { width: 12 },
   ]
   styleHeader(ws.addRow(headers))
 
   CASES.forEach((c, i) => {
     const id = `TC-${String(i + 1).padStart(3, "0")}`
     const [area, feature, testCase, steps, expected, account, route, priority] = c
-    const row = ws.addRow([id, area, feature, testCase, steps, expected, account, route, priority, "Not Started", "", "", ""])
+    const [autoKind, autoRef] = AUTOMATION[id] ?? ["Manual", "Manual QA only"]
+    const row = ws.addRow([id, area, feature, testCase, steps, expected, account, route, priority, autoKind, autoRef, "Not Started", "", "", ""])
     row.alignment = { vertical: "top", wrapText: true }
     if (i % 2 === 1) {
       row.eachCell((cell) => {
         cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF7F7F7" } }
       })
     }
+    // Color the Automated cell by coverage tier (overrides zebra).
+    const autoCell = row.getCell(10)
+    autoCell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: autoFill(autoKind) } }
+    autoCell.font = { bold: true, size: 10 }
   })
 
   const lastRow = ws.rowCount
-  // Status dropdown + conditional coloring
-  const statusCol = "J"
+  // Status dropdown + conditional coloring (Status is now column L)
+  const statusCol = "L"
   for (let r = 2; r <= lastRow; r++) {
     ws.getCell(`${statusCol}${r}`).dataValidation = {
       type: "list",
@@ -168,21 +260,41 @@ async function main() {
       { type: "containsText", operator: "containsText", text: "Blocked", priority: 3, style: { fill: { type: "pattern", pattern: "solid", bgColor: { argb: BLOCK } } } },
     ],
   })
-  ws.autoFilter = { from: "A1", to: `M1` }
+  ws.autoFilter = { from: "A1", to: `O1` }
 
   // ── Summary sheet ───────────────────────────────────────────────────
   const sum = wb.addWorksheet("Summary", { properties: { tabColor: { argb: GREY } } })
   sum.columns = [{ width: 18 }, { width: 12 }, { width: 14 }]
-  styleHeader(sum.addRow(["Status", "Count", "% of Total"]))
   const total = CASES.length
+
+  // Execution status (manual run-through tracking) — Status is column L.
+  styleHeader(sum.addRow(["Status", "Count", "% of Total"]))
   STATUSES.forEach((s) => {
-    const row = sum.addRow([s, { formula: `COUNTIF('Test Plan'!J2:J${lastRow},"${s}")` }, { formula: `COUNTIF('Test Plan'!J2:J${lastRow},"${s}")/${total}` }])
+    const row = sum.addRow([s, { formula: `COUNTIF('Test Plan'!L2:L${lastRow},"${s}")` }, { formula: `COUNTIF('Test Plan'!L2:L${lastRow},"${s}")/${total}` }])
     row.getCell(3).numFmt = "0%"
   })
   sum.addRow([])
   const totalRow = sum.addRow(["Total", total, ""])
   totalRow.getCell(1).font = { bold: true }
   totalRow.getCell(2).font = { bold: true }
+
+  // Automation coverage breakdown — Automated is column J.
+  sum.addRow([])
+  styleHeader(sum.addRow(["Automation", "Count", "% of Total"]))
+  const autoKinds = ["E2E", "Unit + E2E", "E2E (smoke)", "Unit", "Manual"]
+  autoKinds.forEach((k) => {
+    const row = sum.addRow([k, { formula: `COUNTIF('Test Plan'!J2:J${lastRow},"${k}")` }, { formula: `COUNTIF('Test Plan'!J2:J${lastRow},"${k}")/${total}` }])
+    row.getCell(3).numFmt = "0%"
+  })
+  const autoTotalRow = sum.addRow([
+    "Automated (any)",
+    { formula: `${total}-COUNTIF('Test Plan'!J2:J${lastRow},"Manual")` },
+    { formula: `(${total}-COUNTIF('Test Plan'!J2:J${lastRow},"Manual"))/${total}` },
+  ])
+  autoTotalRow.getCell(1).font = { bold: true }
+  autoTotalRow.getCell(2).font = { bold: true }
+  autoTotalRow.getCell(3).font = { bold: true }
+  autoTotalRow.getCell(3).numFmt = "0%"
 
   await wb.xlsx.writeFile(OUT)
   console.log(`[v0] Wrote ${OUT} with ${total} test cases`)
