@@ -200,7 +200,7 @@ export default function NewTalkPage() {
             Optionally link your slides. Attendees on the wall can see what slide you are on.
           </p>
 
-          {/* Slides.com URL option */}
+          {/* Presentation URL option (Phase 4.2) */}
           <div
             className={`border p-4 cursor-pointer transition-all duration-150 ${
               form.slideType === "url"
@@ -211,18 +211,23 @@ export default function NewTalkPage() {
           >
             <div className="flex items-center gap-3 mb-3">
               <Link2 className="h-4 w-4 text-jsconf-yellow" />
-              <span className="font-mono text-sm text-white">Paste a Slides.com URL</span>
+              <span className="font-mono text-sm text-white">Paste an embed URL</span>
             </div>
             {form.slideType === "url" && (
-              <input
-                type="url"
-                value={form.slideUrl}
-                onChange={(e) => update("slideUrl", e.target.value)}
-                placeholder="https://slides.com/you/your-talk"
-                className="w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-mono text-sm text-white placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
-                autoFocus
-                onClick={(e) => e.stopPropagation()}
-              />
+              <>
+                <input
+                  type="url"
+                  value={form.slideUrl}
+                  onChange={(e) => update("slideUrl", e.target.value)}
+                  placeholder="https://slides.com/you/talk or https://docs.google.com/presentation/..."
+                  className="w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-mono text-sm text-white placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
+                  autoFocus
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <p className="font-mono text-[11px] text-jsconf-muted mt-2">
+                  Works with Slides.com, Google Slides, Figma, Miro, or any embeddable presentation URL.
+                </p>
+              </>
             )}
           </div>
 
