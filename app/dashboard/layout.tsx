@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
+import { useEffect, useRef } from "react"
 import { Mic2, User, Zap, LogOut, CalendarRange } from "lucide-react"
 
 const NAV_ITEMS = [
@@ -15,6 +16,26 @@ const NAV_ITEMS = [
 function SidebarNav() {
   const pathname = usePathname()
   const router = useRouter()
+  const zapRef = useRef<SVGSVGElement>(null)
+
+  useEffect(() => {
+    function jiggle() {
+      const el = zapRef.current
+      if (!el) return
+      el.classList.remove("zap-jiggle")
+      // Force reflow so re-adding the class restarts the animation
+      void el.offsetWidth
+      el.classList.add("zap-jiggle")
+      el.addEventListener("animationend", () => el.classList.remove("zap-jiggle"), { once: true })
+    }
+
+    const first = setTimeout(jiggle, 10_000)
+    const repeat = setInterval(jiggle, 40_000) // 10s first + 30s repeating
+    return () => {
+      clearTimeout(first)
+      clearInterval(repeat)
+    }
+  }, [])
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -37,18 +58,17 @@ function SidebarNav() {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 py-4 flex flex-col gap-0.5 px-2">
+        <nav className="flex-1 py-4 flex flex-col gap-2 px-2">
           {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
             const active = href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href)
             return (
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-3 px-3 py-2.5 font-mono text-sm uppercase tracking-wider transition-all duration-150 ${
-                  active
-                    ? "bg-jsconf-yellow text-black font-bold"
-                    : "text-jsconf-muted hover:text-foreground hover:bg-jsconf-surface-2"
-                }`}
+                className={`flex items-center gap-3 px-3 py-2.5 font-mono text-sm uppercase tracking-wider transition-all duration-150 ${active
+                  ? "bg-jsconf-yellow text-black font-bold"
+                  : "text-jsconf-muted hover:text-foreground hover:bg-jsconf-surface-2"
+                  }`}
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 {label}
@@ -59,9 +79,9 @@ function SidebarNav() {
           {/* Upgrade */}
           <Link
             href="/dashboard/upgrade"
-            className="flex items-center gap-3 px-3 py-2.5 font-mono text-sm uppercase tracking-wider bg-jsconf-yellow text-primary-foreground font-bold hover:opacity-90 transition-all duration-150 mt-2"
+            className="flex items-center gap-3 px-3 py-2.5 font-mono text-sm uppercase tracking-wider border-2 border-bg-jsconf-yellow text-primary-foreground font-bold hover:opacity-90 transition-all duration-150 mt-2 hover:bg-jsconf-yellow hover:border-transparent"
           >
-            <Zap className="h-4 w-4 shrink-0" />
+            <Zap ref={zapRef} className="h-4 w-4 shrink-0" />
             Upgrade
           </Link>
         </nav>
@@ -86,9 +106,8 @@ function SidebarNav() {
             <Link
               key={href}
               href={href}
-              className={`flex-1 flex flex-col items-center gap-1 py-3 font-mono text-[10px] uppercase tracking-wider transition-all duration-150 ${
-                active ? "text-jsconf-yellow" : "text-jsconf-muted"
-              }`}
+              className={`flex-1 flex flex-col items-center gap-1 py-3 font-mono text-[10px] uppercase tracking-wider transition-all duration-150 ${active ? "text-jsconf-yellow" : "text-jsconf-muted"
+                }`}
             >
               <Icon className="h-5 w-5" />
               {label}
