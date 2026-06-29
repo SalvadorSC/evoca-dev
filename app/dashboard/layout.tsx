@@ -59,7 +59,7 @@ function SidebarNav() {
           {/* Upgrade */}
           <Link
             href="/dashboard/upgrade"
-            className="flex items-center gap-3 px-3 py-2.5 font-mono text-sm uppercase tracking-wider text-jsconf-yellow hover:bg-jsconf-yellow-dim transition-all duration-150 mt-2 border border-jsconf-yellow/30"
+            className="flex items-center gap-3 px-3 py-2.5 font-mono text-sm uppercase tracking-wider bg-jsconf-yellow text-primary-foreground font-bold hover:opacity-90 transition-all duration-150 mt-2"
           >
             <Zap className="h-4 w-4 shrink-0" />
             Upgrade
