@@ -47,7 +47,7 @@ function Logo({ className = "" }: { className?: string }) {
         <circle cx="14" cy="12" r="1.5" fill="var(--accent, #F7E018)" />
         <circle cx="19" cy="12" r="1.5" fill="var(--accent, #F7E018)" />
       </svg>
-      <span className="font-mono text-sm font-bold tracking-wide text-white">
+      <span className="font-mono text-sm font-bold tracking-wide text-foreground">
         EVOCA
       </span>
       {/* Pulsing dot */}
@@ -64,26 +64,26 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row relative">
       {/* Center logo - absolutely positioned */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-[#080808] px-4 py-3 hidden lg:block">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-jsconf-bg px-4 py-3 hidden lg:block">
         <Logo />
       </div>
 
       {/* Mobile logo */}
-      <div className="lg:hidden py-6 flex justify-center border-b border-[#2a2a2a]">
+      <div className="lg:hidden py-6 flex justify-center border-b border-jsconf-border">
         <Logo />
       </div>
 
       {/* Speaker side */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-[#2a2a2a] relative">
+      <div className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-jsconf-border relative">
         <div className="max-w-md text-center lg:text-left">
-          <p className="font-mono text-xs text-[#666] uppercase tracking-widest mb-2">I&apos;m a</p>
-          <h1 className="font-display font-bold text-white text-5xl lg:text-6xl xl:text-7xl mb-4">Speaker</h1>
-          <p className="font-sans text-[#888] text-base lg:text-lg mb-8">
+          <p className="font-mono text-xs text-jsconf-muted uppercase tracking-widest mb-2">I&apos;m a</p>
+          <h1 className="font-display font-bold text-foreground text-5xl lg:text-6xl xl:text-7xl mb-4">Speaker</h1>
+          <p className="font-sans text-jsconf-muted text-base lg:text-lg mb-8">
             Turn any talk into a live experience
           </p>
           <button
             onClick={() => onSelectRole("speaker")}
-            className="font-mono text-sm font-bold uppercase tracking-wide px-6 py-3 border-2 border-[#F7E018] text-[#F7E018] hover:bg-[#F7E018] hover:text-black transition-colors"
+            className="font-mono text-sm font-bold uppercase tracking-wide px-6 py-3 border-2 border-jsconf-yellow text-jsconf-yellow hover:bg-jsconf-yellow hover:text-jsconf-bg transition-colors"
           >
             Get started free →
           </button>
@@ -93,9 +93,9 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
       {/* Organizer side */}
       <div className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12 relative">
         <div className="max-w-md text-center lg:text-left">
-          <p className="font-mono text-xs text-[#666] uppercase tracking-widest mb-2">I&apos;m an</p>
-          <h1 className="font-display font-bold text-white text-5xl lg:text-6xl xl:text-7xl mb-4">Organizer</h1>
-          <p className="font-sans text-[#888] text-base lg:text-lg mb-8">
+          <p className="font-mono text-xs text-jsconf-muted uppercase tracking-widest mb-2">I&apos;m an</p>
+          <h1 className="font-display font-bold text-foreground text-5xl lg:text-6xl xl:text-7xl mb-4">Organizer</h1>
+          <p className="font-sans text-jsconf-muted text-base lg:text-lg mb-8">
             One platform for your schedule, speakers and live engagement
           </p>
           <button
@@ -141,7 +141,7 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
 // ─── Feature Card ─────────────────────────────────────────────────────────────
 function FeatureCard({ icon, title, description, badge }: { icon: string; title: string; description: string; badge?: string }) {
   return (
-    <div className="bg-[#111] border-l-[3px] p-5" style={{ borderLeftColor: "var(--accent)" }}>
+    <div className="bg-jsconf-surface border-l-[3px] p-5" style={{ borderLeftColor: "var(--accent)" }}>
       <div className="flex items-start justify-between mb-2">
         <span className="text-2xl">{icon}</span>
         {badge && (
@@ -150,8 +150,8 @@ function FeatureCard({ icon, title, description, badge }: { icon: string; title:
           </span>
         )}
       </div>
-      <h3 className="font-display font-bold text-white text-base mb-1">{title}</h3>
-      <p className="font-sans text-sm text-[#888] leading-relaxed whitespace-pre-line">{description}</p>
+      <h3 className="font-display font-bold text-foreground text-base mb-1">{title}</h3>
+      <p className="font-sans text-sm text-jsconf-muted leading-relaxed whitespace-pre-line">{description}</p>
     </div>
   )
 }
@@ -207,12 +207,12 @@ function ProWaitlistForm() {
           value={email}
           onChange={(e) => { setEmail(e.target.value); if (state === "error") setState("idle") }}
           placeholder="your@email.com"
-          className="flex-1 min-w-0 bg-[#111] border border-[#2a2a2a] text-white font-sans text-sm placeholder:text-[#555] px-3 h-9 focus:outline-none focus:border-[#555] transition-colors sm:border-r-0"
+          className="flex-1 min-w-0 bg-jsconf-surface border border-jsconf-border text-foreground font-sans text-sm placeholder:text-jsconf-muted px-3 h-9 focus:outline-none focus:border-jsconf-muted transition-colors sm:border-r-0"
         />
         <button
           type="submit"
           disabled={state === "loading"}
-          className="font-mono text-xs text-[#666] border border-[#2a2a2a] px-4 h-9 hover:text-white hover:border-[#666] transition-colors disabled:opacity-50 whitespace-nowrap shrink-0"
+          className="font-mono text-xs text-jsconf-muted border border-jsconf-border px-4 h-9 hover:text-foreground hover:border-jsconf-muted transition-colors disabled:opacity-50 whitespace-nowrap shrink-0"
         >
           {state === "loading" ? "..." : "Notify me"}
         </button>
@@ -229,18 +229,18 @@ function FAQ({ items }: { items: { q: string; a: string }[] }) {
   const [open, setOpen] = useState<number | null>(null)
 
   return (
-    <div className="divide-y divide-[#2a2a2a]">
+    <div className="divide-y divide-jsconf-border">
       {items.map((item, i) => (
         <div key={i}>
           <button
             onClick={() => setOpen(open === i ? null : i)}
             className="w-full flex items-center justify-between py-4 text-left cursor-pointer"
           >
-            <span className="font-sans text-white">{item.q}</span>
-            <ChevronDown className={`w-5 h-5 text-[#666] transition-transform shrink-0 ml-4 ${open === i ? "rotate-180" : ""}`} />
+            <span className="font-sans text-foreground">{item.q}</span>
+            <ChevronDown className={`w-5 h-5 text-jsconf-muted transition-transform shrink-0 ml-4 ${open === i ? "rotate-180" : ""}`} />
           </button>
           {open === i && (
-            <p className="font-sans text-[#888] text-sm pb-4 leading-relaxed">{item.a}</p>
+            <p className="font-sans text-jsconf-muted text-sm pb-4 leading-relaxed">{item.a}</p>
           )}
         </div>
       ))}
@@ -270,10 +270,10 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
         <HeroBackground items={heroItems} accentColor="var(--accent)" waveAnimation={waveAnimation} />
         <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
-            <h1 className="font-display font-bold text-white text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
+            <h1 className="font-display font-bold text-foreground text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
               Turn any talk into a live experience
             </h1>
-            <p className="font-sans text-[#888] text-lg lg:text-xl mb-8 leading-relaxed">
+            <p className="font-sans text-jsconf-muted text-lg lg:text-xl mb-8 leading-relaxed">
               Slides, live reactions, Q&A and analytics — all in one place. Your audience participates, you stay in control.
             </p>
             <div className="flex flex-wrap gap-4">
@@ -286,7 +286,7 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
               </Link>
               <Link
                 href="/demo"
-                className="font-mono text-sm font-bold px-6 py-3 border-2 text-white hover:bg-white/5 transition-colors"
+                className="font-mono text-sm font-bold px-6 py-3 border-2 text-foreground hover:bg-white/5 transition-colors"
                 style={{ borderColor: "var(--accent)" }}
               >
                 See it live →
@@ -300,7 +300,7 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
       </section>
 
       {/* Features */}
-      <section className="px-6 py-12 border-t border-[#1f1f1f]">
+      <section className="px-6 py-12 border-t border-jsconf-border">
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FeatureCard
@@ -329,12 +329,12 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
       </section>
 
       {/* Social proof */}
-      <section className="px-6 py-8 bg-[#111] border-y border-[#1f1f1f]">
+      <section className="px-6 py-8 bg-jsconf-surface border-y border-jsconf-border">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
           <span className="font-mono text-sm font-bold px-3 py-1 border" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>
             🏆 Winner — JSConf Espana 2026 Hackathon
           </span>
-          <span className="font-sans text-sm text-[#666]">Built at JSConf. Loved by the community.</span>
+          <span className="font-sans text-sm text-jsconf-muted">Built at JSConf. Loved by the community.</span>
         </div>
       </section>
 
@@ -342,14 +342,14 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
       <section className="px-6 py-16">
         <div className="max-w-2xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="border p-6" style={{ borderColor: "var(--accent)" }}>
-            <h3 className="font-display font-bold text-white text-xl mb-3">Free</h3>
-            <p className="font-sans text-[#888] text-sm leading-relaxed">
+            <h3 className="font-display font-bold text-foreground text-xl mb-3">Free</h3>
+            <p className="font-sans text-jsconf-muted text-sm leading-relaxed">
               5 talks · Live Wall watermark · Core features
             </p>
           </div>
-          <div className="border border-[#2a2a2a] p-6">
-            <h3 className="font-display font-bold text-white text-xl mb-3">Pro</h3>
-            <p className="font-sans text-[#888] text-sm leading-relaxed mb-4">
+          <div className="border border-jsconf-border p-6">
+            <h3 className="font-display font-bold text-foreground text-xl mb-3">Pro</h3>
+            <p className="font-sans text-jsconf-muted text-sm leading-relaxed mb-4">
               Coming soon — unlimited talks, analytics, no watermark
             </p>
             <ProWaitlistForm />
@@ -358,9 +358,9 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
       </section>
 
       {/* FAQ */}
-      <section className="px-6 py-16 border-t border-[#1f1f1f]">
+      <section className="px-6 py-16 border-t border-jsconf-border">
         <div className="max-w-2xl mx-auto">
-          <h2 className="font-display font-bold text-white text-2xl mb-8">FAQ</h2>
+          <h2 className="font-display font-bold text-foreground text-2xl mb-8">FAQ</h2>
           <FAQ items={speakerFAQ} />
         </div>
       </section>
@@ -390,10 +390,10 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
         <HeroBackground items={heroItems} accentColor="var(--accent)" waveAnimation={waveAnimation} />
         <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
-            <h1 className="font-display font-bold text-white text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
+            <h1 className="font-display font-bold text-foreground text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
               One platform for your schedule, speakers and live engagement
             </h1>
-            <p className="font-sans text-[#888] text-lg lg:text-xl mb-8 leading-relaxed">
+            <p className="font-sans text-jsconf-muted text-lg lg:text-xl mb-8 leading-relaxed">
               Manage your event, onboard speakers and give every session live engagement — without the Slido price tag.
             </p>
             <div className="flex flex-wrap gap-4">
@@ -406,7 +406,7 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
               </Link>
               <Link
                 href="/demo"
-                className="font-mono text-sm font-bold px-6 py-3 border-2 text-white hover:bg-white/5 transition-colors"
+                className="font-mono text-sm font-bold px-6 py-3 border-2 text-foreground hover:bg-white/5 transition-colors"
                 style={{ borderColor: "var(--accent)" }}
               >
                 See it live →
@@ -420,7 +420,7 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
       </section>
 
       {/* Features */}
-      <section className="px-6 py-16 border-t border-[#1f1f1f]">
+      <section className="px-6 py-16 border-t border-jsconf-border">
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FeatureCard
@@ -448,12 +448,12 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
       </section>
 
       {/* Social proof */}
-      <section className="px-6 py-8 bg-[#111] border-y border-[#1f1f1f]">
+      <section className="px-6 py-8 bg-jsconf-surface border-y border-jsconf-border">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
           <span className="font-mono text-sm font-bold px-3 py-1 border" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>
             🏆 Winner — JSConf Espana 2026 Hackathon
           </span>
-          <span className="font-sans text-sm text-[#666]">Built at JSConf. Loved by the community.</span>
+          <span className="font-sans text-sm text-jsconf-muted">Built at JSConf. Loved by the community.</span>
         </div>
       </section>
 
@@ -461,9 +461,9 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
       <OrganizerPricing />
 
       {/* FAQ */}
-      <section className="px-6 py-16 border-t border-[#1f1f1f]">
+      <section className="px-6 py-16 border-t border-jsconf-border">
         <div className="max-w-2xl mx-auto">
-          <h2 className="font-display font-bold text-white text-2xl mb-8">FAQ</h2>
+          <h2 className="font-display font-bold text-foreground text-2xl mb-8">FAQ</h2>
           <FAQ items={organizerFAQ} />
         </div>
       </section>
@@ -474,13 +474,13 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
 // ─── Footer ───────────────────────────────────────────────────────────────────
 function Footer() {
   return (
-    <footer className="px-6 py-8 border-t border-[#1f1f1f]">
+    <footer className="px-6 py-8 border-t border-jsconf-border">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <Logo />
-        <p className="font-sans text-sm text-[#666]">Built by Salvador Sanchez</p>
+        <p className="font-sans text-sm text-jsconf-muted">Built by Salvador Sanchez</p>
         <div className="flex items-center gap-6">
-          <Link href="/demo" className="font-mono text-xs text-[#666] hover:text-white transition-colors">Demo</Link>
-          <Link href="/login" className="font-mono text-xs text-[#666] hover:text-white transition-colors">Login</Link>
+          <Link href="/demo" className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors">Demo</Link>
+          <Link href="/login" className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors">Login</Link>
         </div>
       </div>
     </footer>
@@ -492,7 +492,7 @@ function DevColorToggle({ onColorChange }: { onColorChange: (color: string) => v
   const [active, setActive] = useState(ORGANIZER_ACCENTS[0].value)
 
   return (
-    <div className="fixed bottom-6 left-6 z-[9999] bg-[#1a1a1a] border border-[#2a2a2a] rounded-full px-3 py-2 flex items-center gap-2">
+    <div className="fixed bottom-6 left-6 z-[9999] bg-jsconf-surface-2 border border-jsconf-border rounded-full px-3 py-2 flex items-center gap-2">
       <span className="font-mono text-[10px] text-red-500 font-bold">DEV</span>
       {ORGANIZER_ACCENTS.map((accent) => (
         <button
@@ -510,7 +510,7 @@ function DevColorToggle({ onColorChange }: { onColorChange: (color: string) => v
             className="w-3 h-3 rounded-full"
             style={{ backgroundColor: accent.value }}
           />
-          <span className="font-mono text-[10px] text-[#888]">{accent.label}</span>
+          <span className="font-mono text-[10px] text-jsconf-muted">{accent.label}</span>
         </button>
       ))}
     </div>
@@ -519,7 +519,7 @@ function DevColorToggle({ onColorChange }: { onColorChange: (color: string) => v
 
 
 
-// ─── Main Landing Content ─────────────────────────────────────────────────────
+// ─── Main Landing Content ────────────────────────────────────────��────────────
 function LandingContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -580,7 +580,7 @@ function LandingContent() {
   const showDevToggle = process.env.NODE_ENV === "development" || searchParams.get("dev") === "true"
 
   return (
-    <div className="min-h-screen bg-[#080808] text-white">
+    <div className="min-h-screen bg-jsconf-bg text-foreground">
       {!role ? (
         <SplitHero onSelectRole={handleSelectRole} />
       ) : (
@@ -609,8 +609,8 @@ function LandingContent() {
 export default function LandingPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-[#080808] flex items-center justify-center">
-        <span className="font-mono text-[#666] text-sm uppercase tracking-widest">Loading...</span>
+      <div className="min-h-screen bg-jsconf-bg flex items-center justify-center">
+        <span className="font-mono text-jsconf-muted text-sm uppercase tracking-widest">Loading...</span>
       </div>
     }>
       <LandingContent />
