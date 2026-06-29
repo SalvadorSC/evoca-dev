@@ -18,7 +18,10 @@ Detailed implementation plans live in `docs/`:
 | 5 — Speaker Experience | [docs/phase-5-speaker-experience.md](docs/phase-5-speaker-experience.md) |
 | 6 — Polish & Responsive | [docs/phase-6-polish.md](docs/phase-6-polish.md) |
 
----
+### Implementation status
+- **Phase 1 (Billing) — built.** Org plans live; Speaker Pro is stubbed in the catalog (`lib/plans.ts`) but not surfaced.
+  Pricing uses Stripe Checkout with inline `price_data` per currency (no pre-created Stripe product IDs).
+  Requires `STRIPE_WEBHOOK_SECRET` to be set for the webhook to verify signatures.
 
 ---
 

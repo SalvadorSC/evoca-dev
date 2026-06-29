@@ -106,17 +106,17 @@
     "priority": "high",
     "category": "core",
     "phase": 1,
-    "status": "pending",
-    "complete": false,
+    "status": "done",
+    "complete": true,
     "subtasks": [
-      { "id": "feat-010.1", "name": "DB migration: speakers + organizer_subscriptions + event_speaker_affiliations", "complete": false },
-      { "id": "feat-010.2", "name": "Stripe products creation (4 products)", "complete": false },
-      { "id": "feat-010.3", "name": "/api/locale — currency detection", "complete": false },
-      { "id": "feat-010.4", "name": "/api/stripe/checkout — session creation", "complete": false },
-      { "id": "feat-010.5", "name": "/api/stripe/webhook — lifecycle events", "complete": false },
-      { "id": "feat-010.6", "name": "usePaywall() context + PaywallModal component", "complete": false },
-      { "id": "feat-010.7", "name": "Account page: real plan display + event date picker + manage link", "complete": false },
-      { "id": "feat-010.8", "name": "Landing page: currency-aware pricing section", "complete": false }
+      { "id": "feat-010.1", "name": "DB migration: speakers + organizer_subscriptions + event_speaker_affiliations", "complete": true },
+      { "id": "feat-010.2", "name": "Plan catalog with inline price_data (EUR/USD) — no static products needed", "complete": true },
+      { "id": "feat-010.3", "name": "/api/locale — currency detection", "complete": true },
+      { "id": "feat-010.4", "name": "/api/stripe/checkout — session creation", "complete": true },
+      { "id": "feat-010.5", "name": "/api/stripe/webhook — lifecycle events", "complete": true },
+      { "id": "feat-010.6", "name": "usePaywall() context + PaywallModal component", "complete": true },
+      { "id": "feat-010.7", "name": "Account page: real plan display + event date picker + manage link", "complete": true },
+      { "id": "feat-010.8", "name": "Landing page: currency-aware pricing section", "complete": true }
     ]
   },
   {

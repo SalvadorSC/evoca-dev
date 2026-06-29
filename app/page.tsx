@@ -8,6 +8,7 @@ import { STORAGE_KEYS } from "@/lib/storage-keys"
 import { InteractivePhoneMockup, HeroBackground } from "@/components/shared/phone-mockup"
 import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
 import { ReducedMotionToggle } from "@/components/shared/wave-background"
+import { OrganizerPricing } from "@/components/landing/organizer-pricing"
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const ROLES = {
@@ -154,7 +155,7 @@ function FeatureCard({ icon, title, description, badge }: { icon: string; title:
   )
 }
 
-// ─── Pro Waitlist Form ────────────────────────────────────────────────────────
+// ─── Pro Waitlist Form ─────────────────────────────���──────────────────────────
 function ProWaitlistForm() {
   const [email, setEmail] = useState("")
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle")
@@ -454,6 +455,9 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
           <span className="font-sans text-sm text-[#666]">Built at JSConf. Loved by the community.</span>
         </div>
       </section>
+
+      {/* Pricing */}
+      <OrganizerPricing />
 
       {/* FAQ */}
       <section className="px-6 py-16 border-t border-[#1f1f1f]">
