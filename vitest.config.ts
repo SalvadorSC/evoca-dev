@@ -29,5 +29,32 @@ export default defineConfig({
     // Playwright E2E specs (tests/e2e/*.spec.ts) are run by Playwright, not Vitest.
     exclude: ["tests/e2e/**", "node_modules/**"],
     globals: true,
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "text-summary", "html"],
+      // Scope coverage to the pure business-logic modules in lib/. SDK/server
+      // bound files (Supabase admin, Stripe, Next server APIs) and browser-only
+      // modules (pdf.js/canvas) can't be meaningfully unit-covered and are
+      // excluded so the gate stays honest and enforceable.
+      include: [
+        "lib/billing.ts",
+        "lib/plans.ts",
+        "lib/locale.ts",
+        "lib/dailymotion.ts",
+        "lib/remote-token.ts",
+        "lib/email.ts",
+        "lib/utils.ts",
+        "lib/anon-id.ts",
+        "lib/storage-keys.ts",
+        "lib/party.ts",
+        "lib/sessions.ts",
+      ],
+      thresholds: {
+        statements: 80,
+        branches: 80,
+        functions: 80,
+        lines: 80,
+      },
+    },
   },
 })
