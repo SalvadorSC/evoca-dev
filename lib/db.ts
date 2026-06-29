@@ -40,6 +40,41 @@ export interface SessionWithTalk extends SessionRow {
   talks: Pick<TalkRow, "id" | "title" | "slide_url" | "slide_type">
 }
 
+// ─── Conference types (Phase 2) ─────────────────────────────────────────────────
+
+export interface ConferenceRow {
+  id: string
+  user_id: string
+  subscription_id: string | null
+  name: string
+  created_at: string
+  updated_at: string
+}
+
+export interface ConferenceDayRow {
+  id: string
+  conference_id: string
+  label: string
+  date: string | null
+  sort_order: number
+  created_at: string
+}
+
+export interface ConferenceSlotRow {
+  id: string
+  day_id: string
+  title: string
+  type: string
+  start_time: string | null
+  duration: number
+  description: string | null
+  speaker_id: string | null
+  speaker_email: string | null
+  track: string | null
+  sort_order: number
+  created_at: string
+}
+
 // ─── Talk queries ─────────────────────────────────────────────────────────────
 
 /** Fetch a single talk by slug. Returns null if not found. */
@@ -119,4 +154,69 @@ export async function finishSession(
     .from("sessions")
     .update({ ended_at: new Date().toISOString(), status: "finished" })
     .eq("id", sessionId)
+}
+
+// ─── Billing queries ────────────────────────────────────────────────────────────
+
+/** Fetch all organizer subscriptions for the authenticated user. */
+export async function getOrganizerSubscriptions(
+  supabase: SupabaseClient,
+): Promise<Record<string, unknown>[]> {
+  const { data } = await supabase.from("organizer_subscriptions").select("*")
+  return data ?? []
+}
+
+// ─── Conference queries (Phase 2) ───────────────────────────────────────────────
+
+/** Fetch all conferences for the authenticated user. */
+export async function getUserConferences(
+  supabase: SupabaseClient,
+): Promise<ConferenceRow[]> {
+  const { data } = await supabase
+    .from("conferences")
+    .select("id, user_id, subscription_id, name, created_at, updated_at")
+    .order("created_at", { ascending: false })
+  return data ?? []
+}
+
+/** Fetch a single conference by id (RLS scopes to owner). */
+export async function getConferenceById(
+  supabase: SupabaseClient,
+  id: string,
+): Promise<ConferenceRow | null> {
+  const { data } = await supabase
+    .from("conferences")
+    .select("id, user_id, subscription_id, name, created_at, updated_at")
+    .eq("id", id)
+    .single()
+  return data ?? null
+}
+
+/** Fetch days for a conference, ordered. */
+export async function getConferenceDays(
+  supabase: SupabaseClient,
+  conferenceId: string,
+): Promise<ConferenceDayRow[]> {
+  const { data } = await supabase
+    .from("conference_days")
+    .select("id, conference_id, label, date, sort_order, created_at")
+    .eq("conference_id", conferenceId)
+    .order("sort_order", { ascending: true })
+  return data ?? []
+}
+
+/** Fetch all slots for a set of day ids, ordered by sort_order. */
+export async function getSlotsForDays(
+  supabase: SupabaseClient,
+  dayIds: string[],
+): Promise<ConferenceSlotRow[]> {
+  if (dayIds.length === 0) return []
+  const { data } = await supabase
+    .from("conference_slots")
+    .select(
+      "id, day_id, title, type, start_time, duration, description, speaker_id, speaker_email, track, sort_order, created_at",
+    )
+    .in("day_id", dayIds)
+    .order("sort_order", { ascending: true })
+  return data ?? []
 }

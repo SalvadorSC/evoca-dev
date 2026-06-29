@@ -4,10 +4,11 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
-import { Mic2, User, Zap, LogOut } from "lucide-react"
+import { Mic2, User, Zap, LogOut, CalendarRange } from "lucide-react"
 
 const NAV_ITEMS = [
   { label: "Talks", href: "/dashboard", icon: Mic2 },
+  { label: "Events", href: "/dashboard/conference", icon: CalendarRange },
   { label: "Account", href: "/dashboard/account", icon: User },
 ]
 

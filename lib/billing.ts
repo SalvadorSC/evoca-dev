@@ -127,8 +127,64 @@ export function hasOrganizerLive(access: OrganizerAccess): boolean {
   return access.level === "live"
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Speaker affiliation access (Phase 2)
+// A speaker assigned to a conference slot gains event-scoped Pro access for the
+// duration of that conference's paying window. This does NOT mutate the
+// speakers.speaker_plan column — it is purely derived at runtime.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type AffiliationStatus = "pending" | "accepted" | "declined" | "revoked"
+
+export interface SpeakerAffiliation {
+  id: string
+  event_id: string // conferences.id
+  speaker_id: string | null
+  invited_by: string
+  email: string
+  status: AffiliationStatus
+  created_at: string
+}
+
+/**
+ * Whether a speaker currently has event-scoped Pro access. True when the
+ * speaker has an `accepted` affiliation whose conference subscription window
+ * is currently active (or is an active recurring subscription).
+ *
+ * Pass the affiliations joined with the conference's paying subscription.
+ */
+export function hasEventScopedPro(
+  affiliations: { status: AffiliationStatus; subscription: OrganizerSubscription | null }[],
+  now: Date = new Date(),
+): boolean {
+  for (const aff of affiliations) {
+    if (aff.status !== "accepted") continue
+    if (!aff.subscription) continue
+    const access = accessFromSub(aff.subscription, now)
+    // The organizer must be at least "live" for speakers to present.
+    if (access.level === "live") return true
+  }
+  return false
+}
+
 /** Validates that a one-time event window is within the allowed 7-day span. */
 export const ONE_TIME_MAX_DAYS = 7
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Conference slot types (Phase 2)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const SLOT_TYPES = ["talk", "keynote", "workshop", "lightning", "break", "panel"] as const
+export type SlotType = (typeof SLOT_TYPES)[number]
+
+/** Slot types that accept a speaker assignment. */
+export const SPEAKER_SLOT_TYPES: SlotType[] = ["talk", "keynote", "workshop", "lightning", "panel"]
+
+export function slotAcceptsSpeaker(type: SlotType): boolean {
+  return SPEAKER_SLOT_TYPES.includes(type)
+}
+
+export const MAX_CONFERENCE_DAYS = 5
 
 export function validateEventWindow(
   startISO: string,
