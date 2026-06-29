@@ -1,6 +1,6 @@
 # Phase 7 — Call for Papers (CFP)
 
-> Status: **Scope locked — in progress.**
+> Status: **Shipped ✅** (organizer pages pending live auth verification — see DoD note).
 > Builds directly on Phase 2 `conferences` / `conference_slots` /
 > `event_speaker_affiliations`.
 
@@ -106,16 +106,18 @@ affiliation system (Phase 2).
 
 ---
 
-## Definition of Done
+## Definition of Done — shipped ✅
 
-- [ ] Schema migrated: `cfp_settings`, `cfp_custom_questions`, `cfp_submissions`, `cfp_submission_answers` (+ RLS).
-- [ ] Public `/cfp/[slug]` page: core fields + dynamic custom questions, honeypot, closed/not-found states.
-- [ ] Submission API: validates, enforces per-email cap + window, stores answers (admin client, no anon RLS).
-- [ ] Organizer CFP settings: enable/disable, open/close window, description, custom question builder.
-- [ ] Review dashboard: list + filter by status, rating (1–5), notes, accept/reject/waitlist actions.
-- [ ] Accept → unscheduled slot + pending affiliation created (reuses Phase 2 flow).
-- [ ] Resend wired: accept/reject/waitlist emails + Phase 2 invite stub backfilled.
-- [ ] `features.json` CFP entries marked complete.
+- [x] Schema migrated: `cfp_settings`, `cfp_custom_questions`, `cfp_submissions`, `cfp_submission_answers` (+ RLS). (`scripts/007_call_for_papers.sql`)
+- [x] Public `/cfp/[slug]` page: core fields + dynamic custom questions, honeypot, closed/not-found states. Browser-verified (13 fields incl. select/multi_select/checkbox).
+- [x] Submission API (`/api/cfp/submit`): validates, enforces per-email cap + window, stores answers (admin client, no anon RLS). Cap verified (4th submission rejected at cap 3).
+- [x] Organizer CFP settings (`/dashboard/conference/[id]/cfp`): enable/disable, open/close window, description, custom question builder. Linked from conference editor header.
+- [x] Review dashboard (`/dashboard/conference/[id]/cfp/review`): list + filter by status, rating (1–5), notes, accept/reject/waitlist actions.
+- [x] Accept → unscheduled slot (`start_time = null`) + pending affiliation created (reuses Phase 2 flow). DB logic verified by simulating the exact inserts.
+- [x] Resend wired (`lib/email.ts`): accept/reject/waitlist emails + Phase 2 invite stub backfilled at `assign-speaker/route.ts`. Sends are best-effort (never fail the action) and no-op if `RESEND_API_KEY` is unset.
+- [x] `features.json` CFP entries marked complete.
+
+> Not browser-tested: the organizer settings/review pages (require an authenticated organizer session, which the dev harness can't mint). Mitigated by a clean type-check, reuse of the proven Phase 2 RLS + server-action patterns, and a live DB simulation of the accept flow's inserts.
 
 ## Data model (final)
 
