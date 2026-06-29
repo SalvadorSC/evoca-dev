@@ -216,6 +216,19 @@
   animation: zap-jiggle 0.6s ease-in-out;
 }
 
+@keyframes letter-wave {
+  0%, 100% { transform: translateY(0); }
+  40%       { transform: translateY(-4px); }
+}
+
+.wave-letter {
+  display: inline-block;
+}
+
+.wave-active .wave-letter {
+  animation: letter-wave 0.5s ease-in-out both;
+}
+
 /* Typography utilities */
 .font-display {
   font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;

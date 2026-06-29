@@ -17,20 +17,31 @@ function SidebarNav() {
   const pathname = usePathname()
   const router = useRouter()
   const zapRef = useRef<SVGSVGElement>(null)
+  const waveRef = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
-    function jiggle() {
-      const el = zapRef.current
-      if (!el) return
-      el.classList.remove("zap-jiggle")
-      // Force reflow so re-adding the class restarts the animation
-      void el.offsetWidth
-      el.classList.add("zap-jiggle")
-      el.addEventListener("animationend", () => el.classList.remove("zap-jiggle"), { once: true })
+    function animate() {
+      // Zap jiggle
+      const zap = zapRef.current
+      if (zap) {
+        zap.classList.remove("zap-jiggle")
+        void zap.offsetWidth
+        zap.classList.add("zap-jiggle")
+        zap.addEventListener("animationend", () => zap.classList.remove("zap-jiggle"), { once: true })
+      }
+      // Letter wave
+      const wave = waveRef.current
+      if (wave) {
+        wave.classList.remove("wave-active")
+        void wave.offsetWidth
+        wave.classList.add("wave-active")
+        // Remove after all letters finish (7 letters × 50ms stagger + 500ms duration)
+        setTimeout(() => wave.classList.remove("wave-active"), 7 * 50 + 500)
+      }
     }
 
-    const first = setTimeout(jiggle, 10_000)
-    const repeat = setInterval(jiggle, 40_000) // 10s first + 30s repeating
+    const first = setTimeout(animate, 10_000)
+    const repeat = setInterval(animate, 40_000) // 10s first, then every 30s
     return () => {
       clearTimeout(first)
       clearInterval(repeat)
@@ -82,7 +93,17 @@ function SidebarNav() {
             className="flex items-center gap-3 px-3 py-2.5 font-mono text-sm uppercase tracking-wider border-2 border-bg-jsconf-yellow text-primary-foreground font-bold hover:opacity-90 transition-all duration-150 mt-2 hover:bg-jsconf-yellow hover:border-transparent"
           >
             <Zap ref={zapRef} className="h-4 w-4 shrink-0" />
-            Upgrade
+            <span ref={waveRef} aria-label="Upgrade">
+              {"Upgrade".split("").map((ch, i) => (
+                <span
+                  key={i}
+                  className="wave-letter"
+                  style={{ animationDelay: `${i * 50}ms` }}
+                >
+                  {ch}
+                </span>
+              ))}
+            </span>
           </Link>
         </nav>
 
