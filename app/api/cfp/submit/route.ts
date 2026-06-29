@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { submitProposal } from "@/lib/cfp"
+import { sendEmail, cfpConfirmationEmail } from "@/lib/email"
 
 export const dynamic = "force-dynamic"
 
@@ -53,5 +54,19 @@ export async function POST(req: NextRequest) {
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: 400 })
   }
+
+  // Best-effort confirmation to the submitter (never fails the submission).
+  try {
+    const { subject, html } = cfpConfirmationEmail({
+      speakerName: result.speakerName,
+      talkTitle: result.talkTitle,
+      talkFormat: result.talkFormat,
+      conferenceName: result.conferenceName,
+    })
+    await sendEmail({ to: email.trim().toLowerCase(), subject, html })
+  } catch (mailErr) {
+    console.error("[v0] confirmation email failed:", (mailErr as Error).message)
+  }
+
   return NextResponse.json({ ok: true })
 }

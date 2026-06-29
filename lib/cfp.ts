@@ -121,7 +121,7 @@ export interface SubmitProposalInput {
 }
 
 export type SubmitProposalResult =
-  | { ok: true }
+  | { ok: true; conferenceName: string; speakerName: string; talkTitle: string; talkFormat: string }
   | { ok: false; error: string }
 
 /**
@@ -135,11 +135,16 @@ export async function submitProposal(input: SubmitProposalInput): Promise<Submit
 
   const { data: settings } = await admin
     .from("cfp_settings")
-    .select("conference_id, is_open, opens_at, closes_at, max_submissions_per_email")
+    .select("conference_id, is_open, opens_at, closes_at, max_submissions_per_email, conferences(name)")
     .eq("slug", input.slug)
     .maybeSingle()
 
   if (!settings) return { ok: false, error: "This call for papers no longer exists." }
+
+  // `conferences` arrives as an object (or array, depending on the join shape).
+  const confRel = settings.conferences as { name?: string } | { name?: string }[] | null
+  const conferenceName =
+    (Array.isArray(confRel) ? confRel[0]?.name : confRel?.name) ?? "the conference"
 
   const now = Date.now()
   const opensAt = settings.opens_at ? new Date(settings.opens_at as string).getTime() : null
@@ -190,7 +195,13 @@ export async function submitProposal(input: SubmitProposalInput): Promise<Submit
     await admin.from("cfp_submission_answers").insert(rows)
   }
 
-  return { ok: true }
+  return {
+    ok: true,
+    conferenceName,
+    speakerName: input.name.trim(),
+    talkTitle: input.title.trim(),
+    talkFormat: input.talkFormat.trim() || "talk",
+  }
 }
 
 /**
