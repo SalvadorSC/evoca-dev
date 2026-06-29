@@ -214,6 +214,8 @@
 
 .zap-jiggle {
   animation: zap-jiggle 0.6s ease-in-out;
+  color: var(--jsconf-yellow);
+  fill: var(--jsconf-yellow);
 }
 
 @keyframes letter-wave {
