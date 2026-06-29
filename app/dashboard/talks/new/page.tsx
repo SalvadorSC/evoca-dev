@@ -115,20 +115,36 @@ export default function NewTalkPage() {
 
       if (form.slideType === "file" && extractedSlides.length > 0) {
         try {
+          // Upload each slide image directly from the browser to Blob. This
+          // avoids the ~4.5 MB serverless request body limit that truncated the
+          // old single base64 JSON POST ("Unterminated string in JSON").
+          const { upload } = await import("@vercel/blob/client")
+          const slideUrls: string[] = []
+          for (let i = 0; i < extractedSlides.length; i++) {
+            const imageBlob = await (await fetch(extractedSlides[i])).blob()
+            const uploaded = await upload(`talks/${slug}/slide-${i + 1}.png`, imageBlob, {
+              access: "public",
+              contentType: "image/png",
+              handleUploadUrl: "/api/talks/slides-upload-token",
+            })
+            slideUrls.push(uploaded.url)
+          }
+
+          // Persist a tiny manifest of URLs (well under the body limit).
           const response = await fetch("/api/talks/upload-slides", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              slides: extractedSlides,
-              talkSlug: slug,
-            }),
+            body: JSON.stringify({ slideUrls, talkSlug: slug }),
           })
 
-          if (!response.ok) throw new Error("Failed to upload slides")
+          if (!response.ok) {
+            const data = await response.json().catch(() => ({}))
+            throw new Error(data.error || "Failed to save slides")
+          }
           const data = await response.json()
           slideUrl = data.url
         } catch (uploadError) {
-          console.error("Slide upload failed:", uploadError)
+          console.error("[v0] Slide upload failed:", uploadError)
           setError("Failed to upload slides. Try again.")
           return
         }

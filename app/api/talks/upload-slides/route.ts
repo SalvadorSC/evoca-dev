@@ -5,43 +5,30 @@ import { NextRequest, NextResponse } from 'next/server'
 export const runtime = 'nodejs'
 
 /**
- * Accepts extracted slide images (base64-encoded PNGs) and uploads them to Blob.
- * Returns a single JSON file URL containing all slides for the presenter to render.
+ * Writes a slide manifest JSON for a talk.
+ *
+ * The slide IMAGES are uploaded directly from the browser to Blob (via the
+ * /api/talks/slides-upload-token client-upload route), so this endpoint only
+ * receives the resulting URL list — a tiny payload well under the request body
+ * limit. The presenter view fetches `slide_url` and renders `manifest.slides`.
  */
 export async function POST(req: NextRequest) {
   try {
     await requireAuth()
 
-    const { slides, talkSlug } = await req.json() as {
-      slides: string[]
+    const { slideUrls, talkSlug } = (await req.json()) as {
+      slideUrls: string[]
       talkSlug: string
     }
 
-    if (!slides || !Array.isArray(slides) || slides.length === 0) {
-      return NextResponse.json({ error: 'No slides provided' }, { status: 400 })
+    if (!slideUrls || !Array.isArray(slideUrls) || slideUrls.length === 0) {
+      return NextResponse.json({ error: 'No slide URLs provided' }, { status: 400 })
     }
 
     if (!talkSlug) {
       return NextResponse.json({ error: 'Talk slug required' }, { status: 400 })
     }
 
-    // Create a JSON manifest with all slide URLs
-    // We'll upload individual slide images and store their URLs
-    const slideUrls: string[] = []
-
-    for (let i = 0; i < slides.length; i++) {
-      const base64 = slides[i]
-      const buffer = Buffer.from(base64.split(',')[1], 'base64')
-
-      const blob = await put(`talks/${talkSlug}/slide-${i + 1}.png`, buffer, {
-        access: 'public',
-        contentType: 'image/png',
-      })
-
-      slideUrls.push(blob.url)
-    }
-
-    // Create a manifest JSON file with all slide URLs
     const manifest = {
       talkSlug,
       slides: slideUrls,
@@ -55,6 +42,7 @@ export async function POST(req: NextRequest) {
       {
         access: 'public',
         contentType: 'application/json',
+        addRandomSuffix: true,
       },
     )
 
@@ -63,10 +51,8 @@ export async function POST(req: NextRequest) {
       totalSlides: slideUrls.length,
     })
   } catch (error) {
-    console.error('Upload slides error:', error)
-    return NextResponse.json(
-      { error: 'Failed to upload slides' },
-      { status: 500 },
-    )
+    const message = error instanceof Error ? error.message : 'Failed to save slides'
+    console.error('[v0] Save slide manifest error:', message)
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
