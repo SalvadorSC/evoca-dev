@@ -153,7 +153,7 @@ export function ConferenceEditor({
       {/* Breadcrumb / header */}
       <Link
         href="/dashboard/conference"
-        className="inline-flex items-center gap-1.5 font-mono text-xs text-jsconf-muted hover:text-white uppercase tracking-wider mb-5"
+        className="inline-flex items-center gap-1.5 font-mono text-xs text-jsconf-muted hover:text-foreground uppercase tracking-wider mb-5"
       >
         <ArrowLeft className="h-3 w-3" />
         All conferences
@@ -166,7 +166,7 @@ export function ConferenceEditor({
               value={nameDraft}
               autoFocus
               onChange={(e) => setNameDraft(e.target.value)}
-              className="flex-1 bg-jsconf-bg border border-jsconf-border px-3 py-2 font-display font-bold text-xl text-white focus:outline-none focus:border-jsconf-yellow"
+              className="flex-1 bg-jsconf-bg border border-jsconf-border px-3 py-2 font-display font-bold text-xl text-foreground focus:outline-none focus:border-jsconf-yellow"
             />
             <button
               onClick={() =>
@@ -182,7 +182,7 @@ export function ConferenceEditor({
           </div>
         ) : (
           <div className="flex items-center gap-3 min-w-0">
-            <h1 className="font-display font-bold text-2xl text-white uppercase tracking-wide truncate">
+            <h1 className="font-display font-bold text-2xl text-foreground uppercase tracking-wide truncate">
               {conference.name}
             </h1>
             <button
@@ -190,7 +190,7 @@ export function ConferenceEditor({
                 setNameDraft(conference.name)
                 setEditingName(true)
               }}
-              className="text-jsconf-muted hover:text-white shrink-0"
+              className="text-jsconf-muted hover:text-foreground shrink-0"
               aria-label="Rename conference"
             >
               <Pencil className="h-4 w-4" />
@@ -201,7 +201,7 @@ export function ConferenceEditor({
         <div className="flex items-center gap-2 shrink-0">
           <Link
             href={`/dashboard/conference/${conference.id}/cfp`}
-            className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-white hover:border-jsconf-yellow transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-foreground hover:border-jsconf-yellow transition-colors"
           >
             <Megaphone className="h-3 w-3" />
             Call for Papers
@@ -238,7 +238,7 @@ export function ConferenceEditor({
             className={`px-3 py-2 font-mono text-xs uppercase tracking-wider border transition-colors ${
               activeDay?.id === day.id
                 ? "bg-jsconf-yellow text-black border-jsconf-yellow font-bold"
-                : "border-jsconf-border text-jsconf-muted hover:text-white hover:border-white"
+                : "border-jsconf-border text-jsconf-muted hover:text-foreground hover:border-white"
             }`}
           >
             {day.label}
@@ -248,7 +248,7 @@ export function ConferenceEditor({
           <button
             onClick={() => run(() => addDay(conference.id))}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 px-3 py-2 border border-dashed border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-white hover:border-white transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-2 border border-dashed border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-foreground hover:border-white transition-colors"
           >
             <Plus className="h-3 w-3" />
             Add day
@@ -311,7 +311,7 @@ export function ConferenceEditor({
               >
                 {/* time */}
                 <div className="w-16 shrink-0 text-center">
-                  <div className="font-mono text-sm text-white">
+                  <div className="font-mono text-sm text-foreground">
                     {slot.start_time ? slot.start_time.slice(0, 5) : "--:--"}
                   </div>
                   <div className="font-mono text-[10px] text-jsconf-muted">{slot.duration}m</div>
@@ -329,7 +329,7 @@ export function ConferenceEditor({
                       </span>
                     )}
                   </div>
-                  <h3 className="font-display font-bold text-white text-sm truncate">{slot.title}</h3>
+                  <h3 className="font-display font-bold text-foreground text-sm truncate">{slot.title}</h3>
                   {slotAcceptsSpeaker(type) && (
                     <div className="mt-1">
                       {assignment ? (
@@ -372,7 +372,7 @@ export function ConferenceEditor({
                     <button
                       onClick={() => reorder(slot, -1)}
                       disabled={idx === 0 || pending}
-                      className="text-jsconf-muted hover:text-white disabled:opacity-30"
+                      className="text-jsconf-muted hover:text-foreground disabled:opacity-30"
                       aria-label="Move up"
                     >
                       <ChevronUp className="h-3.5 w-3.5" />
@@ -380,7 +380,7 @@ export function ConferenceEditor({
                     <button
                       onClick={() => reorder(slot, 1)}
                       disabled={idx === activeSlots.length - 1 || pending}
-                      className="text-jsconf-muted hover:text-white disabled:opacity-30"
+                      className="text-jsconf-muted hover:text-foreground disabled:opacity-30"
                       aria-label="Move down"
                     >
                       <ChevronDown className="h-3.5 w-3.5" />
@@ -388,7 +388,7 @@ export function ConferenceEditor({
                   </div>
                   <button
                     onClick={() => openEditSlot(slot)}
-                    className="p-2 text-jsconf-muted hover:text-white transition-colors"
+                    className="p-2 text-jsconf-muted hover:text-foreground transition-colors"
                     aria-label="Edit slot"
                   >
                     <Pencil className="h-4 w-4" />
@@ -473,7 +473,7 @@ function DayPanel({
             value={draft}
             autoFocus
             onChange={(e) => setDraft(e.target.value)}
-            className="flex-1 bg-jsconf-bg border border-jsconf-border px-3 py-2 font-sans text-sm text-white focus:outline-none focus:border-jsconf-yellow"
+            className="flex-1 bg-jsconf-bg border border-jsconf-border px-3 py-2 font-sans text-sm text-foreground focus:outline-none focus:border-jsconf-yellow"
           />
           <button
             onClick={() => {
@@ -487,13 +487,13 @@ function DayPanel({
         </div>
       ) : (
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <span className="font-display font-bold text-white text-base">{day.label}</span>
+          <span className="font-display font-bold text-foreground text-base">{day.label}</span>
           <button
             onClick={() => {
               setDraft(day.label)
               setEditing(true)
             }}
-            className="text-jsconf-muted hover:text-white"
+            className="text-jsconf-muted hover:text-foreground"
             aria-label="Rename day"
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -509,7 +509,7 @@ function DayPanel({
           min={min}
           max={max}
           onChange={(e) => onSetDate(e.target.value || null)}
-          className="bg-jsconf-bg border border-jsconf-border px-3 py-2 font-mono text-xs text-white focus:outline-none focus:border-jsconf-yellow"
+          className="bg-jsconf-bg border border-jsconf-border px-3 py-2 font-mono text-xs text-foreground focus:outline-none focus:border-jsconf-yellow"
         />
       </div>
 

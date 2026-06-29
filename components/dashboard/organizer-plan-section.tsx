@@ -103,7 +103,7 @@ export function OrganizerPlanSection() {
     <div className="border-t border-jsconf-border pt-8 mt-8">
       <div className="mb-5 flex items-start justify-between gap-3">
         <div>
-          <h2 className="font-display font-bold text-white uppercase tracking-wide text-lg">
+          <h2 className="font-display font-bold text-foreground uppercase tracking-wide text-lg">
             Organizer plan
           </h2>
           <p className="font-mono text-xs text-jsconf-muted mt-1">
@@ -133,7 +133,7 @@ export function OrganizerPlanSection() {
         </div>
       ) : access.level === "none" ? (
         <div className="border border-jsconf-border p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <p className="font-sans text-sm text-white/80">
+          <p className="font-sans text-sm text-foreground/80">
             You don&apos;t have an organizer plan yet. Choose one to start building your event.
           </p>
           <button
@@ -146,7 +146,7 @@ export function OrganizerPlanSection() {
       ) : (
         <div className="border border-jsconf-border p-5 flex flex-col gap-4">
           <div className="flex items-center justify-between gap-3">
-            <span className="font-display font-bold text-white text-lg">{planName}</span>
+            <span className="font-display font-bold text-foreground text-lg">{planName}</span>
             <button
               onClick={() => openPaywall("Change your organizer plan.")}
               className="font-mono text-[11px] uppercase tracking-wider text-jsconf-yellow hover:underline"
@@ -159,8 +159,8 @@ export function OrganizerPlanSection() {
           {isOneTime && access.eventStart && (
             <div className="font-mono text-xs text-jsconf-muted">
               Event window:{" "}
-              <span className="text-white">{formatDate(access.eventStart)}</span> →{" "}
-              <span className="text-white">{formatDate(access.eventEnd)}</span>
+              <span className="text-foreground">{formatDate(access.eventStart)}</span> →{" "}
+              <span className="text-foreground">{formatDate(access.eventEnd)}</span>
               {access.level === "prep" && (
                 <span className="block mt-1 text-jsconf-orange">
                   Live features unlock when the window starts.
@@ -179,7 +179,7 @@ export function OrganizerPlanSection() {
                   type="button"
                   onClick={() => setWindowMode("now")}
                   className={`flex-1 flex items-center gap-2 border px-3 py-2.5 font-mono text-xs transition-colors ${
-                    windowMode === "now" ? "border-jsconf-yellow text-white" : "border-jsconf-border text-jsconf-muted hover:text-white"
+                    windowMode === "now" ? "border-jsconf-yellow text-foreground" : "border-jsconf-border text-jsconf-muted hover:text-foreground"
                   }`}
                 >
                   <Zap className="h-3.5 w-3.5" /> Start now ({ONE_TIME_MAX_DAYS} days)
@@ -188,7 +188,7 @@ export function OrganizerPlanSection() {
                   type="button"
                   onClick={() => setWindowMode("schedule")}
                   className={`flex-1 flex items-center gap-2 border px-3 py-2.5 font-mono text-xs transition-colors ${
-                    windowMode === "schedule" ? "border-jsconf-yellow text-white" : "border-jsconf-border text-jsconf-muted hover:text-white"
+                    windowMode === "schedule" ? "border-jsconf-yellow text-foreground" : "border-jsconf-border text-jsconf-muted hover:text-foreground"
                   }`}
                 >
                   <CalendarClock className="h-3.5 w-3.5" /> Schedule
@@ -202,7 +202,7 @@ export function OrganizerPlanSection() {
                       type="datetime-local"
                       value={startAt}
                       onChange={(e) => setStartAt(e.target.value)}
-                      className="bg-jsconf-bg border border-jsconf-border text-white font-mono text-xs p-2 focus:outline-none focus:border-jsconf-yellow"
+                      className="bg-jsconf-bg border border-jsconf-border text-foreground font-mono text-xs p-2 focus:outline-none focus:border-jsconf-yellow"
                     />
                   </label>
                   <label className="flex-1 flex flex-col gap-1">
@@ -211,7 +211,7 @@ export function OrganizerPlanSection() {
                       type="datetime-local"
                       value={endAt}
                       onChange={(e) => setEndAt(e.target.value)}
-                      className="bg-jsconf-bg border border-jsconf-border text-white font-mono text-xs p-2 focus:outline-none focus:border-jsconf-yellow"
+                      className="bg-jsconf-bg border border-jsconf-border text-foreground font-mono text-xs p-2 focus:outline-none focus:border-jsconf-yellow"
                     />
                   </label>
                 </div>
@@ -232,12 +232,12 @@ export function OrganizerPlanSection() {
             <div className="flex flex-col gap-3">
               <div className="font-mono text-xs text-jsconf-muted">
                 Renews / expires:{" "}
-                <span className="text-white">{formatDate(access.expiresAt)}</span>
+                <span className="text-foreground">{formatDate(access.expiresAt)}</span>
               </div>
               <button
                 onClick={handlePortal}
                 disabled={busy}
-                className="inline-flex items-center justify-center gap-2 border border-jsconf-border text-white font-mono text-xs font-bold uppercase tracking-wider py-2.5 hover:border-white/40 disabled:opacity-60 transition-colors"
+                className="inline-flex items-center justify-center gap-2 border border-jsconf-border text-foreground font-mono text-xs font-bold uppercase tracking-wider py-2.5 hover:border-white/40 disabled:opacity-60 transition-colors"
               >
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
                 Manage billing

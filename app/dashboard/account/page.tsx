@@ -76,7 +76,7 @@ function FieldRow({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="rounded-none border-0 bg-transparent text-white font-sans text-sm placeholder:text-jsconf-muted focus-visible:ring-0 focus-visible:ring-offset-0 h-10"
+          className="rounded-none border-0 bg-transparent text-foreground font-sans text-sm placeholder:text-jsconf-muted focus-visible:ring-0 focus-visible:ring-offset-0 h-10"
         />
       </div>
       {error && <p className="font-mono text-[11px] text-red-400">{error}</p>}
@@ -200,7 +200,7 @@ export default function AccountPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-display font-bold text-2xl text-white uppercase tracking-wide">Account</h1>
+          <h1 className="font-display font-bold text-2xl text-foreground uppercase tracking-wide">Account</h1>
           <p className="font-mono text-xs text-jsconf-muted mt-1">Your speaker profile and socials.</p>
         </div>
         {profile.is_pro && (
@@ -241,7 +241,7 @@ export default function AccountPage() {
             onChange={(e) => setProfile((p) => ({ ...p, bio: e.target.value }))}
             placeholder="A short bio shown on your feedback page..."
             rows={3}
-            className="bg-jsconf-surface border border-jsconf-border text-white font-sans text-sm placeholder:text-jsconf-muted p-3 resize-none focus:outline-none focus:border-jsconf-yellow transition-colors"
+            className="bg-jsconf-surface border border-jsconf-border text-foreground font-sans text-sm placeholder:text-jsconf-muted p-3 resize-none focus:outline-none focus:border-jsconf-yellow transition-colors"
           />
         </div>
 

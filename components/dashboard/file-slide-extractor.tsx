@@ -43,7 +43,7 @@ export function FileSlideExtractor({ onSlidesExtracted, onError }: FileSlideExtr
     <div className="flex flex-col gap-3">
       <label className="flex items-center gap-2 px-4 py-3 border border-jsconf-border cursor-pointer hover:border-jsconf-yellow transition-colors">
         <Upload className="h-4 w-4 text-jsconf-yellow" />
-        <span className="font-mono text-sm text-white">
+        <span className="font-mono text-sm text-foreground">
           {isExtracting ? 'Extracting...' : 'Upload PPTX or PDF'}
         </span>
         <input

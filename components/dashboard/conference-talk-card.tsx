@@ -34,7 +34,7 @@ export function ConferenceTalkCard({ talk }: { talk: SpeakerConferenceTalk }) {
     <div className="bg-jsconf-surface border border-jsconf-border p-5 flex flex-col sm:flex-row sm:items-center gap-4">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2.5 flex-wrap">
-          <h3 className="font-display font-bold text-white text-base truncate">{talk.title}</h3>
+          <h3 className="font-display font-bold text-foreground text-base truncate">{talk.title}</h3>
           <span
             className={`font-mono text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 border ${statusStyle.className}`}
           >

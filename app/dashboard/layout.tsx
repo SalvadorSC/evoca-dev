@@ -29,7 +29,7 @@ function SidebarNav() {
         {/* Logo */}
         <div className="px-5 py-5 border-b border-jsconf-border">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <span className="font-display font-bold text-lg tracking-wide text-white">EVOCA</span>
+            <span className="font-display font-bold text-lg tracking-wide text-foreground">EVOCA</span>
           </Link>
           <span className="font-mono text-[10px] text-jsconf-muted uppercase tracking-widest mt-0.5 block">
             Speaker Dashboard
@@ -47,7 +47,7 @@ function SidebarNav() {
                 className={`flex items-center gap-3 px-3 py-2.5 font-mono text-sm uppercase tracking-wider transition-all duration-150 ${
                   active
                     ? "bg-jsconf-yellow text-black font-bold"
-                    : "text-jsconf-muted hover:text-white hover:bg-jsconf-surface-2"
+                    : "text-jsconf-muted hover:text-foreground hover:bg-jsconf-surface-2"
                 }`}
               >
                 <Icon className="h-4 w-4 shrink-0" />
@@ -70,7 +70,7 @@ function SidebarNav() {
         <div className="px-2 pb-4 border-t border-jsconf-border pt-4">
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-3 w-full px-3 py-2.5 font-mono text-sm uppercase tracking-wider text-jsconf-muted hover:text-white hover:bg-jsconf-surface-2 transition-all duration-150"
+            className="flex items-center gap-3 w-full px-3 py-2.5 font-mono text-sm uppercase tracking-wider text-jsconf-muted hover:text-foreground hover:bg-jsconf-surface-2 transition-all duration-150"
           >
             <LogOut className="h-4 w-4 shrink-0" />
             Sign Out

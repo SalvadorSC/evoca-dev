@@ -12,7 +12,7 @@ const TALK_FORMATS = [
 ]
 
 const inputClass =
-  "w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-mono text-sm text-white placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
+  "w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-mono text-sm text-foreground placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
 const labelClass = "block font-mono text-xs text-jsconf-muted mb-1.5 uppercase tracking-wide"
 
 export function CfpSubmissionForm({
@@ -97,7 +97,7 @@ export function CfpSubmissionForm({
         <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-jsconf-yellow mb-4">
           <Check className="h-6 w-6 text-jsconf-bg" />
         </div>
-        <h2 className="font-display font-bold text-xl text-white mb-2">Submission received</h2>
+        <h2 className="font-display font-bold text-xl text-foreground mb-2">Submission received</h2>
         <p className="font-mono text-sm text-jsconf-muted text-balance">
           Thanks, {form.name.split(" ")[0] || "there"}! We&apos;ve recorded your proposal. You&apos;ll
           hear from the organizers by email once it&apos;s been reviewed.
@@ -229,7 +229,7 @@ function CustomQuestionField({
           {(q.options ?? []).map((opt) => {
             const checked = arr.includes(opt)
             return (
-              <label key={opt} className="flex items-center gap-2 font-mono text-sm text-white cursor-pointer">
+              <label key={opt} className="flex items-center gap-2 font-mono text-sm text-foreground cursor-pointer">
                 <input type="checkbox" checked={checked}
                   onChange={() => onChange(checked ? arr.filter((o) => o !== opt) : [...arr, opt])}
                   className="accent-jsconf-yellow" />
@@ -244,7 +244,7 @@ function CustomQuestionField({
 
   if (q.type === "checkbox") {
     return (
-      <label className="flex items-center gap-2 font-mono text-sm text-white cursor-pointer">
+      <label className="flex items-center gap-2 font-mono text-sm text-foreground cursor-pointer">
         <input type="checkbox" checked={value === true}
           onChange={(e) => onChange(e.target.checked)} className="accent-jsconf-yellow" />
         {q.label}{req}

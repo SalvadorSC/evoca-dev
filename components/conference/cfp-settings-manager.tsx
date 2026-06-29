@@ -28,7 +28,7 @@ const QUESTION_TYPES: { value: CfpQuestionType; label: string }[] = [
 ]
 
 const inputClass =
-  "w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-mono text-sm text-white placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
+  "w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-mono text-sm text-foreground placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
 const labelClass = "block font-mono text-xs text-jsconf-muted mb-1.5 uppercase tracking-wide"
 
 // datetime-local wants "YYYY-MM-DDTHH:mm"; DB returns ISO. Trim to minutes.
@@ -82,7 +82,7 @@ export function CfpSettingsManager({
           <input readOnly value={publicUrl} className={`${inputClass} flex-1`} />
           <button
             onClick={copyLink}
-            className="inline-flex items-center gap-1.5 px-3 py-2.5 border border-jsconf-border font-mono text-xs uppercase text-white hover:border-jsconf-yellow transition-colors shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-2.5 border border-jsconf-border font-mono text-xs uppercase text-foreground hover:border-jsconf-yellow transition-colors shrink-0"
           >
             {copied ? <Check className="h-3.5 w-3.5 text-jsconf-yellow" /> : <Copy className="h-3.5 w-3.5" />}
             {copied ? "Copied" : "Copy"}
@@ -91,7 +91,7 @@ export function CfpSettingsManager({
             href={publicUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center px-3 py-2.5 border border-jsconf-border text-white hover:border-jsconf-yellow transition-colors shrink-0"
+            className="inline-flex items-center px-3 py-2.5 border border-jsconf-border text-foreground hover:border-jsconf-yellow transition-colors shrink-0"
             aria-label="Open public page"
           >
             <ExternalLink className="h-3.5 w-3.5" />
@@ -101,7 +101,7 @@ export function CfpSettingsManager({
 
       {/* Settings */}
       <section className="border border-jsconf-border bg-jsconf-surface p-5 flex flex-col gap-5">
-        <h2 className="font-display font-bold text-lg text-white">Settings</h2>
+        <h2 className="font-display font-bold text-lg text-foreground">Settings</h2>
 
         <label className="flex items-center gap-3 cursor-pointer">
           <input
@@ -110,7 +110,7 @@ export function CfpSettingsManager({
             onChange={(e) => set("isOpen", e.target.checked)}
             className="accent-jsconf-yellow h-4 w-4"
           />
-          <span className="font-mono text-sm text-white">
+          <span className="font-mono text-sm text-foreground">
             Accept submissions {settings.isOpen ? "(open)" : "(closed)"}
           </span>
         </label>
@@ -161,7 +161,7 @@ export function CfpSettingsManager({
 
       {/* Custom questions */}
       <section className="border border-jsconf-border bg-jsconf-surface p-5">
-        <h2 className="font-display font-bold text-lg text-white mb-1">Custom questions</h2>
+        <h2 className="font-display font-bold text-lg text-foreground mb-1">Custom questions</h2>
         <p className="font-mono text-xs text-jsconf-muted mb-4">
           Add your own questions on top of the standard name, email, title, abstract, and bio fields.
         </p>
@@ -173,7 +173,7 @@ export function CfpSettingsManager({
           {questions.map((q) => (
             <div key={q.id} className="flex items-center justify-between gap-3 border border-jsconf-border bg-jsconf-bg px-3 py-2.5">
               <div className="min-w-0">
-                <p className="font-mono text-sm text-white truncate">
+                <p className="font-mono text-sm text-foreground truncate">
                   {q.label} {q.required && <span className="text-jsconf-yellow">*</span>}
                 </p>
                 <p className="font-mono text-[11px] text-jsconf-muted">
@@ -272,7 +272,7 @@ function QuestionBuilder({
         <label className="flex items-center gap-2 cursor-pointer">
           <input type="checkbox" checked={required} onChange={(e) => setRequired(e.target.checked)}
             className="accent-jsconf-yellow h-4 w-4" />
-          <span className="font-mono text-sm text-white">Required</span>
+          <span className="font-mono text-sm text-foreground">Required</span>
         </label>
         <button onClick={add} disabled={pending || !label.trim()}
           className="inline-flex items-center gap-2 border border-jsconf-yellow text-jsconf-yellow font-mono text-xs uppercase tracking-wide py-2.5 px-4 hover:bg-jsconf-yellow-dim transition-colors disabled:opacity-50">

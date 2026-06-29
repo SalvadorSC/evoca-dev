@@ -41,7 +41,7 @@ export default async function DashboardPage() {
       {/* Page header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="font-display font-bold text-2xl text-white uppercase tracking-wide">
+          <h1 className="font-display font-bold text-2xl text-foreground uppercase tracking-wide">
             Your Talks
           </h1>
           <p className="font-mono text-xs text-jsconf-muted mt-1">
@@ -63,7 +63,7 @@ export default async function DashboardPage() {
       <div className="mb-8 p-4 bg-jsconf-surface border border-jsconf-border">
         <div className="flex items-center justify-between mb-2">
           <span className="font-mono text-xs text-jsconf-muted uppercase tracking-wider">Free plan</span>
-          <span className="font-mono text-xs text-white">
+          <span className="font-mono text-xs text-foreground">
             {usedCount} / {FREE_TALK_LIMIT} talks
           </span>
         </div>
@@ -76,7 +76,7 @@ export default async function DashboardPage() {
         {usedCount >= FREE_TALK_LIMIT && (
           <p className="font-mono text-xs text-jsconf-yellow mt-2">
             Limit reached.{" "}
-            <Link href="/dashboard/upgrade" className="underline hover:text-white">
+            <Link href="/dashboard/upgrade" className="underline hover:text-foreground">
               Upgrade to add more talks.
             </Link>
           </p>
@@ -89,7 +89,7 @@ export default async function DashboardPage() {
           <div className="w-12 h-12 bg-jsconf-yellow-dim flex items-center justify-center mb-4">
             <Radio className="h-5 w-5 text-jsconf-yellow" />
           </div>
-          <h2 className="font-display font-bold text-lg text-white mb-2 uppercase tracking-wide">
+          <h2 className="font-display font-bold text-lg text-foreground mb-2 uppercase tracking-wide">
             No talks yet
           </h2>
           <p className="font-mono text-sm text-jsconf-muted mb-6 max-w-sm">
@@ -123,7 +123,7 @@ export default async function DashboardPage() {
                 className="bg-jsconf-surface border border-jsconf-border p-5 flex flex-col sm:flex-row sm:items-center gap-4"
               >
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-display font-bold text-white text-base truncate">
+                  <h3 className="font-display font-bold text-foreground text-base truncate">
                     {talk.title}
                   </h3>
                   <div className="flex items-center gap-4 mt-1.5">
@@ -144,7 +144,7 @@ export default async function DashboardPage() {
                   <DeleteTalkButton talkId={talk.id} talkTitle={talk.title} variant="icon" />
                   <Link
                     href={`/dashboard/talks/${talk.slug}`}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-white hover:border-white transition-all duration-150"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-foreground hover:border-white transition-all duration-150"
                   >
                     <Settings className="h-3 w-3" />
                     Manage
@@ -168,7 +168,7 @@ export default async function DashboardPage() {
         <section className="mt-12">
           <div className="flex items-center gap-2 mb-2">
             <Building2 className="h-4 w-4 text-jsconf-yellow" />
-            <h2 className="font-display font-bold text-lg text-white uppercase tracking-wide">
+            <h2 className="font-display font-bold text-lg text-foreground uppercase tracking-wide">
               Conference Talks
             </h2>
           </div>

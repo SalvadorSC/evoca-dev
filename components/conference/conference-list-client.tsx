@@ -59,7 +59,7 @@ export function ConferenceListClient({ canCreate }: { canCreate: boolean }) {
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-jsconf-surface border-jsconf-border text-white">
+        <DialogContent className="bg-jsconf-surface border-jsconf-border text-foreground">
           <DialogHeader>
             <DialogTitle className="font-display uppercase tracking-wide">
               New Conference
@@ -84,7 +84,7 @@ export function ConferenceListClient({ canCreate }: { canCreate: boolean }) {
                 if (e.key === "Enter") handleCreate()
               }}
               placeholder="e.g. JSConf EU 2026"
-              className="w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-sans text-sm text-white placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
+              className="w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-sans text-sm text-foreground placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
             />
             {error && <p className="font-mono text-xs text-red-400 mt-2">{error}</p>}
           </div>

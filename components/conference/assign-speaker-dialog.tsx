@@ -82,11 +82,11 @@ export function AssignSpeakerDialog({
   }
 
   const inputCls =
-    "w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-sans text-sm text-white placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
+    "w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-sans text-sm text-foreground placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-jsconf-surface border-jsconf-border text-white">
+      <DialogContent className="bg-jsconf-surface border-jsconf-border text-foreground">
         <DialogHeader>
           <DialogTitle className="font-display uppercase tracking-wide">Assign Speaker</DialogTitle>
         </DialogHeader>
@@ -100,7 +100,7 @@ export function AssignSpeakerDialog({
         {currentAssignment && (
           <div className="flex items-center justify-between gap-3 bg-jsconf-bg border border-jsconf-border px-3 py-2.5">
             <div className="min-w-0">
-              <p className="font-sans text-sm text-white truncate">{currentAssignment.email}</p>
+              <p className="font-sans text-sm text-foreground truncate">{currentAssignment.email}</p>
               <p className="font-mono text-[10px] uppercase tracking-wider text-jsconf-muted">
                 Status: {currentAssignment.status}
               </p>

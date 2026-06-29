@@ -51,7 +51,7 @@ export default async function CfpPage({
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-jsconf-yellow mb-3">
             {cfp.conferenceName}
           </p>
-          <h1 className="font-display font-bold text-3xl sm:text-4xl text-white text-balance">
+          <h1 className="font-display font-bold text-3xl sm:text-4xl text-foreground text-balance">
             {cfp.title}
           </h1>
           {cfp.description && (
@@ -71,7 +71,7 @@ export default async function CfpPage({
 
         <footer className="mt-10 flex items-center gap-2 text-jsconf-muted">
           <span className="font-mono text-xs">Powered by</span>
-          <span className="font-display font-bold text-sm text-white uppercase tracking-wide">Evoca</span>
+          <span className="font-display font-bold text-sm text-foreground uppercase tracking-wide">Evoca</span>
         </footer>
       </div>
     </main>
@@ -86,7 +86,7 @@ function ClosedState({ reason }: { reason: string | null }) {
       <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-jsconf-bg border border-jsconf-border mb-4">
         <Icon className="h-5 w-5 text-jsconf-muted" />
       </div>
-      <h2 className="font-display font-bold text-xl text-white mb-2">{copy.heading}</h2>
+      <h2 className="font-display font-bold text-xl text-foreground mb-2">{copy.heading}</h2>
       <p className="font-mono text-sm text-jsconf-muted text-balance">{copy.body}</p>
     </section>
   )

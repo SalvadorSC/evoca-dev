@@ -74,7 +74,7 @@ export default async function TalkDetailPage({
       {/* Back */}
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-2 font-mono text-xs text-jsconf-muted hover:text-white uppercase tracking-wider mb-8 transition-all duration-150"
+        className="inline-flex items-center gap-2 font-mono text-xs text-jsconf-muted hover:text-foreground uppercase tracking-wider mb-8 transition-all duration-150"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         All Talks
@@ -84,7 +84,7 @@ export default async function TalkDetailPage({
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="flex-1 min-w-0">
-            <h1 className="font-display font-bold text-2xl text-white uppercase tracking-wide leading-tight">
+            <h1 className="font-display font-bold text-2xl text-foreground uppercase tracking-wide leading-tight">
               {talkData.title}
             </h1>
             {talkData.description && (
@@ -110,7 +110,7 @@ export default async function TalkDetailPage({
               <span className="font-mono text-[10px] text-jsconf-muted uppercase tracking-wider block mb-0.5">
                 Slides
               </span>
-              <span className="font-mono text-xs text-white truncate max-w-xs block">
+              <span className="font-mono text-xs text-foreground truncate max-w-xs block">
                 {talkData.slide_url}
               </span>
             </div>
@@ -118,7 +118,7 @@ export default async function TalkDetailPage({
               href={talkData.slide_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-white hover:border-white transition-all duration-150 shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-foreground hover:border-white transition-all duration-150 shrink-0"
             >
               <ExternalLink className="h-3 w-3" />
               Preview
@@ -138,7 +138,7 @@ export default async function TalkDetailPage({
             <div className="w-10 h-10 bg-jsconf-yellow-dim flex items-center justify-center mb-3">
               <Radio className="h-4 w-4 text-jsconf-yellow" />
             </div>
-            <p className="font-mono text-sm text-white mb-1">No sessions yet</p>
+            <p className="font-mono text-sm text-foreground mb-1">No sessions yet</p>
             <p className="font-mono text-xs text-jsconf-muted">
               Start a session to go live with your audience.
             </p>
@@ -184,7 +184,7 @@ export default async function TalkDetailPage({
                     </div>
 
                     <div className="flex-1 min-w-0 flex flex-wrap gap-4">
-                      <span className="font-mono text-xs text-white">
+                      <span className="font-mono text-xs text-foreground">
                         {date} · {time}
                       </span>
                       <span className="font-mono text-xs text-jsconf-muted flex items-center gap-1">
@@ -205,7 +205,7 @@ export default async function TalkDetailPage({
                     <div className="flex items-center gap-2 shrink-0">
                       <Link
                         href={isLive ? `/qna/${session.id}` : `/dashboard/sessions/${session.id}/questions`}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-white hover:border-white transition-all duration-150"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-foreground hover:border-white transition-all duration-150"
                       >
                         <MessageCircleQuestion className="h-3 w-3" />
                         {isLive ? "Q&A" : "Q&A History"}

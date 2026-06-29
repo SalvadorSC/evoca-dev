@@ -48,7 +48,7 @@ function SettingRow({
         <span className="text-jsconf-muted mt-0.5 shrink-0">{icon}</span>
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className="font-mono text-xs text-white uppercase tracking-wide">{label}</span>
+            <span className="font-mono text-xs text-foreground uppercase tracking-wide">{label}</span>
             {disabled && <Lock className="h-3 w-3 text-jsconf-yellow shrink-0" />}
           </div>
           <p className="font-sans text-xs text-jsconf-muted mt-0.5 leading-relaxed">
@@ -174,7 +174,7 @@ export function StartSessionButton({ talkId, speakerIsPro = false }: Props) {
         <button
           type="button"
           onClick={() => setShowSettings((v) => !v)}
-          className="inline-flex items-center gap-1.5 px-3 border border-r-0 border-jsconf-border text-jsconf-muted hover:text-white hover:border-jsconf-muted transition-colors font-mono text-xs uppercase tracking-wider"
+          className="inline-flex items-center gap-1.5 px-3 border border-r-0 border-jsconf-border text-jsconf-muted hover:text-foreground hover:border-jsconf-muted transition-colors font-mono text-xs uppercase tracking-wider"
           title="Session settings"
         >
           <Settings className="h-3.5 w-3.5" />

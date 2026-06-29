@@ -56,7 +56,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="font-display font-bold text-3xl tracking-wide mb-2 text-white">
+          <h1 className="font-display font-bold text-3xl tracking-wide mb-2 text-foreground">
             EVOCA
           </h1>
           <p className="font-mono text-xs text-jsconf-muted uppercase tracking-wider">
@@ -73,18 +73,18 @@ export default function LoginPage() {
                   ✓
                 </div>
                 <div>
-                  <h2 className="font-display font-bold text-xl text-white mb-2">
+                  <h2 className="font-display font-bold text-xl text-foreground mb-2">
                     Check your email
                   </h2>
                   <p className="text-sm text-jsconf-muted">
-                    We sent a magic link to <span className="text-white">{email}</span>
+                    We sent a magic link to <span className="text-foreground">{email}</span>
                   </p>
                 </div>
               </div>
             ) : (
               <form onSubmit={handleLogin} className="space-y-6">
                 <div>
-                  <h2 className="font-display font-bold text-xl text-white mb-1">
+                  <h2 className="font-display font-bold text-xl text-foreground mb-1">
                     Sign in
                   </h2>
                   <p className="text-sm text-jsconf-muted">
@@ -106,7 +106,7 @@ export default function LoginPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="bg-jsconf-bg border-jsconf-border text-white placeholder:text-jsconf-muted focus:border-jsconf-yellow h-12"
+                    className="bg-jsconf-bg border-jsconf-border text-foreground placeholder:text-jsconf-muted focus:border-jsconf-yellow h-12"
                   />
                 </div>
 
@@ -139,7 +139,7 @@ export default function LoginPage() {
                 <a
                   key={acc.key}
                   href={`/api/dev-login?as=${acc.key}`}
-                  className="flex items-center justify-between gap-2 px-3 h-9 bg-jsconf-surface border border-jsconf-border text-jsconf-muted hover:text-white hover:border-jsconf-muted font-mono text-xs transition-colors"
+                  className="flex items-center justify-between gap-2 px-3 h-9 bg-jsconf-surface border border-jsconf-border text-jsconf-muted hover:text-foreground hover:border-jsconf-muted font-mono text-xs transition-colors"
                   title={acc.note}
                 >
                   <span className="uppercase tracking-wider truncate">{acc.label}</span>

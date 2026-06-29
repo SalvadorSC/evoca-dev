@@ -210,6 +210,7 @@ function ProWaitlistForm() {
       <div className="flex flex-col sm:flex-row w-full">
         <input
           type="email"
+          aria-label="Email address for Speaker Pro waitlist"
           value={email}
           onChange={(e) => { setEmail(e.target.value); if (state === "error") setState("idle") }}
           placeholder="your@email.com"
@@ -240,6 +241,7 @@ function FAQ({ items }: { items: { q: string; a: string }[] }) {
         <div key={i}>
           <button
             onClick={() => setOpen(open === i ? null : i)}
+            aria-expanded={open === i}
             className="w-full flex items-center justify-between py-4 text-left cursor-pointer"
           >
             <span className="font-sans text-foreground">{item.q}</span>

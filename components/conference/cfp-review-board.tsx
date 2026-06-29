@@ -87,7 +87,7 @@ export function CfpReviewBoard({
             className={`px-3 py-1.5 font-mono text-xs uppercase tracking-wider border transition-colors ${
               filter === f
                 ? "bg-jsconf-yellow text-black border-jsconf-yellow font-bold"
-                : "border-jsconf-border text-jsconf-muted hover:text-white hover:border-white"
+                : "border-jsconf-border text-jsconf-muted hover:text-foreground hover:border-white"
             }`}
           >
             {f === "all" ? "All" : STATUS_META[f].label} ({counts[f] ?? 0})
@@ -170,7 +170,7 @@ function SubmissionCard({
             </span>
             <span className="font-mono text-[11px] text-jsconf-muted uppercase">{s.talkFormat}</span>
           </div>
-          <h3 className="font-display font-bold text-white mt-1.5 truncate">{s.title}</h3>
+          <h3 className="font-display font-bold text-foreground mt-1.5 truncate">{s.title}</h3>
           <p className="font-mono text-xs text-jsconf-muted truncate">
             {s.name} · {s.email}
           </p>
@@ -192,7 +192,7 @@ function SubmissionCard({
         <div className="border-t border-jsconf-border p-4 flex flex-col gap-5">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-wide text-jsconf-muted mb-1">Abstract</p>
-            <p className="font-mono text-sm text-white leading-relaxed whitespace-pre-wrap">{s.abstract}</p>
+            <p className="font-mono text-sm text-foreground leading-relaxed whitespace-pre-wrap">{s.abstract}</p>
           </div>
 
           {s.bio && (
@@ -209,7 +209,7 @@ function SubmissionCard({
                   <p className="font-mono text-[10px] uppercase tracking-wide text-jsconf-muted mb-1">
                     {questionLabels[a.questionId] ?? "Question"}
                   </p>
-                  <p className="font-mono text-sm text-white">{answerToText(a.answer)}</p>
+                  <p className="font-mono text-sm text-foreground">{answerToText(a.answer)}</p>
                 </div>
               ))}
             </div>
@@ -238,7 +238,7 @@ function SubmissionCard({
               onChange={(e) => setNotes(e.target.value)}
               onBlur={saveNotes}
               placeholder="Private notes (not shared with the speaker)."
-              className="w-full bg-jsconf-bg border border-jsconf-border px-3 py-2 font-mono text-sm text-white placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
+              className="w-full bg-jsconf-bg border border-jsconf-border px-3 py-2 font-mono text-sm text-foreground placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
             />
           </div>
 

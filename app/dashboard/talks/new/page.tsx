@@ -164,13 +164,13 @@ export default function NewTalkPage() {
       {/* Back link */}
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-2 font-mono text-xs text-jsconf-muted hover:text-white uppercase tracking-wider mb-8 transition-all duration-150"
+        className="inline-flex items-center gap-2 font-mono text-xs text-jsconf-muted hover:text-foreground uppercase tracking-wider mb-8 transition-all duration-150"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to Talks
       </Link>
 
-      <h1 className="font-display font-bold text-2xl text-white uppercase tracking-wide mb-2">
+      <h1 className="font-display font-bold text-2xl text-foreground uppercase tracking-wide mb-2">
         New Talk
       </h1>
       <p className="font-mono text-xs text-jsconf-muted mb-8">
@@ -191,7 +191,7 @@ export default function NewTalkPage() {
               value={form.title}
               onChange={(e) => update("title", e.target.value)}
               placeholder="e.g. The Future of JavaScript"
-              className="w-full bg-jsconf-surface border border-jsconf-border px-4 py-3 font-sans text-sm text-white placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow transition-all duration-150"
+              className="w-full bg-jsconf-surface border border-jsconf-border px-4 py-3 font-sans text-sm text-foreground placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow transition-all duration-150"
               autoFocus
             />
           </div>
@@ -204,7 +204,7 @@ export default function NewTalkPage() {
               onChange={(e) => update("description", e.target.value)}
               placeholder="A brief description of your talk..."
               rows={4}
-              className="w-full bg-jsconf-surface border border-jsconf-border px-4 py-3 font-sans text-sm text-white placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow resize-none transition-all duration-150"
+              className="w-full bg-jsconf-surface border border-jsconf-border px-4 py-3 font-sans text-sm text-foreground placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow resize-none transition-all duration-150"
             />
           </div>
           {error && (
@@ -238,7 +238,7 @@ export default function NewTalkPage() {
           >
             <div className="flex items-center gap-3 mb-3">
               <Link2 className="h-4 w-4 text-jsconf-yellow" />
-              <span className="font-mono text-sm text-white">Paste an embed URL</span>
+              <span className="font-mono text-sm text-foreground">Paste an embed URL</span>
             </div>
             {form.slideType === "url" && (
               <>
@@ -247,7 +247,7 @@ export default function NewTalkPage() {
                   value={form.slideUrl}
                   onChange={(e) => update("slideUrl", e.target.value)}
                   placeholder="https://slides.com/you/talk or https://docs.google.com/presentation/..."
-                  className="w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-mono text-sm text-white placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
+                  className="w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-mono text-sm text-foreground placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
                   autoFocus
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -269,7 +269,7 @@ export default function NewTalkPage() {
           >
             <div className="flex items-center gap-3 mb-3">
               <FileText className="h-4 w-4 text-jsconf-yellow" />
-              <span className="font-mono text-sm text-white">Upload PDF or PPTX</span>
+              <span className="font-mono text-sm text-foreground">Upload PDF or PPTX</span>
             </div>
             {form.slideType === "file" && (
               <>
@@ -294,7 +294,7 @@ export default function NewTalkPage() {
           <div className="flex items-center justify-between mt-2">
             <button
               onClick={back}
-              className="inline-flex items-center gap-2 px-4 py-2.5 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-white hover:border-white transition-all duration-150"
+              className="inline-flex items-center gap-2 px-4 py-2.5 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-foreground hover:border-white transition-all duration-150"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back
@@ -302,7 +302,7 @@ export default function NewTalkPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={skipSlides}
-                className="inline-flex items-center gap-1.5 px-3 py-2.5 font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-white transition-all duration-150"
+                className="inline-flex items-center gap-1.5 px-3 py-2.5 font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-foreground transition-all duration-150"
               >
                 <SkipForward className="h-3.5 w-3.5" />
                 Skip
@@ -325,7 +325,7 @@ export default function NewTalkPage() {
           <div className="bg-jsconf-surface border border-jsconf-border p-5 flex flex-col gap-4">
             <div>
               <span className="font-mono text-[10px] text-jsconf-muted uppercase tracking-wider block mb-1">Title</span>
-              <p className="font-display font-bold text-white">{form.title}</p>
+              <p className="font-display font-bold text-foreground">{form.title}</p>
             </div>
             {form.description && (
               <div>
@@ -335,7 +335,7 @@ export default function NewTalkPage() {
             )}
             <div>
               <span className="font-mono text-[10px] text-jsconf-muted uppercase tracking-wider block mb-1">Slides</span>
-              <p className="font-mono text-sm text-white">
+              <p className="font-mono text-sm text-foreground">
                 {form.slideUrl ? form.slideUrl : "None — skipped"}
               </p>
             </div>
@@ -349,7 +349,7 @@ export default function NewTalkPage() {
             <button
               onClick={back}
               disabled={loading}
-              className="inline-flex items-center gap-2 px-4 py-2.5 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-white hover:border-white transition-all duration-150 disabled:opacity-40"
+              className="inline-flex items-center gap-2 px-4 py-2.5 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-foreground hover:border-white transition-all duration-150 disabled:opacity-40"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back

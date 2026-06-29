@@ -70,14 +70,14 @@ export default async function CfpReviewPage({
     <div className="px-6 py-8 max-w-4xl mx-auto">
       <Link
         href={`/dashboard/conference/${id}/cfp`}
-        className="inline-flex items-center gap-1.5 font-mono text-xs text-jsconf-muted hover:text-white uppercase tracking-wider mb-5"
+        className="inline-flex items-center gap-1.5 font-mono text-xs text-jsconf-muted hover:text-foreground uppercase tracking-wider mb-5"
       >
         <ArrowLeft className="h-3 w-3" />
         Back to CFP settings
       </Link>
 
       <div className="mb-6">
-        <h1 className="font-display font-bold text-2xl text-white uppercase tracking-wide">
+        <h1 className="font-display font-bold text-2xl text-foreground uppercase tracking-wide">
           Review submissions
         </h1>
         <p className="font-mono text-xs text-jsconf-muted mt-1">{conference.name}</p>

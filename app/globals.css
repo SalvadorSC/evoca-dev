@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-/* theme tokens flip via .light / .dark on <html> */
+/* theme tokens flip via .light / .dark on <html>; .force-dark pins stage screens dark */
 
 @custom-variant dark (&:is(.dark *));
 

@@ -125,9 +125,9 @@ export function PaywallModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-jsconf-surface border-jsconf-border text-white max-w-2xl rounded-none p-0 gap-0">
+      <DialogContent className="bg-jsconf-surface border-jsconf-border text-foreground max-w-2xl rounded-none p-0 gap-0">
         <DialogHeader className="p-6 border-b border-jsconf-border">
-          <DialogTitle className="font-display font-bold uppercase tracking-wide text-xl text-white">
+          <DialogTitle className="font-display font-bold uppercase tracking-wide text-xl text-foreground">
             Organizer plans
           </DialogTitle>
           <DialogDescription className="font-mono text-xs text-jsconf-muted">
@@ -159,13 +159,13 @@ export function PaywallModal({
                 </span>
                 <span className="flex-1">
                   <span className="flex items-baseline justify-between gap-2">
-                    <span className="font-display font-bold text-white">{plan.name}</span>
-                    <span className="font-mono text-sm text-white">
+                    <span className="font-display font-bold text-foreground">{plan.name}</span>
+                    <span className="font-mono text-sm text-foreground">
                       {displayAmount(planId)}
                       <span className="text-jsconf-muted text-xs"> {intervalLabel(planId)}</span>
                     </span>
                   </span>
-                  <span className="font-sans text-sm text-white/70 block mt-1">{plan.description}</span>
+                  <span className="font-sans text-sm text-foreground/70 block mt-1">{plan.description}</span>
                   <ul className="mt-2 flex flex-col gap-1">
                     {PLAN_FEATURES[planId].map((f) => (
                       <li key={f} className="flex items-center gap-2 font-mono text-[11px] text-jsconf-muted">
@@ -191,8 +191,8 @@ export function PaywallModal({
                   onClick={() => setWindowMode("now")}
                   className={`flex-1 flex items-center gap-2 border px-3 py-2.5 font-mono text-xs transition-colors ${
                     windowMode === "now"
-                      ? "border-jsconf-yellow text-white"
-                      : "border-jsconf-border text-jsconf-muted hover:text-white"
+                      ? "border-jsconf-yellow text-foreground"
+                      : "border-jsconf-border text-jsconf-muted hover:text-foreground"
                   }`}
                 >
                   <Zap className="h-3.5 w-3.5" />
@@ -203,8 +203,8 @@ export function PaywallModal({
                   onClick={() => setWindowMode("schedule")}
                   className={`flex-1 flex items-center gap-2 border px-3 py-2.5 font-mono text-xs transition-colors ${
                     windowMode === "schedule"
-                      ? "border-jsconf-yellow text-white"
-                      : "border-jsconf-border text-jsconf-muted hover:text-white"
+                      ? "border-jsconf-yellow text-foreground"
+                      : "border-jsconf-border text-jsconf-muted hover:text-foreground"
                   }`}
                 >
                   <CalendarClock className="h-3.5 w-3.5" />
@@ -220,7 +220,7 @@ export function PaywallModal({
                       type="datetime-local"
                       value={startAt}
                       onChange={(e) => setStartAt(e.target.value)}
-                      className="bg-jsconf-bg border border-jsconf-border text-white font-mono text-xs p-2 focus:outline-none focus:border-jsconf-yellow"
+                      className="bg-jsconf-bg border border-jsconf-border text-foreground font-mono text-xs p-2 focus:outline-none focus:border-jsconf-yellow"
                     />
                   </label>
                   <label className="flex-1 flex flex-col gap-1">
@@ -229,7 +229,7 @@ export function PaywallModal({
                       type="datetime-local"
                       value={endAt}
                       onChange={(e) => setEndAt(e.target.value)}
-                      className="bg-jsconf-bg border border-jsconf-border text-white font-mono text-xs p-2 focus:outline-none focus:border-jsconf-yellow"
+                      className="bg-jsconf-bg border border-jsconf-border text-foreground font-mono text-xs p-2 focus:outline-none focus:border-jsconf-yellow"
                     />
                   </label>
                 </div>

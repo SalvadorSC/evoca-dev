@@ -49,7 +49,7 @@ export default async function CfpSettingsPage({
     <div className="px-6 py-8 max-w-3xl mx-auto">
       <Link
         href={`/dashboard/conference/${id}`}
-        className="inline-flex items-center gap-1.5 font-mono text-xs text-jsconf-muted hover:text-white uppercase tracking-wider mb-5"
+        className="inline-flex items-center gap-1.5 font-mono text-xs text-jsconf-muted hover:text-foreground uppercase tracking-wider mb-5"
       >
         <ArrowLeft className="h-3 w-3" />
         Back to schedule
@@ -57,14 +57,14 @@ export default async function CfpSettingsPage({
 
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className="font-display font-bold text-2xl text-white uppercase tracking-wide">
+          <h1 className="font-display font-bold text-2xl text-foreground uppercase tracking-wide">
             Call for Papers
           </h1>
           <p className="font-mono text-xs text-jsconf-muted mt-1">{conference.name}</p>
         </div>
         <Link
           href={`/dashboard/conference/${id}/cfp/review`}
-          className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-white hover:border-jsconf-yellow transition-colors shrink-0"
+          className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-foreground hover:border-jsconf-yellow transition-colors shrink-0"
         >
           <Inbox className="h-3 w-3" />
           Review ({submissionCount ?? 0})
