@@ -29,6 +29,11 @@ Detailed implementation plans live in `docs/`:
   **separate PartyKit server** (`SalvadorSC/evoca-server`), not Supabase. Client (token auth, moderator UI,
   flagged/delete/ban) is merged here; server changes are staged in [`server-patches/`](server-patches/README.md).
   To go live: apply the patch to evoca-server, set `SUPABASE_JWT_SECRET`, redeploy. v0 lacks push access to that repo.
+- **Phase 5 (Speaker Experience) — 5.1 shipped, 5.2 blocked on the same server deploy.**
+  5.1 conference talk portal (`getSpeakerConferenceTalks` → dashboard "Conference Talks" section) is live & verified.
+  5.2 phone slide remote (`/remote/[token]`, speaker-scoped JWT, QR in presenter view) is code-complete and the
+  token flow is verified, but the deployed PartyKit server drops `slide_*` commands until `server-patches/` ships —
+  that fix is folded into the **same patch** as Phase 3, so one deploy unblocks both.
 - **Phase 7 (Call for Papers) — draft only.** Empty plan with open questions; scope not yet locked. Start after Phase 6.
   Phase 7 owns wiring the transactional email provider (also backfills Phase 2's stubbed invite emails).
 - **Test accounts:** all billing/role cases are seeded — see [docs/test-accounts.md](docs/test-accounts.md)

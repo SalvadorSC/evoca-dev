@@ -1,7 +1,7 @@
 # Phase 5 — Speaker Experience
 
-> Status: **Pending**
-> Blocker: Phase 2 (affiliation system needed for unified portal)
+> Status: **5.1 shipped ✅ · 5.2 code complete, blocked on server deploy ⚠️**
+> Phase 2 (affiliation system) dependency is satisfied.
 
 ---
 
@@ -15,8 +15,39 @@ Improve the day-to-day experience for speakers: a single place to manage all tal
 
 | Feature | Status |
 |---|---|
-| Speaker conference talk portal | Pending |
-| Speaker slide control via phone | Pending |
+| Speaker conference talk portal | **Shipped & browser-verified** |
+| Speaker slide control via phone | **Code complete — blocked on PartyKit server deploy** |
+
+---
+
+## ⚠️ Architecture note (as built)
+
+Slide control rides the **PartyKit realtime server** (`SalvadorSC/evoca-server`),
+not Supabase Realtime as the 5.2 draft guessed. Crucially, the **currently
+deployed** server drops any command not in its `COMMAND_ROLES` allow-list, and
+`slide_next`/`slide_prev`/`slide_up`/`slide_down`/`highlight_question` were
+**never in it** — so presenter→wall slide sync was already a latent no-op, and
+the phone remote's taps are dropped until the server is redeployed.
+
+The fix is folded into the **same staged patch as Phase 3** (`server-patches/`):
+those commands are added to `COMMAND_ROLES` (min role `speaker`) and a
+`PASSTHROUGH_COMMANDS` set rebroadcasts them without mutating state. **One deploy
+unblocks both Phase 3 and Phase 5.2.** The phone remote authenticates with a
+short-lived JWT signed with `SUPABASE_JWT_SECRET` carrying `role: "speaker"`,
+which the patched server's `jose` verification accepts.
+
+### As built (5.1 — shipped)
+- `lib/affiliations.ts` → `getSpeakerConferenceTalks(userId)`: server-only, admin-client,
+  strictly `userId`-scoped join across affiliations → conferences → days → slots → subscription.
+- `lib/billing.ts` → `conferenceTalkStatus()` / `isConferenceTalkReadOnly()` (derived from event window).
+- `components/dashboard/conference-talk-card.tsx` + a "Conference Talks" section in `app/dashboard/page.tsx`
+  (with the "don't use your free slot allowance" banner). Verified with `test.affiliated@evoca.test`.
+
+### As built (5.2 — code complete)
+- `lib/remote-token.ts` (mint/verify), `app/api/remote/token` (owner-gated mint) + `app/api/remote/validate`.
+- `app/remote/[token]/page.tsx` + `components/remote/remote-control.tsx` (swipe/tap, wake lock, slide counter).
+- Presenter "Phone remote" button + QR modal in `app/present/[sessionId]/page.tsx`.
+- `lib/party.ts` shared host/room constants.
 
 ---
 
@@ -82,13 +113,17 @@ Speakers need to advance slides without looking at their laptop. Currently no re
 
 ## Definition of Done
 
-- [ ] Speaker dashboard shows personal talks and conference talks in separate sections
-- [ ] Conference talks do not count toward free-tier talk limit
-- [ ] Conference talk cards show conference name, dates, slot time, status
-- [ ] After event ends, conference talks are read-only
-- [ ] Presenter view shows "Phone remote" button with QR code
-- [ ] Phone remote page works without login (token-authenticated URL)
-- [ ] Prev/Next on phone controls slides in realtime
-- [ ] Wake lock keeps phone screen on during session
-- [ ] Token expires after 8 hours
-- [ ] `features.json` feat-009, feat-015 marked complete
+**5.1 — shipped & browser-verified:**
+- [x] Speaker dashboard shows personal talks and conference talks in separate sections
+- [x] Conference talks do not count toward free-tier talk limit
+- [x] Conference talk cards show conference name, dates, slot time, status badge
+- [x] After event ends, conference talks are read-only (status "past", no live-session CTA)
+
+**5.2 — code complete; realtime slide control pending server deploy:**
+- [x] Presenter view shows "Phone remote" button with QR code
+- [x] Phone remote page works without login (token-authenticated URL)
+- [x] Token mint is owner-gated; expires after 8 hours; minted/validated end-to-end (verified)
+- [x] Remote UI: swipe + Prev/Next tap targets, slide counter, wake lock
+- [ ] **Prev/Next on phone actually advances slides** — blocked: deployed server drops `slide_*`
+      until `server-patches/` is deployed (adds them to `COMMAND_ROLES` + passthrough)
+- [x] `features.json` feat-009 → done, feat-015 → blocked (see entries)

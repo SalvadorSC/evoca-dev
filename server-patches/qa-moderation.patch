@@ -1,4 +1,4 @@
-From b8b59a4192a02d2a9995e028b81d220305a41e89 Mon Sep 17 00:00:00 2001
+From f10fa1919b06e0185ef8eb23bdc3e441286e509d Mon Sep 17 00:00:00 2001
 From: v0agent <it+v0agent@vercel.com>
 Date: Mon, 29 Jun 2026 10:41:53 +0000
 Subject: [PATCH] Add Q&A moderation: JWT auth, flagged model, delete/ban/lift
@@ -15,8 +15,8 @@ Co-authored-by: v0agent <it+v0agent@vercel.com>
 ---
  package-lock.json |  10 ++
  package.json      |   1 +
- src/server.ts     | 258 +++++++++++++++++++++++-----------------------
- 3 files changed, 142 insertions(+), 127 deletions(-)
+ src/server.ts     | 282 +++++++++++++++++++++++++---------------------
+ 3 files changed, 165 insertions(+), 128 deletions(-)
 
 diff --git a/package-lock.json b/package-lock.json
 index a690ba2..0594dbf 100644
@@ -59,10 +59,10 @@ index 9b02d21..e54d63c 100644
      "qrcode.react": "^4.2.0"
    },
 diff --git a/src/server.ts b/src/server.ts
-index 991eee1..b76277f 100644
+index 991eee1..563d9e0 100644
 --- a/src/server.ts
 +++ b/src/server.ts
-@@ -1,44 +1,46 @@
+@@ -1,46 +1,67 @@
  import type * as Party from "partykit/server";
 -
 -/* 
@@ -121,10 +121,31 @@ index 991eee1..b76277f 100644
 +  delete_question: "admin",
 +  ban_user: "admin",
 +  lift_ban: "admin",
++
++  // Slide control + presenter passthrough (Phase 5) — broadcast-only, no state.
++  // Speaker role required so attendees can't hijack the deck. The phone remote
++  // connects with a speaker-scoped token, so its taps are authorized here.
++  slide_next: "speaker",
++  slide_prev: "speaker",
++  slide_up: "speaker",
++  slide_down: "speaker",
++  highlight_question: "speaker",
  };
  
++// Commands that are simply rebroadcast to the room without mutating state.
++const PASSTHROUGH_COMMANDS = new Set([
++  "session_finished",
++  "slide_next",
++  "slide_prev",
++  "slide_up",
++  "slide_down",
++  "highlight_question",
++]);
++
  // ============================================================
-@@ -71,6 +73,8 @@ interface Question {
+ // TYPES
+ // ============================================================
+@@ -71,6 +92,8 @@ interface Question {
    votes: number;
    answered: boolean;
    hidden?: boolean;
@@ -133,7 +154,7 @@ index 991eee1..b76277f 100644
    createdAt: number;
    [key: string]: unknown;
  }
-@@ -92,30 +96,16 @@ interface State {
+@@ -92,30 +115,16 @@ interface State {
    alert: string | null;
  }
  
@@ -167,7 +188,7 @@ index 991eee1..b76277f 100644
  
  function isOffensive(text: string): boolean {
    const normalized = text.toLowerCase().replace(/[^a-z\s]/g, "");
-@@ -129,24 +119,20 @@ function isOffensive(text: string): boolean {
+@@ -129,24 +138,20 @@ function isOffensive(text: string): boolean {
  class RateLimiter {
    private buckets: Map<string, number[]> = new Map();
  
@@ -194,7 +215,7 @@ index 991eee1..b76277f 100644
      }
  
      timestamps.push(now);
-@@ -154,10 +140,9 @@ class RateLimiter {
+@@ -154,10 +159,9 @@ class RateLimiter {
      return true;
    }
  
@@ -206,7 +227,7 @@ index 991eee1..b76277f 100644
      for (const [key, timestamps] of this.buckets) {
        const filtered = timestamps.filter((t) => now - t < maxWindow);
        if (filtered.length === 0) {
-@@ -170,63 +155,44 @@ class RateLimiter {
+@@ -170,63 +174,44 @@ class RateLimiter {
  }
  
  // ============================================================
@@ -289,7 +310,7 @@ index 991eee1..b76277f 100644
    const role =
      payload.app_metadata?.role ||
      payload.user_metadata?.role ||
-@@ -252,10 +218,18 @@ function getConnectionRole(conn: Party.Connection): ConnectionRole {
+@@ -252,10 +237,18 @@ function getConnectionRole(conn: Party.Connection): ConnectionRole {
    return (conn.state as ConnectionMeta | undefined)?.role || "attendee";
  }
  
@@ -309,7 +330,7 @@ index 991eee1..b76277f 100644
      questions: state.questions.filter((q) => !q.hidden),
    };
  }
-@@ -277,20 +251,32 @@ export default class Server implements Party.Server {
+@@ -277,20 +270,32 @@ export default class Server implements Party.Server {
    };
  
    private rateLimiter = new RateLimiter();
@@ -345,7 +366,7 @@ index 991eee1..b76277f 100644
      const url = new URL(ctx.request.url);
      const token = url.searchParams.get("token");
  
-@@ -298,21 +284,22 @@ export default class Server implements Party.Server {
+@@ -298,21 +303,22 @@ export default class Server implements Party.Server {
      let userId: string | undefined;
  
      if (token) {
@@ -375,7 +396,7 @@ index 991eee1..b76277f 100644
  
      this.broadcastConnectionCount();
    }
-@@ -332,10 +319,8 @@ export default class Server implements Party.Server {
+@@ -332,10 +338,8 @@ export default class Server implements Party.Server {
      const msgType = msg.type as string;
      if (!msgType) return;
  
@@ -386,7 +407,7 @@ index 991eee1..b76277f 100644
        console.log(`[server] unknown command: ${msgType}`);
        return;
      }
-@@ -349,13 +334,10 @@ export default class Server implements Party.Server {
+@@ -349,13 +353,10 @@ export default class Server implements Party.Server {
            message: `Insufficient permissions for '${msgType}'. Required: ${requiredRole}, you have: ${senderRole}`,
          })
        );
@@ -401,7 +422,19 @@ index 991eee1..b76277f 100644
      if (!this.rateLimiter.check(sender.id, msgType)) {
        sender.send(
          JSON.stringify({
-@@ -380,17 +362,31 @@ export default class Server implements Party.Server {
+@@ -369,7 +370,10 @@ export default class Server implements Party.Server {
+ 
+     // ---- HANDLE COMMANDS ----
+ 
+-    if (msgType === "session_finished") {
++    // Broadcast-only commands (slide control, presenter cues): forward verbatim
++    // to the room without touching room state. Authorization + rate limiting
++    // already applied above, so the phone remote's taps land here as a speaker.
++    if (PASSTHROUGH_COMMANDS.has(msgType)) {
+       this.room.broadcast(JSON.stringify(msg));
+       return;
+     }
+@@ -380,17 +384,31 @@ export default class Server implements Party.Server {
  
      if (msgType === "question") {
        const text = (msg.text as string) || "";
@@ -435,7 +468,7 @@ index 991eee1..b76277f 100644
          createdAt: Date.now(),
        };
        this.state.questions = [question, ...this.state.questions].slice(0, 50);
-@@ -399,7 +395,6 @@ export default class Server implements Party.Server {
+@@ -399,7 +417,6 @@ export default class Server implements Party.Server {
      if (msgType === "vote") {
        const questionId = msg.questionId as string;
  
@@ -443,7 +476,7 @@ index 991eee1..b76277f 100644
        if (!this.voteTracker.has(questionId)) {
          this.voteTracker.set(questionId, new Set());
        }
-@@ -429,17 +424,41 @@ export default class Server implements Party.Server {
+@@ -429,17 +446,41 @@ export default class Server implements Party.Server {
  
      if (msgType === "flag") {
        const messageId = msg.messageId as string;
@@ -493,7 +526,7 @@ index 991eee1..b76277f 100644
        }
      }
  
-@@ -469,16 +488,9 @@ export default class Server implements Party.Server {
+@@ -469,16 +510,9 @@ export default class Server implements Party.Server {
  
      if (msgType === "attend") {
        const sessionId = msg.sessionId as string;
@@ -513,7 +546,7 @@ index 991eee1..b76277f 100644
        if (msg.status === "going") {
          att.going.push({
            userId: msg.userId as string,
-@@ -498,19 +510,11 @@ export default class Server implements Party.Server {
+@@ -498,19 +532,11 @@ export default class Server implements Party.Server {
        this.state.alert = msg.text as string;
        setTimeout(() => {
          this.state.alert = null;
@@ -535,7 +568,7 @@ index 991eee1..b76277f 100644
    }
  
    private broadcastConnectionCount() {
-@@ -523,4 +527,4 @@ export default class Server implements Party.Server {
+@@ -523,4 +549,4 @@ export default class Server implements Party.Server {
    }
  }
  

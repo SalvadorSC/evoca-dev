@@ -370,7 +370,10 @@ export default class Server implements Party.Server {
 
     // ---- HANDLE COMMANDS ----
 
-    if (msgType === "session_finished") {
+    // Broadcast-only commands (slide control, presenter cues): forward verbatim
+    // to the room without touching room state. Authorization + rate limiting
+    // already applied above, so the phone remote's taps land here as a speaker.
+    if (PASSTHROUGH_COMMANDS.has(msgType)) {
       this.room.broadcast(JSON.stringify(msg));
       return;
     }

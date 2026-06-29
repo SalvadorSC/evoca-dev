@@ -44,8 +44,8 @@ export function RemoteControl({ room, token }: { room: string; token: string }) 
 
     async function acquire() {
       try {
-        // @ts-expect-error - wakeLock is not in all TS lib targets yet
-        lock = await navigator.wakeLock?.request("screen")
+        const wl = (navigator as Navigator & { wakeLock?: WakeLock }).wakeLock
+        lock = wl ? await wl.request("screen") : null
       } catch {
         /* wake lock unsupported or denied — non-fatal */
       }

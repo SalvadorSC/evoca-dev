@@ -90,13 +90,13 @@
   {
     "id": "feat-009",
     "name": "Speaker conference talk portal",
-    "description": "Speakers who have both conference talks and personal presentations can manage all of them from the same speaker portal. Conference talks are excluded from the personal free-tier talk count.",
+    "description": "Speakers manage personal + conference talks from the dashboard: a 'Conference Talks' section (getSpeakerConferenceTalks) lists slots assigned via accepted affiliations with conference name, dates, slot time, and a status badge, excluded from the free-tier count and read-only after the event ends. Shipped and browser-verified.",
     "complexity": "medium",
     "priority": "medium",
     "category": "nice-to-have",
     "phase": 5,
-    "status": "pending",
-    "complete": false
+    "status": "done",
+    "complete": true
   },
   {
     "id": "feat-010",
@@ -166,12 +166,12 @@
   {
     "id": "feat-015",
     "name": "Speaker slide control via phone",
-    "description": "Allow speakers to control their slide deck (next, previous, jump to slide) from a mobile phone via a dedicated remote-control view. Connection should be low-latency and require no app install (PWA or web).",
+    "description": "Web phone remote (no install): presenter shows a QR linking to /remote/[token]; the token is a short-lived speaker-scoped JWT (8h) minted at /api/remote/token. The remote (swipe + Prev/Next, slide counter, wake lock) broadcasts slide_next/slide_prev over PartyKit. Code complete and token flow verified end-to-end; blocked because the deployed PartyKit server drops slide_* commands until server-patches/ is deployed (adds them to COMMAND_ROLES + passthrough). One deploy unblocks this and Phase 3.",
     "complexity": "high",
     "priority": "medium",
     "category": "nice-to-have",
     "phase": 5,
-    "status": "pending",
+    "status": "blocked",
     "complete": false
   },
   {

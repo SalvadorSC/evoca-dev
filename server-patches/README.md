@@ -1,9 +1,10 @@
-# evoca-server — Q&A Moderation changes (Phase 3)
+# evoca-server — Phase 3 (Q&A Moderation) + Phase 5.2 (slide remote) changes
 
-These files hold the PartyKit server changes for Phase 3 Q&A moderation. They
-live here **only because v0 could not push to `SalvadorSC/evoca-server`** (the
-GitHub integration in this chat is authorized for `evoca-dev`, not the server
-repo). Apply them to the server repo to go live.
+These files hold the PartyKit server changes for **Phase 3 Q&A moderation** and
+**Phase 5.2 phone slide remote**. They live here **only because v0 could not push
+to `SalvadorSC/evoca-server`** (the GitHub integration in this chat is authorized
+for `evoca-dev`, not the server repo). Apply them to the server repo to go live.
+A single deploy unblocks both phases.
 
 ## Contents
 
@@ -21,6 +22,12 @@ repo). Apply them to the server repo to go live.
 - New admin-only commands: `delete_question`, `ban_user`, `lift_ban`.
 - The `sync` payload now includes the connection's `role` so the client can gate
   moderator UI (the server still enforces every action).
+- **Phase 5.2:** `slide_next`/`slide_prev`/`slide_up`/`slide_down`/`highlight_question`
+  added to `COMMAND_ROLES` (min role `speaker`) and a `PASSTHROUGH_COMMANDS` set
+  rebroadcasts them without mutating state. Without this, the deployed server
+  drops these as "unknown command", so the phone remote (and presenter→wall
+  slide sync) is a no-op. The remote authenticates with a speaker-scoped JWT the
+  `jose` verification above accepts.
 
 ## How to apply
 
