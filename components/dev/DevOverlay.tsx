@@ -14,8 +14,8 @@ type Item = {
   id: string;
   name: string;
   description: string;
-  complexity: string;
-  priority: string;
+  complexity: "low" | "medium" | "high";
+  priority: "low" | "medium" | "high";
   category?: string;
   phase?: number;
   status: string;
@@ -23,46 +23,29 @@ type Item = {
   subtasks?: Subtask[];
 };
 
-const PHASE_LABELS: Record<number, string> = {
-  0: "DX / Tooling",
-  1: "Phase 1 — Billing Foundation",
-  2: "Phase 2 — Conference Management",
-  3: "Phase 3 — Q&A Moderation",
-  4: "Phase 4 — Presentation Formats",
-  5: "Phase 5 — Speaker Experience",
-  6: "Phase 6 — Polish & Responsive",
+const PHASE_META: Record<number, { label: string; color: string }> = {
+  0: { label: "DX / Tooling",              color: "#64748b" },
+  1: { label: "Billing Foundation",        color: "#f59e0b" },
+  2: { label: "Conference Management",     color: "#3b82f6" },
+  3: { label: "Q&A Moderation",            color: "#ef4444" },
+  4: { label: "Presentation Formats",      color: "#8b5cf6" },
+  5: { label: "Speaker Experience",        color: "#10b981" },
+  6: { label: "Polish & Responsive",       color: "#ec4899" },
 };
 
-const priorityColor: Record<string, string> = {
-  high: "#e24b4a",
+const PRIORITY_DOT: Record<string, string> = {
+  high:   "#e24b4a",
   medium: "#ef9f27",
-  low: "#639922",
+  low:    "#93c5fd",
 };
 
-const complexityLabel: Record<string, string> = {
-  low: "L",
-  medium: "M",
-  high: "H",
+const COMPLEXITY_LABEL: Record<string, string> = {
+  low:    "easy",
+  medium: "mid",
+  high:   "hard",
 };
 
-function Badge({ label, color }: { label: string; color: string }) {
-  return (
-    <span
-      style={{
-        fontSize: 10,
-        fontWeight: 500,
-        padding: "1px 6px",
-        borderRadius: 4,
-        border: `1px solid ${color}`,
-        color,
-        whiteSpace: "nowrap",
-      }}
-    >
-      {label}
-    </span>
-  );
-}
-
+// ─── Subtask row ────────────────────────────────────────────────────────────
 function SubtaskRow({
   subtask,
   done,
@@ -74,49 +57,51 @@ function SubtaskRow({
 }) {
   return (
     <div
+      onClick={() => onToggle(subtask.id)}
       style={{
         display: "flex",
         alignItems: "flex-start",
-        gap: 6,
-        padding: "3px 0 3px 20px",
-        opacity: done ? 0.45 : 1,
+        gap: 7,
+        padding: "3px 0 3px 22px",
+        cursor: "pointer",
+        opacity: done ? 0.4 : 1,
       }}
     >
-      <span
-        title={done ? "Mark as pending" : "Mark as done"}
-        onClick={() => onToggle(subtask.id)}
-        style={{
-          marginTop: 1,
-          width: 12,
-          height: 12,
-          borderRadius: 2,
-          border: `1.5px solid ${done ? "#639922" : "#ccc"}`,
-          background: done ? "#639922" : "transparent",
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          flexShrink: 0,
-          cursor: "pointer",
-          color: "#fff",
-          fontSize: 8,
-          lineHeight: 1,
-        }}
-      >
-        {done ? "✓" : ""}
-      </span>
-      <span
-        style={{
-          fontSize: 11,
-          color: "#555",
-          textDecoration: done ? "line-through" : "none",
-        }}
-      >
+      <Checkbox checked={done} size={11} />
+      <span style={{ fontSize: 11, color: "#444", lineHeight: 1.4, textDecoration: done ? "line-through" : "none" }}>
         {subtask.name}
       </span>
     </div>
   );
 }
 
+// ─── Checkbox ───────────────────────────────────────────────────────────────
+function Checkbox({ checked, size = 14 }: { checked: boolean; size?: number }) {
+  return (
+    <span
+      style={{
+        flexShrink: 0,
+        marginTop: 1,
+        width: size,
+        height: size,
+        borderRadius: size === 11 ? 2 : 3,
+        border: `1.5px solid ${checked ? "#22c55e" : "#d1d5db"}`,
+        background: checked ? "#22c55e" : "transparent",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#fff",
+        fontSize: size - 4,
+        lineHeight: 1,
+        transition: "all 0.15s",
+      }}
+    >
+      {checked ? "✓" : ""}
+    </span>
+  );
+}
+
+// ─── Item row ────────────────────────────────────────────────────────────────
 function ItemRow({
   item,
   done,
@@ -135,109 +120,111 @@ function ItemRow({
         doneOverrides[s.id] !== undefined ? doneOverrides[s.id] : s.complete
       ).length
     : null;
+  const subtasksTotal = item.subtasks?.length ?? 0;
+  const hasSubtasks = subtasksTotal > 0;
 
   return (
     <div
       style={{
-        borderBottom: "0.5px solid rgba(0,0,0,0.08)",
-        padding: "6px 0",
-        opacity: done ? 0.45 : 1,
+        borderBottom: "0.5px solid rgba(0,0,0,0.07)",
+        opacity: done ? 0.38 : 1,
+        transition: "opacity 0.15s",
       }}
     >
+      {/* Main row */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 6,
+          gap: 7,
+          padding: "6px 0",
           cursor: "pointer",
           userSelect: "none",
         }}
         onClick={() => setOpen((v) => !v)}
       >
+        {/* Checkbox — stop propagation so clicking it doesn't also toggle expand */}
         <span
-          title={done ? "Mark as pending" : "Mark as done"}
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleDone(item.id);
-          }}
-          style={{
-            width: 14,
-            height: 14,
-            borderRadius: 3,
-            border: `1.5px solid ${done ? "#639922" : "#ccc"}`,
-            background: done ? "#639922" : "transparent",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-            cursor: "pointer",
-            color: "#fff",
-            fontSize: 9,
-            lineHeight: 1,
-          }}
+          onClick={(e) => { e.stopPropagation(); onToggleDone(item.id); }}
+          title={done ? "Mark pending" : "Mark done"}
         >
-          {done ? "✓" : ""}
+          <Checkbox checked={done} />
         </span>
-        <span style={{ fontSize: 11, color: "#888", minWidth: 54 }}>{item.id}</span>
+
+        {/* Priority dot */}
+        <span
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            background: PRIORITY_DOT[item.priority] ?? "#ccc",
+            flexShrink: 0,
+          }}
+          title={`Priority: ${item.priority}`}
+        />
+
+        {/* Name */}
         <span
           style={{
             flex: 1,
             fontSize: 12,
             fontWeight: 500,
+            color: "#1a1a1a",
             textDecoration: done ? "line-through" : "none",
+            lineHeight: 1.35,
           }}
         >
           {item.name}
         </span>
-        {subtasksDone !== null && (
-          <span style={{ fontSize: 10, color: "#888" }}>
-            {subtasksDone}/{item.subtasks!.length}
-          </span>
-        )}
-        {item.category && (
-          <Badge
-            label={item.category === "nice-to-have" ? "nice" : item.category}
-            color={
-              item.category === "core"
-                ? "#3b82f6"
-                : item.category === "nice-to-have"
-                ? "#a855f7"
-                : "#64748b"
-            }
-          />
-        )}
-        <Badge
-          label={complexityLabel[item.complexity] ?? item.complexity}
-          color="#888"
-        />
-        <Badge
-          label={item.priority}
-          color={priorityColor[item.priority] ?? "#888"}
-        />
-        <span style={{ fontSize: 11, color: "#aaa", marginLeft: 2 }}>
-          {open ? "▲" : "▼"}
-        </span>
-      </div>
 
-      {open && (
-        <>
-          <p
+        {/* Right side meta */}
+        <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
+          {hasSubtasks && (
+            <span
+              style={{
+                fontSize: 10,
+                color: subtasksDone === subtasksTotal ? "#22c55e" : "#94a3b8",
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
+              {subtasksDone}/{subtasksTotal}
+            </span>
+          )}
+          <span
             style={{
-              fontSize: 11,
-              color: "#555",
-              margin: "4px 0 0 80px",
-              lineHeight: 1.5,
+              fontSize: 10,
+              color: "#94a3b8",
+              background: "#f1f5f9",
+              borderRadius: 4,
+              padding: "1px 5px",
             }}
           >
+            {COMPLEXITY_LABEL[item.complexity] ?? item.complexity}
+          </span>
+          <span
+            style={{
+              fontSize: 10,
+              color: "#94a3b8",
+              transform: open ? "rotate(180deg)" : "none",
+              transition: "transform 0.15s",
+              lineHeight: 1,
+            }}
+          >
+            ▾
+          </span>
+        </div>
+      </div>
+
+      {/* Expanded body */}
+      {open && (
+        <div style={{ paddingBottom: 6 }}>
+          <p style={{ fontSize: 11, color: "#6b7280", margin: "0 0 4px 21px", lineHeight: 1.5 }}>
             {item.description}
           </p>
-          {item.subtasks && item.subtasks.length > 0 && (
-            <div style={{ marginTop: 4 }}>
-              {item.subtasks.map((s) => {
-                const sDone =
-                  doneOverrides[s.id] !== undefined
-                    ? doneOverrides[s.id]
-                    : s.complete;
+          {hasSubtasks && (
+            <div>
+              {item.subtasks!.map((s) => {
+                const sDone = doneOverrides[s.id] !== undefined ? doneOverrides[s.id] : s.complete;
                 return (
                   <SubtaskRow
                     key={s.id}
@@ -249,12 +236,13 @@ function ItemRow({
               })}
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );
 }
 
+// ─── Phase group ─────────────────────────────────────────────────────────────
 function PhaseGroup({
   phase,
   items,
@@ -269,33 +257,64 @@ function PhaseGroup({
   doneOverrides: Record<string, boolean>;
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const meta = PHASE_META[phase] ?? { label: `Phase ${phase}`, color: "#94a3b8" };
   const pending = items.filter((i) => !isDone(i)).length;
   const total = items.length;
+  const allDone = pending === 0;
 
   return (
     <div style={{ marginBottom: 2 }}>
+      {/* Phase header */}
       <div
         onClick={() => setCollapsed((v) => !v)}
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 6,
-          padding: "5px 0",
+          gap: 7,
+          padding: "7px 0 5px",
           cursor: "pointer",
           userSelect: "none",
-          borderBottom: "1px solid rgba(0,0,0,0.1)",
+          borderBottom: collapsed ? "none" : `1.5px solid ${meta.color}22`,
         }}
       >
-        <span style={{ fontSize: 10, color: "#aaa" }}>{collapsed ? "▶" : "▼"}</span>
-        <span style={{ fontSize: 11, fontWeight: 700, color: "#333", flex: 1 }}>
-          {PHASE_LABELS[phase] ?? `Phase ${phase}`}
+        {/* Colored pill */}
+        <span
+          style={{
+            width: 3,
+            height: 14,
+            borderRadius: 99,
+            background: meta.color,
+            flexShrink: 0,
+            opacity: allDone ? 0.4 : 1,
+          }}
+        />
+        <span
+          style={{
+            flex: 1,
+            fontSize: 11,
+            fontWeight: 700,
+            color: allDone ? "#94a3b8" : "#111",
+            letterSpacing: 0.1,
+          }}
+        >
+          {meta.label}
         </span>
-        <span style={{ fontSize: 10, color: pending === 0 ? "#639922" : "#888" }}>
-          {pending === 0 ? "done" : `${pending}/${total} pending`}
+        <span
+          style={{
+            fontSize: 10,
+            color: allDone ? "#22c55e" : "#94a3b8",
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
+          {allDone ? "done" : `${total - pending}/${total}`}
+        </span>
+        <span style={{ fontSize: 10, color: "#cbd5e1", transform: collapsed ? "none" : "rotate(180deg)", transition: "transform 0.15s" }}>
+          ▾
         </span>
       </div>
+
       {!collapsed && (
-        <div style={{ paddingLeft: 2 }}>
+        <div style={{ paddingLeft: 6 }}>
           {items.map((item) => (
             <ItemRow
               key={item.id}
@@ -311,6 +330,7 @@ function PhaseGroup({
   );
 }
 
+// ─── Root ────────────────────────────────────────────────────────────────────
 export function DevOverlay() {
   if (process.env.NODE_ENV !== "development") return null;
   return <DevOverlayInner />;
@@ -323,18 +343,12 @@ function DevOverlayInner() {
   const [minimized, setMinimized] = useState(false);
   const [tab, setTab] = useState<"features" | "ideas">("features");
   const [pos, setPos] = useState({ x: 16, y: 80 });
-  const [doneOverrides, setDoneOverrides] = useState<Record<string, boolean>>(
-    () => {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
-      } catch {
-        return {};
-      }
-    }
-  );
+  const [doneOverrides, setDoneOverrides] = useState<Record<string, boolean>>(() => {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}"); }
+    catch { return {}; }
+  });
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
-  const panelRef = useRef<HTMLDivElement>(null);
 
   const toggleDone = useCallback((id: string) => {
     setDoneOverrides((prev) => {
@@ -358,9 +372,7 @@ function DevOverlayInner() {
       if (!dragging.current) return;
       setPos({ x: e.clientX - offset.current.x, y: e.clientY - offset.current.y });
     };
-    const onUp = () => {
-      dragging.current = false;
-    };
+    const onUp = () => { dragging.current = false; };
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
     return () => {
@@ -370,25 +382,23 @@ function DevOverlayInner() {
   }, []);
 
   const isDone = (item: Item) =>
-    doneOverrides[item.id] !== undefined
-      ? doneOverrides[item.id]
-      : item.complete;
+    doneOverrides[item.id] !== undefined ? doneOverrides[item.id] : item.complete;
 
   const featureItems = features as Item[];
   const ideaItems = ideas as Item[];
 
-  const pendingCount = featureItems.filter((f) => !isDone(f)).length;
+  const totalFeatures = featureItems.length;
+  const doneFeatures = featureItems.filter(isDone).length;
+  const pendingCount = totalFeatures - doneFeatures;
 
-  // Group features by phase
+  // Group by phase
   const byPhase: Record<number, Item[]> = {};
   featureItems.forEach((f) => {
     const p = f.phase ?? 99;
     if (!byPhase[p]) byPhase[p] = [];
     byPhase[p].push(f);
   });
-  const phaseKeys = Object.keys(byPhase)
-    .map(Number)
-    .sort((a, b) => a - b);
+  const phaseKeys = Object.keys(byPhase).map(Number).sort((a, b) => a - b);
 
   if (!visible) {
     return (
@@ -400,38 +410,38 @@ function DevOverlayInner() {
           right: 16,
           zIndex: 9999,
           fontSize: 11,
-          fontWeight: 500,
-          padding: "6px 12px",
+          fontWeight: 600,
+          padding: "5px 12px",
           borderRadius: 8,
-          border: "1px solid rgba(0,0,0,0.15)",
+          border: "1px solid #e2e8f0",
           background: "#fff",
           cursor: "pointer",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          color: "#475569",
         }}
       >
-        Dev overlay
+        {pendingCount} pending
       </button>
     );
   }
 
   return (
     <div
-      ref={panelRef}
       style={{
         position: "fixed",
         top: pos.y,
         left: pos.x,
         zIndex: 9999,
-        width: 360,
-        maxHeight: minimized ? "auto" : "75vh",
+        width: 340,
+        maxHeight: minimized ? "auto" : "72vh",
         background: "#fff",
-        border: "1px solid rgba(0,0,0,0.12)",
-        borderRadius: 10,
-        boxShadow: "0 4px 24px rgba(0,0,0,0.14)",
+        border: "1px solid #e2e8f0",
+        borderRadius: 12,
+        boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        fontFamily: "system-ui, sans-serif",
+        fontFamily: "'Inter', system-ui, sans-serif",
       }}
     >
       {/* Header */}
@@ -441,71 +451,73 @@ function DevOverlayInner() {
           display: "flex",
           alignItems: "center",
           gap: 8,
-          padding: "8px 10px",
-          background: "#f5f5f5",
-          borderBottom: "0.5px solid rgba(0,0,0,0.1)",
+          padding: "9px 12px",
+          borderBottom: "1px solid #f1f5f9",
           cursor: "grab",
           userSelect: "none",
+          background: "#fafafa",
         }}
       >
-        <span style={{ fontSize: 11, fontWeight: 600, flex: 1, color: "#333" }}>
-          Dev tracker — {pendingCount} pending
-        </span>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#0f172a" }}>Roadmap</div>
+          <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 1 }}>
+            {doneFeatures}/{totalFeatures} done &middot; {pendingCount} remaining
+          </div>
+        </div>
+        {/* Mini progress bar */}
+        <div style={{ width: 60, height: 4, borderRadius: 99, background: "#f1f5f9", overflow: "hidden" }}>
+          <div
+            style={{
+              height: "100%",
+              width: `${(doneFeatures / totalFeatures) * 100}%`,
+              background: "#22c55e",
+              borderRadius: 99,
+              transition: "width 0.3s",
+            }}
+          />
+        </div>
         <button
           onClick={() => setMinimized((v) => !v)}
-          style={{
-            fontSize: 11,
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "#666",
-          }}
+          style={{ fontSize: 13, background: "none", border: "none", cursor: "pointer", color: "#94a3b8", lineHeight: 1, padding: "0 2px" }}
         >
-          {minimized ? "expand" : "—"}
+          {minimized ? "+" : "−"}
         </button>
         <button
           onClick={() => setVisible(false)}
-          style={{
-            fontSize: 11,
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "#666",
-          }}
+          style={{ fontSize: 13, background: "none", border: "none", cursor: "pointer", color: "#94a3b8", lineHeight: 1, padding: "0 2px" }}
         >
-          x
+          ×
         </button>
       </div>
 
       {!minimized && (
         <>
           {/* Tabs */}
-          <div style={{ display: "flex", borderBottom: "0.5px solid rgba(0,0,0,0.1)" }}>
+          <div style={{ display: "flex", background: "#fafafa", borderBottom: "1px solid #f1f5f9" }}>
             {(["features", "ideas"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
                 style={{
                   flex: 1,
-                  padding: "6px 0",
-                  fontSize: 12,
+                  padding: "7px 0",
+                  fontSize: 11,
                   fontWeight: tab === t ? 600 : 400,
-                  background: tab === t ? "#fff" : "#f9f9f9",
+                  background: "none",
                   border: "none",
-                  borderBottom: tab === t ? "2px solid #333" : "2px solid transparent",
+                  borderBottom: tab === t ? "2px solid #0f172a" : "2px solid transparent",
                   cursor: "pointer",
-                  color: tab === t ? "#111" : "#888",
+                  color: tab === t ? "#0f172a" : "#94a3b8",
+                  transition: "color 0.15s",
                 }}
               >
-                {t === "features"
-                  ? `Roadmap (${featureItems.length})`
-                  : `Ideas (${ideaItems.length})`}
+                {t === "features" ? "Roadmap" : "Ideas"}
               </button>
             ))}
           </div>
 
           {/* Content */}
-          <div style={{ overflowY: "auto", padding: "4px 10px 8px", flex: 1 }}>
+          <div style={{ overflowY: "auto", padding: "4px 12px 10px", flex: 1 }}>
             {tab === "features" ? (
               phaseKeys.map((phase) => (
                 <PhaseGroup
@@ -530,19 +542,27 @@ function DevOverlayInner() {
             )}
           </div>
 
-          {/* Legend */}
+          {/* Footer legend */}
           <div
             style={{
-              padding: "4px 10px",
-              borderTop: "0.5px solid rgba(0,0,0,0.08)",
+              padding: "4px 12px",
+              borderTop: "1px solid #f1f5f9",
               display: "flex",
-              gap: 10,
+              gap: 12,
               fontSize: 10,
-              color: "#aaa",
+              color: "#cbd5e1",
             }}
           >
-            <span>L=low M=med H=high complexity</span>
-            <span style={{ marginLeft: "auto" }}>Click row to expand</span>
+            <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#e24b4a", display: "inline-block" }} /> high
+            </span>
+            <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#ef9f27", display: "inline-block" }} /> medium
+            </span>
+            <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#93c5fd", display: "inline-block" }} /> low
+            </span>
+            <span style={{ marginLeft: "auto" }}>click to expand</span>
           </div>
         </>
       )}
