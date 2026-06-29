@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
+import { FileSlideExtractor } from "@/components/dashboard/file-slide-extractor"
 import { ArrowLeft, ArrowRight, Check, Link2, FileText, SkipForward } from "lucide-react"
 
 type Step = 1 | 2 | 3
@@ -12,7 +13,7 @@ type FormData = {
   title: string
   description: string
   slideUrl: string
-  slideType: "url" | "none"
+  slideType: "url" | "file" | "none"
 }
 
 function slugify(text: string): string {
@@ -58,6 +59,7 @@ export default function NewTalkPage() {
   const [step, setStep] = useState<Step>(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [extractedSlides, setExtractedSlides] = useState<string[]>([])
   const [form, setForm] = useState<FormData>({
     title: "",
     description: "",
@@ -107,6 +109,47 @@ export default function NewTalkPage() {
       const suffix = Math.random().toString(36).slice(2, 6)
       const slug = `${baseSlug}-${suffix}`
 
+      // If file slides were extracted, upload them to Blob
+      let slideUrl = form.slideUrl.trim() || null
+      let slideType = form.slideType === "none" ? null : form.slideType
+
+      if (form.slideType === "file" && extractedSlides.length > 0) {
+        try {
+          // Upload each slide image directly from the browser to Blob. This
+          // avoids the ~4.5 MB serverless request body limit that truncated the
+          // old single base64 JSON POST ("Unterminated string in JSON").
+          const { upload } = await import("@vercel/blob/client")
+          const slideUrls: string[] = []
+          for (let i = 0; i < extractedSlides.length; i++) {
+            const imageBlob = await (await fetch(extractedSlides[i])).blob()
+            const uploaded = await upload(`talks/${slug}/slide-${i + 1}.png`, imageBlob, {
+              access: "public",
+              contentType: "image/png",
+              handleUploadUrl: "/api/talks/slides-upload-token",
+            })
+            slideUrls.push(uploaded.url)
+          }
+
+          // Persist a tiny manifest of URLs (well under the body limit).
+          const response = await fetch("/api/talks/upload-slides", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ slideUrls, talkSlug: slug }),
+          })
+
+          if (!response.ok) {
+            const data = await response.json().catch(() => ({}))
+            throw new Error(data.error || "Failed to save slides")
+          }
+          const data = await response.json()
+          slideUrl = data.url
+        } catch (uploadError) {
+          console.error("[v0] Slide upload failed:", uploadError)
+          setError("Failed to upload slides. Try again.")
+          return
+        }
+      }
+
       const { error: insertError } = await supabase
         .from("talks")
         .insert({
@@ -114,8 +157,8 @@ export default function NewTalkPage() {
           title: form.title.trim(),
           description: form.description.trim() || null,
           slug,
-          slide_url: form.slideUrl.trim() || null,
-          slide_type: form.slideUrl.trim() ? form.slideType : null,
+          slide_url: slideUrl,
+          slide_type: slideUrl ? slideType : null,
         })
 
       if (insertError) {
@@ -137,13 +180,13 @@ export default function NewTalkPage() {
       {/* Back link */}
       <Link
         href="/dashboard"
-        className="inline-flex items-center gap-2 font-mono text-xs text-jsconf-muted hover:text-white uppercase tracking-wider mb-8 transition-all duration-150"
+        className="inline-flex items-center gap-2 font-mono text-xs text-jsconf-muted hover:text-foreground uppercase tracking-wider mb-8 transition-all duration-150"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         Back to Talks
       </Link>
 
-      <h1 className="font-display font-bold text-2xl text-white uppercase tracking-wide mb-2">
+      <h1 className="font-display font-bold text-2xl text-foreground uppercase tracking-wide mb-2">
         New Talk
       </h1>
       <p className="font-mono text-xs text-jsconf-muted mb-8">
@@ -164,7 +207,7 @@ export default function NewTalkPage() {
               value={form.title}
               onChange={(e) => update("title", e.target.value)}
               placeholder="e.g. The Future of JavaScript"
-              className="w-full bg-jsconf-surface border border-jsconf-border px-4 py-3 font-sans text-sm text-white placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow transition-all duration-150"
+              className="w-full bg-jsconf-surface border border-jsconf-border px-4 py-3 font-sans text-sm text-foreground placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow transition-all duration-150"
               autoFocus
             />
           </div>
@@ -177,7 +220,7 @@ export default function NewTalkPage() {
               onChange={(e) => update("description", e.target.value)}
               placeholder="A brief description of your talk..."
               rows={4}
-              className="w-full bg-jsconf-surface border border-jsconf-border px-4 py-3 font-sans text-sm text-white placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow resize-none transition-all duration-150"
+              className="w-full bg-jsconf-surface border border-jsconf-border px-4 py-3 font-sans text-sm text-foreground placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow resize-none transition-all duration-150"
             />
           </div>
           {error && (
@@ -200,7 +243,7 @@ export default function NewTalkPage() {
             Optionally link your slides. Attendees on the wall can see what slide you are on.
           </p>
 
-          {/* Slides.com URL option */}
+          {/* Presentation URL option (Phase 4.2) */}
           <div
             className={`border p-4 cursor-pointer transition-all duration-150 ${
               form.slideType === "url"
@@ -211,28 +254,53 @@ export default function NewTalkPage() {
           >
             <div className="flex items-center gap-3 mb-3">
               <Link2 className="h-4 w-4 text-jsconf-yellow" />
-              <span className="font-mono text-sm text-white">Paste a Slides.com URL</span>
+              <span className="font-mono text-sm text-foreground">Paste an embed URL</span>
             </div>
             {form.slideType === "url" && (
-              <input
-                type="url"
-                value={form.slideUrl}
-                onChange={(e) => update("slideUrl", e.target.value)}
-                placeholder="https://slides.com/you/your-talk"
-                className="w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-mono text-sm text-white placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
-                autoFocus
-                onClick={(e) => e.stopPropagation()}
-              />
+              <>
+                <input
+                  type="url"
+                  value={form.slideUrl}
+                  onChange={(e) => update("slideUrl", e.target.value)}
+                  placeholder="https://slides.com/you/talk or https://docs.google.com/presentation/..."
+                  className="w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-mono text-sm text-foreground placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
+                  autoFocus
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <p className="font-mono text-[11px] text-jsconf-muted mt-2">
+                  Works with Slides.com, Google Slides, Figma, Miro, or any embeddable presentation URL.
+                </p>
+              </>
             )}
           </div>
 
-          {/* PDF note */}
-          <div className="border border-jsconf-border bg-jsconf-surface p-4 flex items-start gap-3 opacity-50">
-            <FileText className="h-4 w-4 text-jsconf-muted mt-0.5 shrink-0" />
-            <div>
-              <span className="font-mono text-sm text-jsconf-muted">Upload PDF / PPTX</span>
-              <p className="font-mono text-xs text-jsconf-muted mt-1">Coming soon on Pro plan</p>
+          {/* File upload option (Phase 4.1) */}
+          <div
+            className={`border p-4 cursor-pointer transition-all duration-150 ${
+              form.slideType === "file"
+                ? "border-jsconf-yellow bg-jsconf-yellow-dim"
+                : "border-jsconf-border bg-jsconf-surface hover:border-jsconf-muted"
+            }`}
+            onClick={() => update("slideType", "file")}
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <FileText className="h-4 w-4 text-jsconf-yellow" />
+              <span className="font-mono text-sm text-foreground">Upload PDF or PPTX</span>
             </div>
+            {form.slideType === "file" && (
+              <>
+                <FileSlideExtractor
+                  onSlidesExtracted={(slides) => {
+                    setExtractedSlides(slides)
+                  }}
+                />
+                {extractedSlides.length > 0 && (
+                  <p className="font-mono text-[11px] text-jsconf-muted mt-2">
+                    ✓ {extractedSlides.length} slide{extractedSlides.length !== 1 ? "s" : ""} extracted
+                  </p>
+                )}
+              </>
+            )}
           </div>
 
           {error && (
@@ -242,7 +310,7 @@ export default function NewTalkPage() {
           <div className="flex items-center justify-between mt-2">
             <button
               onClick={back}
-              className="inline-flex items-center gap-2 px-4 py-2.5 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-white hover:border-white transition-all duration-150"
+              className="inline-flex items-center gap-2 px-4 py-2.5 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-foreground hover:border-white transition-all duration-150"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back
@@ -250,7 +318,7 @@ export default function NewTalkPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={skipSlides}
-                className="inline-flex items-center gap-1.5 px-3 py-2.5 font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-white transition-all duration-150"
+                className="inline-flex items-center gap-1.5 px-3 py-2.5 font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-foreground transition-all duration-150"
               >
                 <SkipForward className="h-3.5 w-3.5" />
                 Skip
@@ -273,7 +341,7 @@ export default function NewTalkPage() {
           <div className="bg-jsconf-surface border border-jsconf-border p-5 flex flex-col gap-4">
             <div>
               <span className="font-mono text-[10px] text-jsconf-muted uppercase tracking-wider block mb-1">Title</span>
-              <p className="font-display font-bold text-white">{form.title}</p>
+              <p className="font-display font-bold text-foreground">{form.title}</p>
             </div>
             {form.description && (
               <div>
@@ -283,9 +351,53 @@ export default function NewTalkPage() {
             )}
             <div>
               <span className="font-mono text-[10px] text-jsconf-muted uppercase tracking-wider block mb-1">Slides</span>
-              <p className="font-mono text-sm text-white">
-                {form.slideUrl ? form.slideUrl : "None — skipped"}
-              </p>
+
+              {/* Uploaded file: thumbnail grid preview */}
+              {form.slideType === "file" && extractedSlides.length > 0 ? (
+                <>
+                  <p className="font-mono text-sm text-foreground mb-3">
+                    {extractedSlides.length} slide{extractedSlides.length !== 1 ? "s" : ""} from your file
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {extractedSlides.slice(0, 6).map((src, i) => (
+                      <div
+                        key={i}
+                        className="relative aspect-video border border-jsconf-border bg-jsconf-bg overflow-hidden"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={src || "/placeholder.svg"}
+                          alt={`Slide ${i + 1} preview`}
+                          className="w-full h-full object-contain"
+                        />
+                        <span className="absolute bottom-0 right-0 px-1.5 py-0.5 bg-jsconf-bg/80 font-mono text-[10px] text-jsconf-muted">
+                          {i + 1}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  {extractedSlides.length > 6 && (
+                    <p className="font-mono text-[11px] text-jsconf-muted mt-2">
+                      + {extractedSlides.length - 6} more
+                    </p>
+                  )}
+                </>
+              ) : form.slideType === "url" && form.slideUrl ? (
+                /* Embed URL: live iframe preview */
+                <>
+                  <p className="font-mono text-sm text-foreground mb-3 break-all">{form.slideUrl}</p>
+                  <div className="relative aspect-video border border-jsconf-border bg-jsconf-bg overflow-hidden">
+                    <iframe
+                      src={form.slideUrl}
+                      title="Slide embed preview"
+                      className="w-full h-full"
+                      sandbox="allow-scripts allow-same-origin allow-popups"
+                    />
+                  </div>
+                </>
+              ) : (
+                <p className="font-mono text-sm text-foreground">None — skipped</p>
+              )}
             </div>
           </div>
 
@@ -297,7 +409,7 @@ export default function NewTalkPage() {
             <button
               onClick={back}
               disabled={loading}
-              className="inline-flex items-center gap-2 px-4 py-2.5 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-white hover:border-white transition-all duration-150 disabled:opacity-40"
+              className="inline-flex items-center gap-2 px-4 py-2.5 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-foreground hover:border-white transition-all duration-150 disabled:opacity-40"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back

@@ -87,7 +87,7 @@ export default function NotFound() {
           <div className="hidden sm:block absolute right-0 top-1/2 -translate-y-1/2 w-px h-24 bg-jsconf-border" aria-hidden="true" />
 
           <h1
-            className="font-display font-bold text-white leading-none tracking-tighter"
+            className="font-display font-bold text-foreground leading-none tracking-tighter"
             style={{ fontSize: "clamp(7rem, 22vw, 18rem)" }}
           >
             4
@@ -100,7 +100,7 @@ export default function NotFound() {
         <div className="w-16 h-px bg-jsconf-border mb-8" aria-hidden="true" />
 
         {/* Copy */}
-        <p className="font-display font-bold text-white text-xl uppercase tracking-widest mb-3 text-balance">
+        <p className="font-display font-bold text-foreground text-xl uppercase tracking-widest mb-3 text-balance">
           Nothing here
         </p>
         <p className="font-mono text-sm text-jsconf-muted leading-relaxed mb-10 max-w-sm text-balance">
@@ -117,7 +117,7 @@ export default function NotFound() {
           </Link>
           <Link
             href="/"
-            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-white hover:border-white transition-all duration-150"
+            className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-foreground hover:border-white transition-all duration-150"
           >
             Home
           </Link>

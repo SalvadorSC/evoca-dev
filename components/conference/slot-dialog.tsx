@@ -92,12 +92,12 @@ export function SlotDialog({
   }
 
   const inputCls =
-    "w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-sans text-sm text-white placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
+    "w-full bg-jsconf-bg border border-jsconf-border px-3 py-2.5 font-sans text-sm text-foreground placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
   const labelCls = "font-mono text-xs text-jsconf-muted uppercase tracking-wider block mb-2"
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-jsconf-surface border-jsconf-border text-white max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-jsconf-surface border-jsconf-border text-foreground max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display uppercase tracking-wide">
             {slot ? "Edit Slot" : "Add Slot"}
@@ -133,7 +133,7 @@ export function SlotDialog({
                   className={`px-3 py-1.5 font-mono text-xs uppercase tracking-wider border transition-colors ${
                     type === t
                       ? "bg-jsconf-yellow text-black border-jsconf-yellow font-bold"
-                      : "border-jsconf-border text-jsconf-muted hover:text-white hover:border-white"
+                      : "border-jsconf-border text-jsconf-muted hover:text-foreground hover:border-white"
                   }`}
                 >
                   {SLOT_TYPE_LABELS[t]}

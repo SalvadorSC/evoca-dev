@@ -17,27 +17,72 @@ Detailed implementation plans live in `docs/`:
 | 4 — Presentation Formats | [docs/phase-4-presentation-formats.md](docs/phase-4-presentation-formats.md) |
 | 5 — Speaker Experience | [docs/phase-5-speaker-experience.md](docs/phase-5-speaker-experience.md) |
 | 6 — Polish & Responsive | [docs/phase-6-polish.md](docs/phase-6-polish.md) |
-| 7 — Call for Papers (draft) | [docs/phase-7-call-for-papers.md](docs/phase-7-call-for-papers.md) |
+| 7 — Call for Papers | [docs/phase-7-call-for-papers.md](docs/phase-7-call-for-papers.md) |
+| Transactional Email | [docs/emails.md](docs/emails.md) |
 
 ### Implementation status
-- **Phase 1 (Billing) — built.** Org plans live; Speaker Pro is stubbed in the catalog (`lib/plans.ts`) but not surfaced.
+- **Phase 1 (Billing) — shipped ✅.** Org plans live; Speaker Pro is stubbed in the catalog (`lib/plans.ts`) but not surfaced.
   Pricing uses Stripe Checkout with inline `price_data` per currency (no pre-created Stripe product IDs).
   Requires `STRIPE_WEBHOOK_SECRET` to be set for the webhook to verify signatures.
-- **Phase 2 (Conference Management) — built.** Conferences/days/slots + speaker assignment via affiliations.
-  Migrations `005_conferences` + `006_slot_speaker_email`. Invitation **emails are stubbed** (no provider wired).
-- **Phase 3 (Q&A Moderation) — code complete, blocked on server deploy.** Live Q&A state lives in a
-  **separate PartyKit server** (`SalvadorSC/evoca-server`), not Supabase. Client (token auth, moderator UI,
-  flagged/delete/ban) is merged here; server changes are staged in [`server-patches/`](server-patches/README.md).
-  To go live: apply the patch to evoca-server, set `SUPABASE_JWT_SECRET`, redeploy. v0 lacks push access to that repo.
-- **Phase 5 (Speaker Experience) — 5.1 shipped, 5.2 blocked on the same server deploy.**
-  5.1 conference talk portal (`getSpeakerConferenceTalks` → dashboard "Conference Talks" section) is live & verified.
-  5.2 phone slide remote (`/remote/[token]`, speaker-scoped JWT, QR in presenter view) is code-complete and the
-  token flow is verified, but the deployed PartyKit server drops `slide_*` commands until `server-patches/` ships —
-  that fix is folded into the **same patch** as Phase 3, so one deploy unblocks both.
-- **Phase 7 (Call for Papers) — draft only.** Empty plan with open questions; scope not yet locked. Start after Phase 6.
-  Phase 7 owns wiring the transactional email provider (also backfills Phase 2's stubbed invite emails).
+- **Phase 2 (Conference Management) — shipped ✅.** Conferences/days/slots + speaker assignment via affiliations.
+  Migrations `005_conferences` + `006_slot_speaker_email`. Invitation emails are now **wired via Resend**
+  (backfilled in Phase 7 — see `lib/email.ts` `speakerInviteEmail`).
+- **Phase 3 (Q&A Moderation) — shipped ✅.** Live Q&A state lives in a **separate PartyKit server**
+  (`SalvadorSC/evoca-server`), not Supabase. Client (token auth, moderator UI, flagged/delete/ban) plus the
+  server patch (JWT verification + flagged/delete/ban commands) are deployed to
+  `jsconf-live-wall.salvadorsc.partykit.dev` with `SUPABASE_JWT_SECRET` set.
+- **Phase 4 (Presentation Formats) — shipped ✅.** 4.2 iframe embed URLs (any provider) + 4.1 client-side
+  PDF/PPTX extraction (`pdfjs-dist` + `jszip`) → Blob, presenter renders extracted images.
+- **Phase 5 (Speaker Experience) — shipped ✅.** 5.1 conference talk portal (`getSpeakerConferenceTalks` →
+  dashboard "Conference Talks" section) and 5.2 phone slide remote (`/remote/[token]`, speaker-scoped JWT, QR in
+  presenter view) are live. The PartyKit server patch (Phase 3 + slide commands) was deployed to evoca-server.
+- **Phase 6 (Polish & Responsive) — not started.** The only remaining phase.
+- **Phase 7 (Call for Papers) — shipped ✅.** Public `/cfp/[slug]` submission (core fields + organizer custom
+  questions), organizer settings + review dashboard, accept → unscheduled slot + pending affiliation. Transactional
+  email via **Resend** (`lib/email.ts`) for accept/reject/waitlist + submission confirmation; also backfills Phase 2's
+  invite emails. Organizer pages await live-auth browser verification (DB accept-flow simulated + type-clean).
+- **Transactional email — shipped ✅.** 5 design-system-aligned templates via Resend
+  (`lib/email.ts`): CFP confirmation, accept, waitlist, reject, and speaker invite. No-ops without `RESEND_API_KEY`.
+  Fully documented in [docs/emails.md](docs/emails.md).
 - **Test accounts:** all billing/role cases are seeded — see [docs/test-accounts.md](docs/test-accounts.md)
   (`scripts/seed-test-accounts.mjs`, dev login via `/api/dev-login?as=<key>`).
+
+---
+
+## Feature Map — where to see each phase
+
+Jump straight to the live route or the source. Route params (`[id]`, `[slug]`, `[sessionId]`,
+`[token]`) require a real record — grab one from the dashboard. Tip: `/api/dev-login?as=<key>` to sign in fast.
+
+### Phase 1 — Billing Foundation ✅
+- **Live:** `/` (pricing) · `/dashboard/account` (manage plan)
+- **Source:** [lib/plans.ts](lib/plans.ts) · [app/api/stripe/checkout/route.ts](app/api/stripe/checkout/route.ts) · [app/api/stripe/webhook/route.ts](app/api/stripe/webhook/route.ts) · [app/api/billing/access/route.ts](app/api/billing/access/route.ts) · [components/billing](components/billing) · [app/dashboard/account/page.tsx](app/dashboard/account/page.tsx)
+
+### Phase 2 — Conference Management ✅
+- **Live:** `/dashboard/conference` (list) · `/dashboard/conference/[id]` (editor)
+- **Source:** [app/dashboard/conference/page.tsx](app/dashboard/conference/page.tsx) · [app/dashboard/conference/[id]/page.tsx](app/dashboard/conference/[id]/page.tsx) · [app/dashboard/conference/actions.ts](app/dashboard/conference/actions.ts) · [components/conference/conference-editor.tsx](components/conference/conference-editor.tsx) · [lib/affiliations.ts](lib/affiliations.ts) · [scripts/005_conferences.sql](scripts/005_conferences.sql)
+
+### Phase 3 — Q&A Moderation ✅
+- **Live:** `/qna/[sessionId]` (attendee Q&A) · `/wall` (live wall) · `/present/[sessionId]` (presenter + mod controls)
+- **Source:** [app/qna/[sessionId]/page.tsx](app/qna/[sessionId]/page.tsx) · [app/wall/page.tsx](app/wall/page.tsx) · [components/attendee/ask-tab.tsx](components/attendee/ask-tab.tsx) · [components/shared/question-card.tsx](components/shared/question-card.tsx) · [hooks/use-party.ts](hooks/use-party.ts) · [hooks/use-party-room.ts](hooks/use-party-room.ts) · [lib/party.ts](lib/party.ts) · [server-patches/README.md](server-patches/README.md) (separate PartyKit server)
+
+### Phase 4 — Presentation Formats ✅
+- **Live:** `/dashboard/talks/new` (URL embed + PDF/PPTX upload) · `/present/[sessionId]` (renders slides)
+- **Source:** [app/dashboard/talks/new/page.tsx](app/dashboard/talks/new/page.tsx) · [lib/slide-extraction.ts](lib/slide-extraction.ts) · [components/dashboard/file-slide-extractor.tsx](components/dashboard/file-slide-extractor.tsx) · [app/api/talks/upload-slides/route.ts](app/api/talks/upload-slides/route.ts) · [app/present/[sessionId]/page.tsx](app/present/[sessionId]/page.tsx)
+
+### Phase 5 — Speaker Experience ✅
+- **Live:** `/dashboard` ("Conference Talks" section) · `/present/[sessionId]` ("Phone remote" QR button) · `/remote/[token]` (phone remote)
+- **Source:** [app/remote/[token]/page.tsx](app/remote/[token]/page.tsx) · [components/remote/remote-control.tsx](components/remote/remote-control.tsx) · [app/api/remote/token/route.ts](app/api/remote/token/route.ts) · [app/api/remote/validate/route.ts](app/api/remote/validate/route.ts) · [lib/remote-token.ts](lib/remote-token.ts)
+
+### Phase 6 — Polish & Responsive ⏳ (not started)
+- **Plan:** [docs/phase-6-polish.md](docs/phase-6-polish.md)
+
+### Phase 7 — Call for Papers ✅
+- **Live:** `/cfp/[slug]` (public submission) · `/dashboard/conference/[id]/cfp` (settings + question builder) · `/dashboard/conference/[id]/cfp/review` (review dashboard)
+- **Source:** [app/cfp/[slug]/page.tsx](app/cfp/[slug]/page.tsx) · [components/cfp/cfp-submission-form.tsx](components/cfp/cfp-submission-form.tsx) · [app/api/cfp/submit/route.ts](app/api/cfp/submit/route.ts) · [lib/cfp.ts](lib/cfp.ts) · [app/dashboard/conference/cfp-actions.ts](app/dashboard/conference/cfp-actions.ts) · [components/conference/cfp-settings-manager.tsx](components/conference/cfp-settings-manager.tsx) · [components/conference/cfp-review-board.tsx](components/conference/cfp-review-board.tsx) · [scripts/007_call_for_papers.sql](scripts/007_call_for_papers.sql)
+
+### Transactional Email ✅
+- **Source:** [lib/email.ts](lib/email.ts) · docs: [docs/emails.md](docs/emails.md)
 
 ---
 

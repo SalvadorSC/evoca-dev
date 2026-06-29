@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import { DevOverlay } from '@/components/dev/DevOverlay'
 import { PaywallProvider } from '@/components/billing/paywall-provider'
+import { ThemeProvider } from '@/components/theme/theme-provider'
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -58,9 +59,18 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="es" className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="font-sans antialiased bg-jsconf-bg text-white">
-        <PaywallProvider>{children}</PaywallProvider>
+    <html lang="es" className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');var d=t==='dark'||((!t||t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);var c=document.documentElement.classList;c.remove('light','dark');c.add(d?'dark':'light');}catch(e){document.documentElement.classList.add('dark');}})();`,
+          }}
+        />
+      </head>
+      <body className="font-sans antialiased bg-jsconf-bg text-foreground">
+        <ThemeProvider>
+          <PaywallProvider>{children}</PaywallProvider>
+        </ThemeProvider>
         <Analytics />
         {process.env.NODE_ENV === 'development' && <DevOverlay />}
       </body>

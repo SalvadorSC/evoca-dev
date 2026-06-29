@@ -23,6 +23,9 @@ type Item = {
   subtasks?: Subtask[];
 };
 
+// Testing status for each item / subtask. Absence = untested.
+type TestStatus = "pass" | "fail" | "untested";
+
 const PHASE_META: Record<number, { label: string; color: string }> = {
   0: { label: "DX / Tooling",              color: "#64748b" },
   1: { label: "Billing Foundation",        color: "#f59e0b" },
@@ -31,6 +34,7 @@ const PHASE_META: Record<number, { label: string; color: string }> = {
   4: { label: "Presentation Formats",      color: "#8b5cf6" },
   5: { label: "Speaker Experience",        color: "#10b981" },
   6: { label: "Polish & Responsive",       color: "#ec4899" },
+  7: { label: "Other",                     color: "#0ea5e9" },
 };
 
 const PRIORITY_DOT: Record<string, string> = {
@@ -45,38 +49,23 @@ const COMPLEXITY_LABEL: Record<string, string> = {
   high:   "hard",
 };
 
-// ─── Subtask row ────────────────────────────────────────────────────────────
-function SubtaskRow({
-  subtask,
-  done,
-  onToggle,
-}: {
-  subtask: Subtask;
-  done: boolean;
-  onToggle: (id: string) => void;
-}) {
-  return (
-    <div
-      onClick={() => onToggle(subtask.id)}
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        gap: 7,
-        padding: "3px 0 3px 22px",
-        cursor: "pointer",
-        opacity: done ? 0.4 : 1,
-      }}
-    >
-      <Checkbox checked={done} size={11} />
-      <span style={{ fontSize: 11, color: "#444", lineHeight: 1.4, textDecoration: done ? "line-through" : "none" }}>
-        {subtask.name}
-      </span>
-    </div>
-  );
-}
+const STATUS_COLOR: Record<TestStatus, string> = {
+  pass:     "#22c55e",
+  fail:     "#e24b4a",
+  untested: "#d1d5db",
+};
 
-// ─── Checkbox ───────────────────────────────────────────────────────────────
-function Checkbox({ checked, size = 14 }: { checked: boolean; size?: number }) {
+// Cycle order when clicking a status box.
+const NEXT_STATUS: Record<TestStatus, TestStatus> = {
+  untested: "pass",
+  pass:     "fail",
+  fail:     "untested",
+};
+
+// ─── Tri-state status box (untested → pass → fail → untested) ─────────────────
+function StatusBox({ status, size = 14 }: { status: TestStatus; size?: number }) {
+  const color = STATUS_COLOR[status];
+  const filled = status !== "untested";
   return (
     <span
       style={{
@@ -84,50 +73,80 @@ function Checkbox({ checked, size = 14 }: { checked: boolean; size?: number }) {
         marginTop: 1,
         width: size,
         height: size,
-        borderRadius: size === 11 ? 2 : 3,
-        border: `1.5px solid ${checked ? "#22c55e" : "#d1d5db"}`,
-        background: checked ? "#22c55e" : "transparent",
+        borderRadius: size <= 11 ? 2 : 3,
+        border: `1.5px solid ${color}`,
+        background: filled ? color : "transparent",
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
         color: "#fff",
-        fontSize: size - 4,
+        fontSize: size - 3,
+        fontWeight: 700,
         lineHeight: 1,
         transition: "all 0.15s",
       }}
+      title={status}
     >
-      {checked ? "✓" : ""}
+      {status === "pass" ? "✓" : status === "fail" ? "✕" : ""}
     </span>
+  );
+}
+
+// ─── Subtask row ────────────────────────────────────────────────────────────
+function SubtaskRow({
+  subtask,
+  status,
+  onCycle,
+}: {
+  subtask: Subtask;
+  status: TestStatus;
+  onCycle: (id: string) => void;
+}) {
+  return (
+    <div
+      onClick={() => onCycle(subtask.id)}
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 7,
+        padding: "3px 0 3px 22px",
+        cursor: "pointer",
+      }}
+    >
+      <StatusBox status={status} size={11} />
+      <span style={{ fontSize: 11, color: "#444", lineHeight: 1.4 }}>
+        {subtask.name}
+      </span>
+    </div>
   );
 }
 
 // ─── Item row ────────────────────────────────────────────────────────────────
 function ItemRow({
   item,
-  done,
-  onToggleDone,
-  doneOverrides,
+  status,
+  onCycle,
+  statusFor,
+  readOnly = false,
 }: {
   item: Item;
-  done: boolean;
-  onToggleDone: (id: string) => void;
-  doneOverrides: Record<string, boolean>;
+  status: TestStatus;
+  onCycle: (id: string) => void;
+  statusFor: (id: string) => TestStatus;
+  readOnly?: boolean;
 }) {
   const [open, setOpen] = useState(false);
 
-  const subtasksDone = item.subtasks
-    ? item.subtasks.filter((s) =>
-        doneOverrides[s.id] !== undefined ? doneOverrides[s.id] : s.complete
-      ).length
-    : null;
   const subtasksTotal = item.subtasks?.length ?? 0;
   const hasSubtasks = subtasksTotal > 0;
+  const subtasksPassed = item.subtasks
+    ? item.subtasks.filter((s) => statusFor(s.id) === "pass").length
+    : 0;
 
   return (
     <div
       style={{
         borderBottom: "0.5px solid rgba(0,0,0,0.07)",
-        opacity: done ? 0.38 : 1,
         transition: "opacity 0.15s",
       }}
     >
@@ -143,13 +162,15 @@ function ItemRow({
         }}
         onClick={() => setOpen((v) => !v)}
       >
-        {/* Checkbox — stop propagation so clicking it doesn't also toggle expand */}
-        <span
-          onClick={(e) => { e.stopPropagation(); onToggleDone(item.id); }}
-          title={done ? "Mark pending" : "Mark done"}
-        >
-          <Checkbox checked={done} />
-        </span>
+        {/* Status box — stop propagation so clicking it cycles instead of expanding */}
+        {!readOnly && (
+          <span
+            onClick={(e) => { e.stopPropagation(); onCycle(item.id); }}
+            title="Click to cycle: untested → pass → fail"
+          >
+            <StatusBox status={status} />
+          </span>
+        )}
 
         {/* Priority dot */}
         <span
@@ -170,7 +191,6 @@ function ItemRow({
             fontSize: 12,
             fontWeight: 500,
             color: "#1a1a1a",
-            textDecoration: done ? "line-through" : "none",
             lineHeight: 1.35,
           }}
         >
@@ -183,11 +203,11 @@ function ItemRow({
             <span
               style={{
                 fontSize: 10,
-                color: subtasksDone === subtasksTotal ? "#22c55e" : "#94a3b8",
+                color: subtasksPassed === subtasksTotal ? "#22c55e" : "#94a3b8",
                 fontVariantNumeric: "tabular-nums",
               }}
             >
-              {subtasksDone}/{subtasksTotal}
+              {subtasksPassed}/{subtasksTotal}
             </span>
           )}
           <span
@@ -221,19 +241,16 @@ function ItemRow({
           <p style={{ fontSize: 11, color: "#6b7280", margin: "0 0 4px 21px", lineHeight: 1.5 }}>
             {item.description}
           </p>
-          {hasSubtasks && (
+          {hasSubtasks && !readOnly && (
             <div>
-              {item.subtasks!.map((s) => {
-                const sDone = doneOverrides[s.id] !== undefined ? doneOverrides[s.id] : s.complete;
-                return (
-                  <SubtaskRow
-                    key={s.id}
-                    subtask={s}
-                    done={sDone}
-                    onToggle={onToggleDone}
-                  />
-                );
-              })}
+              {item.subtasks!.map((s) => (
+                <SubtaskRow
+                  key={s.id}
+                  subtask={s}
+                  status={statusFor(s.id)}
+                  onCycle={onCycle}
+                />
+              ))}
             </div>
           )}
         </div>
@@ -246,21 +263,20 @@ function ItemRow({
 function PhaseGroup({
   phase,
   items,
-  isDone,
-  onToggleDone,
-  doneOverrides,
+  statusFor,
+  onCycle,
 }: {
   phase: number;
   items: Item[];
-  isDone: (item: Item) => boolean;
-  onToggleDone: (id: string) => void;
-  doneOverrides: Record<string, boolean>;
+  statusFor: (id: string) => TestStatus;
+  onCycle: (id: string) => void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const meta = PHASE_META[phase] ?? { label: `Phase ${phase}`, color: "#94a3b8" };
-  const pending = items.filter((i) => !isDone(i)).length;
   const total = items.length;
-  const allDone = pending === 0;
+  const passed = items.filter((i) => statusFor(i.id) === "pass").length;
+  const failed = items.filter((i) => statusFor(i.id) === "fail").length;
+  const allPassed = passed === total;
 
   return (
     <div style={{ marginBottom: 2 }}>
@@ -285,7 +301,7 @@ function PhaseGroup({
             borderRadius: 99,
             background: meta.color,
             flexShrink: 0,
-            opacity: allDone ? 0.4 : 1,
+            opacity: allPassed ? 0.4 : 1,
           }}
         />
         <span
@@ -293,20 +309,26 @@ function PhaseGroup({
             flex: 1,
             fontSize: 11,
             fontWeight: 700,
-            color: allDone ? "#94a3b8" : "#111",
+            color: allPassed ? "#94a3b8" : "#111",
             letterSpacing: 0.1,
           }}
         >
           {meta.label}
         </span>
+        {failed > 0 && (
+          <span style={{ fontSize: 10, color: "#e24b4a", fontVariantNumeric: "tabular-nums" }} title="failing">
+            {failed}✕
+          </span>
+        )}
         <span
           style={{
             fontSize: 10,
-            color: allDone ? "#22c55e" : "#94a3b8",
+            color: allPassed ? "#22c55e" : "#94a3b8",
             fontVariantNumeric: "tabular-nums",
           }}
+          title="passing / total"
         >
-          {allDone ? "done" : `${total - pending}/${total}`}
+          {allPassed ? "all pass" : `${passed}/${total}`}
         </span>
         <span style={{ fontSize: 10, color: "#cbd5e1", transform: collapsed ? "none" : "rotate(180deg)", transition: "transform 0.15s" }}>
           ▾
@@ -319,9 +341,9 @@ function PhaseGroup({
             <ItemRow
               key={item.id}
               item={item}
-              done={isDone(item)}
-              onToggleDone={onToggleDone}
-              doneOverrides={doneOverrides}
+              status={statusFor(item.id)}
+              onCycle={onCycle}
+              statusFor={statusFor}
             />
           ))}
         </div>
@@ -336,26 +358,37 @@ export function DevOverlay() {
   return <DevOverlayInner />;
 }
 
-const STORAGE_KEY = "devtracker:done";
+const STORAGE_KEY = "testtracker:status";
 
 function DevOverlayInner() {
   const [visible, setVisible] = useState(true);
   const [minimized, setMinimized] = useState(false);
-  const [tab, setTab] = useState<"features" | "ideas">("features");
+  const [tab, setTab] = useState<"tests" | "ideas">("tests");
   const [pos, setPos] = useState({ x: 16, y: 80 });
-  const [doneOverrides, setDoneOverrides] = useState<Record<string, boolean>>(() => {
+  const [statuses, setStatuses] = useState<Record<string, TestStatus>>(() => {
     try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}"); }
     catch { return {}; }
   });
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
 
-  const toggleDone = useCallback((id: string) => {
-    setDoneOverrides((prev) => {
-      const next = { ...prev, [id]: !prev[id] };
+  const statusFor = useCallback(
+    (id: string): TestStatus => statuses[id] ?? "untested",
+    [statuses]
+  );
+
+  const cycleStatus = useCallback((id: string) => {
+    setStatuses((prev) => {
+      const current = prev[id] ?? "untested";
+      const next = { ...prev, [id]: NEXT_STATUS[current] };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       return next;
     });
+  }, []);
+
+  const resetAll = useCallback(() => {
+    setStatuses({});
+    localStorage.removeItem(STORAGE_KEY);
   }, []);
 
   const onMouseDown = useCallback(
@@ -381,15 +414,13 @@ function DevOverlayInner() {
     };
   }, []);
 
-  const isDone = (item: Item) =>
-    doneOverrides[item.id] !== undefined ? doneOverrides[item.id] : item.complete;
-
   const featureItems = features as Item[];
   const ideaItems = ideas as Item[];
 
   const totalFeatures = featureItems.length;
-  const doneFeatures = featureItems.filter(isDone).length;
-  const pendingCount = totalFeatures - doneFeatures;
+  const passedFeatures = featureItems.filter((i) => statusFor(i.id) === "pass").length;
+  const failedFeatures = featureItems.filter((i) => statusFor(i.id) === "fail").length;
+  const untestedCount = totalFeatures - passedFeatures - failedFeatures;
 
   // Group by phase
   const byPhase: Record<number, Item[]> = {};
@@ -420,7 +451,7 @@ function DevOverlayInner() {
           color: "#475569",
         }}
       >
-        {pendingCount} pending
+        {untestedCount} untested{failedFeatures > 0 ? ` · ${failedFeatures}✕` : ""}
       </button>
     );
   }
@@ -459,22 +490,17 @@ function DevOverlayInner() {
         }}
       >
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: "#0f172a" }}>Roadmap</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: "#0f172a" }}>Testing Tracker</div>
           <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 1 }}>
-            {doneFeatures}/{totalFeatures} done &middot; {pendingCount} remaining
+            {passedFeatures}/{totalFeatures} pass
+            {failedFeatures > 0 ? ` · ${failedFeatures} fail` : ""}
+            {untestedCount > 0 ? ` · ${untestedCount} untested` : ""}
           </div>
         </div>
-        {/* Mini progress bar */}
-        <div style={{ width: 60, height: 4, borderRadius: 99, background: "#f1f5f9", overflow: "hidden" }}>
-          <div
-            style={{
-              height: "100%",
-              width: `${(doneFeatures / totalFeatures) * 100}%`,
-              background: "#22c55e",
-              borderRadius: 99,
-              transition: "width 0.3s",
-            }}
-          />
+        {/* Mini progress bar (pass = green, fail = red) */}
+        <div style={{ width: 60, height: 4, borderRadius: 99, background: "#f1f5f9", overflow: "hidden", display: "flex" }}>
+          <div style={{ height: "100%", width: `${(passedFeatures / totalFeatures) * 100}%`, background: "#22c55e" }} />
+          <div style={{ height: "100%", width: `${(failedFeatures / totalFeatures) * 100}%`, background: "#e24b4a" }} />
         </div>
         <button
           onClick={() => setMinimized((v) => !v)}
@@ -494,7 +520,7 @@ function DevOverlayInner() {
         <>
           {/* Tabs */}
           <div style={{ display: "flex", background: "#fafafa", borderBottom: "1px solid #f1f5f9" }}>
-            {(["features", "ideas"] as const).map((t) => (
+            {(["tests", "ideas"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
@@ -511,32 +537,32 @@ function DevOverlayInner() {
                   transition: "color 0.15s",
                 }}
               >
-                {t === "features" ? "Roadmap" : "Ideas"}
+                {t === "tests" ? "Tests" : "Ideas"}
               </button>
             ))}
           </div>
 
           {/* Content */}
           <div style={{ overflowY: "auto", padding: "4px 12px 10px", flex: 1 }}>
-            {tab === "features" ? (
+            {tab === "tests" ? (
               phaseKeys.map((phase) => (
                 <PhaseGroup
                   key={phase}
                   phase={phase}
                   items={byPhase[phase]}
-                  isDone={isDone}
-                  onToggleDone={toggleDone}
-                  doneOverrides={doneOverrides}
+                  statusFor={statusFor}
+                  onCycle={cycleStatus}
                 />
               ))
             ) : (
-              (ideaItems as Item[]).map((item) => (
+              ideaItems.map((item) => (
                 <ItemRow
                   key={item.id}
                   item={item}
-                  done={isDone(item)}
-                  onToggleDone={toggleDone}
-                  doneOverrides={doneOverrides}
+                  status="untested"
+                  onCycle={cycleStatus}
+                  statusFor={statusFor}
+                  readOnly
                 />
               ))
             )}
@@ -548,21 +574,28 @@ function DevOverlayInner() {
               padding: "4px 12px",
               borderTop: "1px solid #f1f5f9",
               display: "flex",
+              alignItems: "center",
               gap: 12,
               fontSize: 10,
-              color: "#cbd5e1",
+              color: "#94a3b8",
             }}
           >
             <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#e24b4a", display: "inline-block" }} /> high
+              <span style={{ width: 8, height: 8, borderRadius: 2, background: "#22c55e", display: "inline-block" }} /> pass
             </span>
             <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#ef9f27", display: "inline-block" }} /> medium
+              <span style={{ width: 8, height: 8, borderRadius: 2, background: "#e24b4a", display: "inline-block" }} /> fail
             </span>
             <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#93c5fd", display: "inline-block" }} /> low
+              <span style={{ width: 8, height: 8, borderRadius: 2, border: "1.5px solid #d1d5db", display: "inline-block" }} /> untested
             </span>
-            <span style={{ marginLeft: "auto" }}>click to expand</span>
+            <button
+              onClick={resetAll}
+              style={{ marginLeft: "auto", fontSize: 10, background: "none", border: "none", cursor: "pointer", color: "#cbd5e1", textDecoration: "underline" }}
+              title="Reset all testing status"
+            >
+              reset
+            </button>
           </div>
         </>
       )}

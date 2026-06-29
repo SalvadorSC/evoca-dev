@@ -65,7 +65,7 @@ export function ReactTab({ send }: ReactTabProps) {
           placeholder="Anonymous"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="bg-jsconf-surface border-jsconf-border rounded-none h-11 font-sans text-white placeholder:text-jsconf-muted focus:border-jsconf-yellow focus:ring-jsconf-yellow/20"
+          className="bg-jsconf-surface border-jsconf-border rounded-none h-11 font-sans text-foreground placeholder:text-jsconf-muted focus:border-jsconf-yellow focus:ring-jsconf-yellow/20"
         />
       </div>
 
@@ -82,7 +82,7 @@ export function ReactTab({ send }: ReactTabProps) {
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, 160))}
           maxLength={160}
-          className="bg-jsconf-surface rounded-none font-sans text-white placeholder:text-jsconf-muted resize-none transition-colors border-jsconf-border focus:border-jsconf-yellow focus:ring-jsconf-yellow/20"
+          className="bg-jsconf-surface rounded-none font-sans text-foreground placeholder:text-jsconf-muted resize-none transition-colors border-jsconf-border focus:border-jsconf-yellow focus:ring-jsconf-yellow/20"
           rows={3}
         />
         {text.trim() && (

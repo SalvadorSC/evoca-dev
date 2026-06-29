@@ -25,7 +25,7 @@ export default async function ConferenceListPage() {
     <div className="px-6 py-8 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-8 gap-4">
         <div>
-          <h1 className="font-display font-bold text-2xl text-white uppercase tracking-wide">
+          <h1 className="font-display font-bold text-2xl text-foreground uppercase tracking-wide">
             Conferences
           </h1>
           <p className="font-mono text-xs text-jsconf-muted mt-1">
@@ -40,7 +40,7 @@ export default async function ConferenceListPage() {
           <div className="w-12 h-12 bg-jsconf-yellow-dim flex items-center justify-center mb-4">
             <CalendarRange className="h-5 w-5 text-jsconf-yellow" />
           </div>
-          <h2 className="font-display font-bold text-lg text-white mb-2 uppercase tracking-wide">
+          <h2 className="font-display font-bold text-lg text-foreground mb-2 uppercase tracking-wide">
             No conferences yet
           </h2>
           <p className="font-mono text-sm text-jsconf-muted mb-6 max-w-sm">
@@ -55,7 +55,7 @@ export default async function ConferenceListPage() {
               className="bg-jsconf-surface border border-jsconf-border p-5 flex flex-col sm:flex-row sm:items-center gap-4"
             >
               <div className="flex-1 min-w-0">
-                <h3 className="font-display font-bold text-white text-base truncate">{conf.name}</h3>
+                <h3 className="font-display font-bold text-foreground text-base truncate">{conf.name}</h3>
                 <span className="font-mono text-xs text-jsconf-muted flex items-center gap-1.5 mt-1.5">
                   <CalendarRange className="h-3 w-3" />
                   Created{" "}

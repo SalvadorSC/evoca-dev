@@ -67,7 +67,7 @@ export function DeleteTalkButton({
                 <AlertTriangle className="h-4 w-4 text-jsconf-red" />
               </div>
               <div>
-                <p className="font-display font-bold text-white uppercase tracking-wide text-base">
+                <p className="font-display font-bold text-foreground uppercase tracking-wide text-base">
                   Delete talk?
                 </p>
                 <p className="font-mono text-xs text-jsconf-muted mt-1 leading-relaxed">
@@ -81,14 +81,14 @@ export function DeleteTalkButton({
               <button
                 onClick={() => setOpen(false)}
                 disabled={isPending}
-                className="flex-1 font-mono text-xs uppercase tracking-wider py-2.5 border border-jsconf-border text-jsconf-muted hover:text-white hover:border-white transition-all duration-150 disabled:opacity-40"
+                className="flex-1 font-mono text-xs uppercase tracking-wider py-2.5 border border-jsconf-border text-jsconf-muted hover:text-foreground hover:border-white transition-all duration-150 disabled:opacity-40"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirm}
                 disabled={isPending}
-                className="flex-1 font-mono text-xs uppercase tracking-wider py-2.5 bg-jsconf-red text-white hover:opacity-90 transition-all duration-150 disabled:opacity-40"
+                className="flex-1 font-mono text-xs uppercase tracking-wider py-2.5 bg-jsconf-red text-destructive-foreground hover:opacity-90 transition-all duration-150 disabled:opacity-40"
               >
                 {isPending ? "Deleting..." : "Delete"}
               </button>

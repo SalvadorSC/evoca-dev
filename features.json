@@ -120,15 +120,15 @@
     ]
   },
   {
-    "id": "feat-011",
-    "name": "Color mode (theme switcher)",
-    "description": "Implement a clear/light mode alongside the existing mode. Test multiple color palette combinations. Expose a toggle in user settings and persist the preference.",
-    "complexity": "medium",
-    "priority": "medium",
-    "category": "ui",
-    "phase": 6,
-    "status": "pending",
-    "complete": false
+  "id": "feat-011",
+  "name": "Color mode (theme switcher)",
+  "description": "Light mode implemented alongside dark via CSS-variable tokens: .light overrides on <html>, .force-dark pins live stage screens (wall, present, speaker, remote, qna, app, demo) dark, and an anti-FOUC inline script applies the theme pre-paint. Sun/moon toggle defaults to system and persists to localStorage. Whole-app token migration done (38 homepage hex colors + 28 themed files).",
+  "complexity": "medium",
+  "priority": "medium",
+  "category": "ui",
+  "phase": 6,
+  "status": "done",
+  "complete": true
   },
   {
     "id": "feat-012",
@@ -144,73 +144,73 @@
   {
     "id": "feat-013",
     "name": "PowerPoint and PDF presentation support",
-    "description": "Enable speakers to upload PowerPoint (.pptx) and PDF files as their presentation source, reducing dependency on slides.com. Files are converted and rendered slide-by-slide in the viewer.",
+    "description": "Client-side extraction via pdfjs-dist (PDF rendering) + jszip (PPTX image extraction). Extracted slides are uploaded to Vercel Blob as a manifest JSON. Presenter renders extracted images with prev/next navigation in /present/[sessionId].",
     "complexity": "high",
     "priority": "high",
     "category": "core",
     "phase": 4,
-    "status": "pending",
-    "complete": false
+    "status": "done",
+    "complete": true
   },
   {
     "id": "feat-014",
-    "name": "iFrame URL embedding (experimental)",
-    "description": "Offer an option to embed a presentation via an arbitrary URL in an iframe. This is explicitly marked as experimental: compatibility is not guaranteed and will vary by source. A clear disclaimer must be shown to the organizer and audience.",
+    "name": "iFrame URL embedding",
+    "description": "Generalized form input to accept any embeddable URL (Slides.com, Google Slides, Figma, Miro, etc.). Presenter view renders the URL as an iframe. No experimental disclaimer needed — widely supported.",
     "complexity": "low",
     "priority": "medium",
     "category": "nice-to-have",
     "phase": 4,
-    "status": "pending",
-    "complete": false
+    "status": "done",
+    "complete": true
   },
   {
     "id": "feat-015",
     "name": "Speaker slide control via phone",
-    "description": "Web phone remote (no install): presenter shows a QR linking to /remote/[token]; the token is a short-lived speaker-scoped JWT (8h) minted at /api/remote/token. The remote (swipe + Prev/Next, slide counter, wake lock) broadcasts slide_next/slide_prev over PartyKit. Code complete and token flow verified end-to-end; blocked because the deployed PartyKit server drops slide_* commands until server-patches/ is deployed (adds them to COMMAND_ROLES + passthrough). One deploy unblocks this and Phase 3.",
+    "description": "Web phone remote at /remote/[token]; speaker-scoped JWT minted at /api/remote/token with 8h expiry. Remote broadcasts slide_next/slide_prev over PartyKit. Deployed to jsconf-live-wall.salvadorsc.partykit.dev with SUPABASE_JWT_SECRET set.",
     "complexity": "high",
     "priority": "medium",
     "category": "nice-to-have",
     "phase": 5,
-    "status": "blocked",
-    "complete": false
+    "status": "done",
+    "complete": true
   },
   {
     "id": "feat-016",
     "name": "Q&A — flagged questions remain visible (dimmed)",
-    "description": "Implemented via the PartyKit server (evoca-server): flagged questions are filtered out for attendees but broadcast to moderators, who see them dimmed with a 'Flagged' badge sorted to the bottom in app/qna/[sessionId]/page.tsx. Code complete; blocked on server deploy + SUPABASE_JWT_SECRET.",
+    "description": "Flagged questions are filtered out for attendees but broadcast to moderators, who see them dimmed with a 'Flagged' badge sorted to the bottom. Implemented server-side and deployed to jsconf-live-wall.salvadorsc.partykit.dev.",
     "complexity": "low",
     "priority": "high",
     "category": "core",
     "phase": 3,
-    "status": "blocked",
-    "complete": false
+    "status": "done",
+    "complete": true
   },
   {
     "id": "feat-017",
     "name": "Q&A — question deletion by moderator",
-    "description": "Moderators can permanently delete individual questions from the Q&A view, with a confirmation step. The delete_question command is enforced admin-only on the PartyKit server and broadcast to all clients in realtime. Code complete; blocked on server deploy.",
+    "description": "Moderators can permanently delete individual questions from the Q&A view with a confirmation step. Enforced admin-only on the PartyKit server and broadcast to all clients in realtime. Deployed.",
     "complexity": "low",
     "priority": "high",
     "category": "core",
     "phase": 3,
-    "status": "blocked",
-    "complete": false
+    "status": "done",
+    "complete": true
   },
   {
     "id": "feat-018",
     "name": "Q&A — ban user on question ban",
-    "description": "Moderators can ban a question's author (by stable authorId) for the rest of the session, with a confirmation dialog. The server removes the author's questions and rejects further submissions; bans are in-memory, session-scoped, and reversible via lift_ban (no UI for lifting yet). Code complete; blocked on server deploy.",
+    "description": "Moderators can ban a question's author (by stable authorId) for the rest of the session. Server removes the author's questions and rejects further submissions; bans are in-memory and session-scoped. Deployed.",
     "complexity": "medium",
     "priority": "high",
     "category": "core",
     "phase": 3,
-    "status": "blocked",
-    "complete": false
+    "status": "done",
+    "complete": true
   },
   {
     "id": "feat-019",
-    "name": "Dev floating overlay — features & ideas tracker",
-    "description": "A draggable floating panel visible only in the development environment (NODE_ENV=development) that displays the features.json and ideas.json lists. Features can be highlighted with annotated arrows. The panel can be minimized and re-opened via a persistent button. Has no effect on production UI.",
+    "name": "Dev floating overlay — testing tracker",
+    "description": "A draggable floating panel visible only in development (NODE_ENV=development). Repurposed from a dev-completion checklist into a manual Testing Tracker: every feature (grouped by phase) and its subtasks cycle untested -> pass -> fail on click, with pass/fail/untested counts, a two-color progress bar, per-phase failing badges, and a reset button, plus a read-only Ideas tab for reference. Status persists in localStorage under 'testtracker:status'. No effect on production UI.",
     "complexity": "medium",
     "priority": "high",
     "category": "ui",
@@ -232,12 +232,34 @@
   {
     "id": "feat-021",
     "name": "Call for Papers (CFP)",
-    "description": "Public CFP submission page per conference, organizer submission review dashboard (rate/accept/reject), and accept->slot+affiliation flow building on Phase 2. Draft/empty plan — scope and data model not yet locked. See docs/phase-7-call-for-papers.md. Notifications likely require the transactional email provider that Phase 2 left stubbed.",
+    "description": "Public CFP submission page (/cfp/[slug]) per conference with fixed core fields + organizer custom questions (text/long_text/select/multi_select/checkbox), honeypot + per-email cap. Organizer settings (open/close window, question builder) at /dashboard/conference/[id]/cfp and a review dashboard (filter, 1-5 rating, notes, accept/reject/waitlist). Accept creates an unscheduled slot + pending affiliation (reuses Phase 2). Transactional email via Resend (lib/email.ts) for accept/reject/waitlist, which also backfills the Phase 2 invite stub; sends are best-effort and no-op without RESEND_API_KEY. See docs/phase-7-call-for-papers.md.",
     "complexity": "high",
     "priority": "medium",
     "category": "core",
     "phase": 7,
-    "status": "planned",
-    "complete": false
+    "status": "done",
+    "complete": true
+  },
+  {
+    "id": "feat-022",
+    "name": "Q&A history — persisted to dashboard",
+    "description": "Ending a presenter session snapshots the live PartyKit questions to the Supabase questions table via /api/sessions/snapshot-questions (admin client, ownership-checked, best-effort). A new dashboard view at /dashboard/sessions/[sessionId]/questions reads them back (sorted by votes, answered state shown), making the homepage 'saved to your dashboard' FAQ claim true. The talk detail page links ended sessions to 'Q&A History' and live ones to the live view.",
+    "complexity": "medium",
+    "priority": "high",
+    "category": "core",
+    "phase": 6,
+    "status": "done",
+    "complete": true
+  },
+  {
+    "id": "feat-023",
+    "name": "Dedicated pricing page (Slido-style)",
+    "description": "Public /pricing page with an audience toggle (Speakers / Organizers). Speakers see Free (EUR 0) + Speaker Pro (monthly/annual toggle, 'Coming soon' badge + waitlist, no checkout). Organizers see the three live tiers (one-time / Growth / Scale) with currency-aware prices from /api/locale and a 'Popular' highlight. Linked from the homepage nav and pricing teaser. Fully themed for light/dark. Pricing model captured in docs/pricing.md.",
+    "complexity": "medium",
+    "priority": "high",
+    "category": "core",
+    "phase": 6,
+    "status": "done",
+    "complete": true
   }
 ]

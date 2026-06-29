@@ -1,10 +1,11 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+/* theme tokens flip via .light / .dark on <html>; .force-dark pins stage screens dark */
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* JSConf España 2026 Design System */
+  /* JSConf España 2026 Design System — Dark (default) */
   --jsconf-bg: #080808;
   --jsconf-surface: #111111;
   --jsconf-surface-2: #1a1a1a;
@@ -18,7 +19,7 @@
   --jsconf-blue: #3B82F6;
   --jsconf-orange: #F97316;
 
-  /* Tailwind mappings */
+  /* Tailwind mappings — dark */
   --background: #080808;
   --foreground: #FFFFFF;
   --card: #111111;
@@ -39,6 +40,98 @@
   --input: #2a2a2a;
   --ring: #F7E018;
   --radius: 0px;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+/*
+ * Live "stage" screens (wall, presenter, phone remote, attendee live views, demo)
+ * are designed for projection and must stay dark regardless of the user's theme.
+ * Applying `.force-dark` to their root re-declares the dark token values so any
+ * themed token (bg-jsconf-bg, text-foreground, border-jsconf-border, ...) used
+ * inside resolves to dark even when <html> is in light mode.
+ */
+.force-dark {
+  color-scheme: dark;
+
+  --wave-color: var(--accent);
+  --jsconf-bg: #080808;
+  --jsconf-surface: #111111;
+  --jsconf-surface-2: #1a1a1a;
+  --jsconf-border: #2a2a2a;
+  --jsconf-yellow: #F7E018;
+  --jsconf-yellow-dim: rgba(247, 224, 24, 0.12);
+  --jsconf-white: #FFFFFF;
+  --jsconf-muted: #888888;
+  --jsconf-red: #FF3B3B;
+  --jsconf-purple: #9B5CF6;
+  --jsconf-blue: #3B82F6;
+  --jsconf-orange: #F97316;
+
+  --background: #080808;
+  --foreground: #FFFFFF;
+  --card: #111111;
+  --card-foreground: #FFFFFF;
+  --popover: #111111;
+  --popover-foreground: #FFFFFF;
+  --primary: #F7E018;
+  --primary-foreground: #080808;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #FFFFFF;
+  --muted: #1a1a1a;
+  --muted-foreground: #888888;
+  --accent: #1a1a1a;
+  --accent-foreground: #FFFFFF;
+  --destructive: #FF3B3B;
+  --destructive-foreground: #FFFFFF;
+  --border: #2a2a2a;
+  --input: #2a2a2a;
+  --ring: #F7E018;
+}
+
+/* Light theme — applied via the `.light` class on <html> by ThemeProvider. */
+.light {
+  color-scheme: light;
+
+  /* Hero wave background uses near-black in light mode instead of the role accent. */
+  --wave-color: #0A0A0A;
+
+  /* JSConf España 2026 Design System — Light */
+  --jsconf-bg: #FFFFFF;
+  --jsconf-surface: #F5F5F5;
+  --jsconf-surface-2: #EBEBEB;
+  --jsconf-border: #D9D9D9;
+  --jsconf-yellow: #F7E018;
+  --jsconf-yellow-dim: rgba(247, 224, 24, 0.12);
+  --jsconf-white: #080808;
+  --jsconf-muted: #5C5C5C;
+  --jsconf-red: #DC2626;
+  --jsconf-purple: #7C3AED;
+  --jsconf-blue: #2563EB;
+  --jsconf-orange: #EA580C;
+
+  /* Tailwind mappings — light */
+  --background: #FFFFFF;
+  --foreground: #0A0A0A;
+  --card: #F5F5F5;
+  --card-foreground: #0A0A0A;
+  --popover: #F5F5F5;
+  --popover-foreground: #0A0A0A;
+  --primary: #F7E018;
+  --primary-foreground: #0A0A0A;
+  --secondary: #EBEBEB;
+  --secondary-foreground: #0A0A0A;
+  --muted: #EBEBEB;
+  --muted-foreground: #5C5C5C;
+  --accent: #EBEBEB;
+  --accent-foreground: #0A0A0A;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border: #D9D9D9;
+  --input: #EBEBEB;
+  --ring: #F7E018;
 }
 
 @theme inline {
@@ -69,18 +162,19 @@
   --radius-lg: 0px;
   --radius-xl: 0px;
   
-  /* JSConf Colors */
-  --color-jsconf-bg: #080808;
-  --color-jsconf-surface: #111111;
-  --color-jsconf-surface-2: #1a1a1a;
-  --color-jsconf-border: #2a2a2a;
-  --color-jsconf-yellow: #F7E018;
-  --color-jsconf-yellow-dim: rgba(247, 224, 24, 0.12);
-  --color-jsconf-muted: #888888;
-  --color-jsconf-red: #FF3B3B;
-  --color-jsconf-purple: #9B5CF6;
-  --color-jsconf-blue: #3B82F6;
-  --color-jsconf-orange: #F97316;
+  /* JSConf Colors — reference the runtime CSS vars so they flip with the theme */
+  --color-jsconf-bg: var(--jsconf-bg);
+  --color-jsconf-surface: var(--jsconf-surface);
+  --color-jsconf-surface-2: var(--jsconf-surface-2);
+  --color-jsconf-border: var(--jsconf-border);
+  --color-jsconf-yellow: var(--jsconf-yellow);
+  --color-jsconf-yellow-dim: var(--jsconf-yellow-dim);
+  --color-jsconf-white: var(--jsconf-white);
+  --color-jsconf-muted: var(--jsconf-muted);
+  --color-jsconf-red: var(--jsconf-red);
+  --color-jsconf-purple: var(--jsconf-purple);
+  --color-jsconf-blue: var(--jsconf-blue);
+  --color-jsconf-orange: var(--jsconf-orange);
 }
 
 @layer base {
@@ -95,6 +189,44 @@
   button, a, input, textarea, select {
     @apply transition-all duration-150 ease-out;
   }
+
+  /* Buttons and role=button elements always show pointer cursor */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@keyframes zap-jiggle {
+  0%   { transform: rotate(0deg)   scale(1);    color: inherit;               fill: inherit; }
+  15%  { transform: rotate(-20deg) scale(1.2);  color: var(--jsconf-yellow);  fill: var(--jsconf-yellow); }
+  30%  { transform: rotate(20deg)  scale(1.2);  color: var(--jsconf-yellow);  fill: var(--jsconf-yellow); }
+  45%  { transform: rotate(-15deg) scale(1.1);  color: var(--jsconf-yellow);  fill: var(--jsconf-yellow); }
+  60%  { transform: rotate(15deg)  scale(1.1);  color: var(--jsconf-yellow);  fill: var(--jsconf-yellow); }
+  75%  { transform: rotate(-8deg)  scale(1.05); color: var(--jsconf-yellow);  fill: var(--jsconf-yellow); }
+  90%  { transform: rotate(8deg)   scale(1.05); color: var(--jsconf-yellow);  fill: var(--jsconf-yellow); }
+  100% { transform: rotate(0deg)   scale(1);    color: inherit;               fill: inherit; }
+}
+
+.zap-jiggle {
+  animation: zap-jiggle 0.6s ease-in-out;
+}
+
+@keyframes letter-wave {
+  0%, 100% { transform: translateY(0); }
+  40%       { transform: translateY(-4px); }
+}
+
+.wave-letter {
+  display: inline-block;
+}
+
+.wave-active .wave-letter {
+  animation: letter-wave 0.5s ease-in-out both;
 }
 
 /* Typography utilities */

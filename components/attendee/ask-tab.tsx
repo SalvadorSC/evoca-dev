@@ -104,7 +104,7 @@ export function AskTab({ send, questions, sessionId }: AskTabProps) {
           placeholder="Anonymous"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="bg-jsconf-bg border-jsconf-border rounded-none h-10 font-sans text-white placeholder:text-jsconf-muted focus:border-jsconf-yellow focus:ring-jsconf-yellow/20"
+          className="bg-jsconf-bg border-jsconf-border rounded-none h-10 font-sans text-foreground placeholder:text-jsconf-muted focus:border-jsconf-yellow focus:ring-jsconf-yellow/20"
         />
 
         <div className="flex flex-col gap-1">
@@ -113,7 +113,7 @@ export function AskTab({ send, questions, sessionId }: AskTabProps) {
             value={text}
             onChange={(e) => setText(e.target.value.slice(0, 200))}
             maxLength={200}
-            className="bg-jsconf-bg border-jsconf-border rounded-none font-sans text-white placeholder:text-jsconf-muted resize-none focus:border-jsconf-yellow focus:ring-jsconf-yellow/20"
+            className="bg-jsconf-bg border-jsconf-border rounded-none font-sans text-foreground placeholder:text-jsconf-muted resize-none focus:border-jsconf-yellow focus:ring-jsconf-yellow/20"
             rows={3}
           />
           <span className="font-mono text-xs text-jsconf-muted text-right">

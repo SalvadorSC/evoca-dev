@@ -6,7 +6,7 @@ export default function AuthErrorPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="font-display font-bold text-3xl tracking-wide mb-2 text-white">
+          <h1 className="font-display font-bold text-3xl tracking-wide mb-2 text-foreground">
             EVOCA
           </h1>
           <p className="font-mono text-xs text-jsconf-muted uppercase tracking-wider">
@@ -21,7 +21,7 @@ export default function AuthErrorPage() {
               ✕
             </div>
             <div>
-              <h2 className="font-display font-bold text-xl text-white mb-2">
+              <h2 className="font-display font-bold text-xl text-foreground mb-2">
                 Authentication failed
               </h2>
               <p className="text-sm text-jsconf-muted">

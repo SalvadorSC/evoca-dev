@@ -14,8 +14,8 @@
     "description": "Implement an end-to-end submission flow inspired by the Software Crafters conference process. Speakers submit talk proposals with title, abstract, format, level, and tags. Organizers review, accept, reject, or waitlist submissions. Accepted speakers are notified and their talk can be slotted directly into the conference schedule. Full spec to be provided separately.",
     "complexity": "high",
     "priority": "medium",
-    "status": "idea",
-    "complete": false
+    "status": "built",
+    "complete": true
   },
   {
     "id": "idea-003",

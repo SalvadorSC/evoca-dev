@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
+import { useEffect, useRef } from "react"
 import { Mic2, User, Zap, LogOut, CalendarRange } from "lucide-react"
 
 const NAV_ITEMS = [
@@ -15,6 +16,37 @@ const NAV_ITEMS = [
 function SidebarNav() {
   const pathname = usePathname()
   const router = useRouter()
+  const zapRef = useRef<SVGSVGElement>(null)
+  const waveRef = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    function animate() {
+      // Zap jiggle
+      const zap = zapRef.current
+      if (zap) {
+        zap.classList.remove("zap-jiggle")
+        void zap.offsetWidth
+        zap.classList.add("zap-jiggle")
+        zap.addEventListener("animationend", () => zap.classList.remove("zap-jiggle"), { once: true })
+      }
+      // Letter wave
+      const wave = waveRef.current
+      if (wave) {
+        wave.classList.remove("wave-active")
+        void wave.offsetWidth
+        wave.classList.add("wave-active")
+        // Remove after all letters finish (7 letters × 50ms stagger + 500ms duration)
+        setTimeout(() => wave.classList.remove("wave-active"), 7 * 50 + 500)
+      }
+    }
+
+    const first = setTimeout(animate, 10_000)
+    const repeat = setInterval(animate, 40_000) // 10s first, then every 30s
+    return () => {
+      clearTimeout(first)
+      clearInterval(repeat)
+    }
+  }, [])
 
   async function handleSignOut() {
     const supabase = createClient()
@@ -29,7 +61,7 @@ function SidebarNav() {
         {/* Logo */}
         <div className="px-5 py-5 border-b border-jsconf-border">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <span className="font-display font-bold text-lg tracking-wide text-white">EVOCA</span>
+            <span className="font-display font-bold text-lg tracking-wide text-foreground">EVOCA</span>
           </Link>
           <span className="font-mono text-[10px] text-jsconf-muted uppercase tracking-widest mt-0.5 block">
             Speaker Dashboard
@@ -37,18 +69,17 @@ function SidebarNav() {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 py-4 flex flex-col gap-0.5 px-2">
+        <nav className="flex-1 py-4 flex flex-col gap-2 px-2">
           {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
             const active = href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href)
             return (
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-3 px-3 py-2.5 font-mono text-sm uppercase tracking-wider transition-all duration-150 ${
-                  active
-                    ? "bg-jsconf-yellow text-black font-bold"
-                    : "text-jsconf-muted hover:text-white hover:bg-jsconf-surface-2"
-                }`}
+                className={`flex items-center gap-3 px-3 py-2.5 font-mono text-sm uppercase tracking-wider transition-all duration-150 ${active
+                  ? "bg-jsconf-yellow text-black font-bold"
+                  : "text-jsconf-muted hover:text-foreground hover:bg-jsconf-surface-2"
+                  }`}
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 {label}
@@ -59,10 +90,20 @@ function SidebarNav() {
           {/* Upgrade */}
           <Link
             href="/dashboard/upgrade"
-            className="flex items-center gap-3 px-3 py-2.5 font-mono text-sm uppercase tracking-wider text-jsconf-yellow hover:bg-jsconf-yellow-dim transition-all duration-150 mt-2 border border-jsconf-yellow/30"
+            className="flex items-center gap-3 px-3 py-2.5 font-mono text-sm uppercase tracking-wider border-2 border-bg-jsconf-yellow text-primary-foreground font-bold hover:opacity-90 transition-all duration-150 mt-2 hover:bg-jsconf-yellow hover:border-transparent"
           >
-            <Zap className="h-4 w-4 shrink-0" />
-            Upgrade
+            <Zap ref={zapRef} className="h-4 w-4 shrink-0" />
+            <span ref={waveRef} aria-label="Upgrade">
+              {"Upgrade".split("").map((ch, i) => (
+                <span
+                  key={i}
+                  className="wave-letter"
+                  style={{ animationDelay: `${i * 50}ms` }}
+                >
+                  {ch}
+                </span>
+              ))}
+            </span>
           </Link>
         </nav>
 
@@ -70,7 +111,7 @@ function SidebarNav() {
         <div className="px-2 pb-4 border-t border-jsconf-border pt-4">
           <button
             onClick={handleSignOut}
-            className="flex items-center gap-3 w-full px-3 py-2.5 font-mono text-sm uppercase tracking-wider text-jsconf-muted hover:text-white hover:bg-jsconf-surface-2 transition-all duration-150"
+            className="flex items-center gap-3 w-full px-3 py-2.5 font-mono text-sm uppercase tracking-wider text-jsconf-muted hover:text-foreground hover:bg-jsconf-surface-2 transition-all duration-150"
           >
             <LogOut className="h-4 w-4 shrink-0" />
             Sign Out
@@ -86,9 +127,8 @@ function SidebarNav() {
             <Link
               key={href}
               href={href}
-              className={`flex-1 flex flex-col items-center gap-1 py-3 font-mono text-[10px] uppercase tracking-wider transition-all duration-150 ${
-                active ? "text-jsconf-yellow" : "text-jsconf-muted"
-              }`}
+              className={`flex-1 flex flex-col items-center gap-1 py-3 font-mono text-[10px] uppercase tracking-wider transition-all duration-150 ${active ? "text-jsconf-yellow" : "text-jsconf-muted"
+                }`}
             >
               <Icon className="h-5 w-5" />
               {label}
@@ -97,7 +137,7 @@ function SidebarNav() {
         })}
         <button
           onClick={handleSignOut}
-          className="flex-1 flex flex-col items-center gap-1 py-3 font-mono text-[10px] uppercase tracking-wider text-jsconf-muted"
+          className="flex-1 flex flex-col items-center gap-1 py-3 font-mono text-[10px] uppercase tracking-wider text-jsconf-muted hover:text-foreground hover:bg-jsconf-surface-2 transition-all duration-150"
         >
           <LogOut className="h-5 w-5" />
           Out

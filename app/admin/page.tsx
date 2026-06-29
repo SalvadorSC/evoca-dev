@@ -140,7 +140,7 @@ export default function AdminPage() {
             <div className="mx-auto w-12 h-12 bg-jsconf-yellow-dim flex items-center justify-center mb-4">
               <Lock className="h-6 w-6 text-jsconf-yellow" />
             </div>
-            <h1 className="font-display font-bold text-xl text-white uppercase tracking-wide">
+            <h1 className="font-display font-bold text-xl text-foreground uppercase tracking-wide">
               Admin Access
             </h1>
           </div>
@@ -159,7 +159,7 @@ export default function AdminPage() {
                   setPasswordError(false)
                 }}
                 onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                className={`bg-jsconf-bg border-jsconf-border rounded-none h-11 font-sans text-white placeholder:text-jsconf-muted focus:border-jsconf-yellow ${passwordError ? "border-jsconf-red" : ""
+                className={`bg-jsconf-bg border-jsconf-border rounded-none h-11 font-sans text-foreground placeholder:text-jsconf-muted focus:border-jsconf-yellow ${passwordError ? "border-jsconf-red" : ""
                   }`}
               />
               <Label htmlFor="password" className="font-mono text-xs text-jsconf-muted uppercase tracking-wide">(for demo purposes, jsconf2026 is the password.)</Label>
@@ -197,7 +197,7 @@ export default function AdminPage() {
           {state.currentTalk && (
             <div className="p-3 bg-jsconf-surface-2 border border-jsconf-border mb-4">
               <p className="font-mono text-xs text-jsconf-muted">Current:</p>
-              <p className="font-display font-semibold text-white">{state.currentTalk}</p>
+              <p className="font-display font-semibold text-foreground">{state.currentTalk}</p>
             </div>
           )}
           <div className="flex gap-2">
@@ -206,7 +206,7 @@ export default function AdminPage() {
               value={talkTitle}
               onChange={(e) => setTalkTitle(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSetTalk()}
-              className="bg-jsconf-bg border-jsconf-border rounded-none h-10 font-sans text-white placeholder:text-jsconf-muted focus:border-jsconf-yellow"
+              className="bg-jsconf-bg border-jsconf-border rounded-none h-10 font-sans text-foreground placeholder:text-jsconf-muted focus:border-jsconf-yellow"
             />
             <Button
               onClick={handleSetTalk}
@@ -226,7 +226,7 @@ export default function AdminPage() {
           </h2>
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-display font-semibold text-white uppercase tracking-wide">
+              <p className="font-display font-semibold text-foreground uppercase tracking-wide">
                 {state.mode === "wall" ? "Wall Mode" : "Q&A Mode"}
               </p>
               <p className="font-sans text-sm text-jsconf-muted">
@@ -258,7 +258,7 @@ export default function AdminPage() {
               value={alertText}
               onChange={(e) => setAlertText(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handlePushAlert()}
-              className="bg-jsconf-bg border-jsconf-border rounded-none h-10 font-sans text-white placeholder:text-jsconf-muted focus:border-jsconf-yellow"
+              className="bg-jsconf-bg border-jsconf-border rounded-none h-10 font-sans text-foreground placeholder:text-jsconf-muted focus:border-jsconf-yellow"
             />
             <Button
               onClick={handlePushAlert}
@@ -317,7 +317,7 @@ export default function AdminPage() {
                         )}
                       </div>
                       <p
-                        className={`font-display font-semibold text-sm text-white ${session.cancelled ? "line-through opacity-60" : ""
+                        className={`font-display font-semibold text-sm text-foreground ${session.cancelled ? "line-through opacity-60" : ""
                           }`}
                       >
                         {session.title}
@@ -342,7 +342,7 @@ export default function AdminPage() {
                         variant="outline"
                         onClick={() => handleEditSession(session)}
                         disabled={session.cancelled}
-                        className="h-8 px-2 rounded-none border-jsconf-border text-jsconf-muted hover:text-white hover:border-jsconf-yellow"
+                        className="h-8 px-2 rounded-none border-jsconf-border text-jsconf-muted hover:text-foreground hover:border-jsconf-yellow"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -386,7 +386,7 @@ export default function AdminPage() {
                   >
                     <span className="text-2xl">{reaction.emoji}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="font-sans text-sm text-white">{reaction.text}</p>
+                      <p className="font-sans text-sm text-foreground">{reaction.text}</p>
                       <p className="font-mono text-xs text-jsconf-muted mt-1">
                         {reaction.name} ·{" "}
                         {formatDistanceToNow(reaction.ts, { addSuffix: true })}
@@ -421,7 +421,7 @@ export default function AdminPage() {
       <Dialog open={!!editingSession} onOpenChange={() => setEditingSession(null)}>
         <DialogContent className="bg-jsconf-surface border-jsconf-border rounded-none">
           <DialogHeader>
-            <DialogTitle className="font-display font-bold text-white uppercase tracking-wide">
+            <DialogTitle className="font-display font-bold text-foreground uppercase tracking-wide">
               Edit Session
             </DialogTitle>
             <DialogDescription className="sr-only">
@@ -437,7 +437,7 @@ export default function AdminPage() {
                 id="edit-title"
                 value={editForm.title}
                 onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
-                className="bg-jsconf-bg border-jsconf-border rounded-none h-10 font-sans text-white focus:border-jsconf-yellow"
+                className="bg-jsconf-bg border-jsconf-border rounded-none h-10 font-sans text-foreground focus:border-jsconf-yellow"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -450,7 +450,7 @@ export default function AdminPage() {
                   type="time"
                   value={editForm.start}
                   onChange={(e) => setEditForm((f) => ({ ...f, start: e.target.value }))}
-                  className="bg-jsconf-bg border-jsconf-border rounded-none h-10 font-mono text-white focus:border-jsconf-yellow"
+                  className="bg-jsconf-bg border-jsconf-border rounded-none h-10 font-mono text-foreground focus:border-jsconf-yellow"
                 />
               </div>
               <div className="space-y-2">
@@ -462,7 +462,7 @@ export default function AdminPage() {
                   type="time"
                   value={editForm.end}
                   onChange={(e) => setEditForm((f) => ({ ...f, end: e.target.value }))}
-                  className="bg-jsconf-bg border-jsconf-border rounded-none h-10 font-mono text-white focus:border-jsconf-yellow"
+                  className="bg-jsconf-bg border-jsconf-border rounded-none h-10 font-mono text-foreground focus:border-jsconf-yellow"
                 />
               </div>
             </div>
@@ -476,7 +476,7 @@ export default function AdminPage() {
                   setEditForm((f) => ({ ...f, track: v as "main" | "workshop" }))
                 }
               >
-                <SelectTrigger id="edit-track" className="bg-jsconf-bg border-jsconf-border rounded-none h-10 font-sans text-white">
+                <SelectTrigger id="edit-track" className="bg-jsconf-bg border-jsconf-border rounded-none h-10 font-sans text-foreground">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-jsconf-surface border-jsconf-border rounded-none">
@@ -490,7 +490,7 @@ export default function AdminPage() {
             <Button
               variant="outline"
               onClick={() => setEditingSession(null)}
-              className="rounded-none border-jsconf-border text-jsconf-muted hover:text-white"
+              className="rounded-none border-jsconf-border text-jsconf-muted hover:text-foreground"
             >
               Cancel
             </Button>
@@ -508,7 +508,7 @@ export default function AdminPage() {
       <Dialog open={!!cancelConfirm} onOpenChange={() => setCancelConfirm(null)}>
         <DialogContent className="bg-jsconf-surface border-jsconf-border rounded-none">
           <DialogHeader>
-            <DialogTitle className="font-display font-bold text-white uppercase tracking-wide">
+            <DialogTitle className="font-display font-bold text-foreground uppercase tracking-wide">
               Cancel Session
             </DialogTitle>
             <DialogDescription className="sr-only">
@@ -523,7 +523,7 @@ export default function AdminPage() {
             <Button
               variant="outline"
               onClick={() => setCancelConfirm(null)}
-              className="rounded-none border-jsconf-border text-jsconf-muted hover:text-white"
+              className="rounded-none border-jsconf-border text-jsconf-muted hover:text-foreground"
             >
               No, Keep It
             </Button>

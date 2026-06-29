@@ -66,7 +66,7 @@ export function SessionFeedbackResults({ sessionId }: Props) {
       {/* Summary */}
       <div className="flex items-center gap-4">
         <div className="flex flex-col gap-1">
-          <span className="font-display font-bold text-3xl text-white">{avg.toFixed(1)}</span>
+          <span className="font-display font-bold text-3xl text-foreground">{avg.toFixed(1)}</span>
           <StarDisplay rating={avg} />
         </div>
         <div className="flex flex-col gap-0.5">
@@ -110,7 +110,7 @@ export function SessionFeedbackResults({ sessionId }: Props) {
                   {new Date(f.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
                 </span>
               </div>
-              <p className="font-sans text-xs text-white leading-relaxed">{f.comment}</p>
+              <p className="font-sans text-xs text-foreground leading-relaxed">{f.comment}</p>
             </div>
           ))}
         </div>
