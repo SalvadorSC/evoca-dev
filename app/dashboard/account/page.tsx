@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { User, Twitter, Linkedin, Github, Globe, Save, Sparkles, AtSign, CheckCircle2 } from "lucide-react"
+import { User, Twitter, Linkedin, Github, Globe, Save, Sparkles, AtSign } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { OrganizerPlanSection } from "@/components/dashboard/organizer-plan-section"
 
 interface Profile {
   id?: string
@@ -29,151 +30,6 @@ const EMPTY: Profile = {
   website: "",
   is_pro: false,
   plan: "free",
-}
-
-// ─── Plan features ────────────────────────────────────────────────────────────
-const FREE_FEATURES = [
-  "Up to 3 active talks",
-  "Live reactions & Q&A",
-  "Evoca branding on session page",
-]
-
-const PRO_FEATURES = [
-  "Unlimited talks",
-  "Advanced analytics & engagement stats",
-  "Custom branding — remove Evoca watermark",
-  "Social links shown on feedback screen",
-  "Priority support",
-]
-
-function PlanCard({
-  title,
-  price,
-  features,
-  isCurrent,
-  isUpgrade,
-  onAction,
-  accent,
-}: {
-  title: string
-  price: string
-  features: string[]
-  isCurrent: boolean
-  isUpgrade: boolean
-  onAction?: () => void
-  accent: string
-}) {
-  return (
-    <div
-      className={`flex-1 border p-5 flex flex-col gap-4 transition-colors ${
-        isCurrent ? `border-[${accent}]` : "border-jsconf-border"
-      }`}
-      style={isCurrent ? { borderColor: accent } : undefined}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="font-display font-bold text-white text-lg">{title}</span>
-            {isCurrent && (
-              <span
-                className="font-mono text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5"
-                style={{ background: accent, color: title === "Pro" ? "#000" : "#fff" }}
-              >
-                Current
-              </span>
-            )}
-          </div>
-          <p className="font-mono text-xs text-jsconf-muted mt-0.5">{price}</p>
-        </div>
-      </div>
-
-      <ul className="flex flex-col gap-2 flex-1">
-        {features.map((f) => (
-          <li key={f} className="flex items-start gap-2">
-            <CheckCircle2 className="h-3.5 w-3.5 mt-0.5 shrink-0" style={{ color: accent }} />
-            <span className="font-sans text-sm text-white/80">{f}</span>
-          </li>
-        ))}
-      </ul>
-
-      {!isCurrent && onAction && (
-        <button
-          onClick={onAction}
-          className="w-full font-mono text-xs font-bold uppercase tracking-wider py-2.5 border-2 transition-colors"
-          style={{
-            borderColor: accent,
-            color: isUpgrade ? "#000" : accent,
-            background: isUpgrade ? accent : "transparent",
-          }}
-          onMouseEnter={(e) => {
-            if (!isUpgrade) {
-              e.currentTarget.style.background = accent
-              e.currentTarget.style.color = "#000"
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isUpgrade) {
-              e.currentTarget.style.background = "transparent"
-              e.currentTarget.style.color = accent
-            }
-          }}
-        >
-          {isUpgrade ? "Upgrade to Pro" : "Downgrade to Free"}
-        </button>
-      )}
-    </div>
-  )
-}
-
-function PlanSection({ isPro }: { isPro: boolean }) {
-  const [notice, setNotice] = useState<string | null>(null)
-
-  function handleUpgrade() {
-    setNotice("Pro plan via Stripe is coming soon. You'll be notified when it's available.")
-  }
-
-  function handleDowngrade() {
-    setNotice("To downgrade, please contact support@evoca.live and we'll process it within 24 hours.")
-  }
-
-  return (
-    <div className="border-t border-jsconf-border pt-8 mt-8">
-      <div className="mb-5">
-        <h2 className="font-display font-bold text-white uppercase tracking-wide text-lg">Plan</h2>
-        <p className="font-mono text-xs text-jsconf-muted mt-1">
-          You are currently on the{" "}
-          <span className="text-white font-bold">{isPro ? "Pro" : "Free"}</span> plan.
-        </p>
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-4">
-        <PlanCard
-          title="Free"
-          price="$0 / month"
-          features={FREE_FEATURES}
-          isCurrent={!isPro}
-          isUpgrade={false}
-          onAction={isPro ? handleDowngrade : undefined}
-          accent="#888"
-        />
-        <PlanCard
-          title="Pro"
-          price="Coming soon"
-          features={PRO_FEATURES}
-          isCurrent={isPro}
-          isUpgrade={true}
-          onAction={!isPro ? handleUpgrade : undefined}
-          accent="#F7E018"
-        />
-      </div>
-
-      {notice && (
-        <p className="font-mono text-xs text-jsconf-muted mt-4 border border-jsconf-border px-4 py-3 leading-relaxed">
-          {notice}
-        </p>
-      )}
-    </div>
-  )
 }
 
 const USERNAME_RE = /^[a-z0-9_-]{3,32}$/
@@ -456,7 +312,7 @@ export default function AccountPage() {
         )}
       </div>
 
-      <PlanSection isPro={profile.is_pro} />
+      <OrganizerPlanSection />
     </div>
   )
 }
