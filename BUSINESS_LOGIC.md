@@ -195,14 +195,15 @@ updated_at           timestamptz not null default now()
 ### New table: `event_speaker_affiliations`
 ```sql
 id           uuid primary key default gen_random_uuid(),
-event_id     uuid not null references organizer_subscriptions(id) on delete cascade,
-speaker_id   uuid not null references speakers(user_id) on delete cascade,
-invited_by   uuid not null references speakers(user_id),
+event_id     uuid not null references conferences(id) on delete cascade, -- re-pointed in 005_conferences (was organizer_subscriptions)
+speaker_id   uuid references auth.users(id) on delete cascade,
+invited_by   uuid not null references auth.users(id),
 email        text not null,
-status       text not null default 'pending', -- 'pending' | 'accepted' | 'declined'
+status       text not null default 'pending', -- 'pending' | 'accepted' | 'declined' | 'revoked'
 created_at   timestamptz not null default now(),
 unique(event_id, email)
 ```
+> **Phase 1 vs Phase 2:** the table was created in `004_billing` with `event_id` → `organizer_subscriptions(id)`. Phase 2's `005_conferences` migration introduces a dedicated `conferences` table and re-points this FK to `conferences(id)`, and adds the `'revoked'` status. See `docs/phase-2-conference-management.md`.
 
 ---
 
