@@ -3,8 +3,15 @@
 import * as pdfjsLib from 'pdfjs-dist'
 import JSZip from 'jszip'
 
-// Set up the PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
+// Set up the PDF.js worker.
+// pdfjs-dist v4+ ships the worker as an ESM `.mjs` module — the old cdnjs
+// `pdf.worker.min.js` path 404s for these versions. Resolving it from the
+// installed package via import.meta.url lets the bundler serve a
+// version-matched worker locally (no CDN, no version drift).
+pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString()
 
 export interface SlideExtractionResult {
   slides: string[] // Base64-encoded PNG images
