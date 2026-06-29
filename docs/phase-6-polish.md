@@ -2,6 +2,10 @@
 
 > Status: **Pending**
 > Blocker: None. Can be worked on in parallel with any other phase.
+> **Next:** Once this phase is complete, prepare for **Phase 7 — Call for Papers**
+> (`docs/phase-7-call-for-papers.md`). Resolve its open questions and lock scope
+> before starting; note that Phase 7 notifications likely require wiring the
+> transactional email provider that Phase 2 left stubbed.
 
 ---
 

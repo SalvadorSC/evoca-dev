@@ -5,6 +5,21 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useState } from 'react'
 
+// Mirrors scripts/seed-test-accounts.mjs + /api/dev-login. See docs/test-accounts.md.
+const DEV_ACCOUNTS = [
+  { key: 'free', label: 'Free speaker', tag: 'free', note: 'No paid access — triggers paywall.' },
+  { key: 'speaker-pro', label: 'Speaker Pro', tag: 'spk pro', note: 'Own Pro subscription.' },
+  { key: 'organizer-live', label: 'Organizer (live)', tag: 'monthly', note: 'Active subscription — full live access.' },
+  { key: 'organizer-onetime-live', label: 'One-time (live)', tag: 'window now', note: 'Event window is now — live.' },
+  { key: 'organizer-onetime-prep', label: 'One-time (prep)', tag: 'future', note: 'Window in future — prep only.' },
+  { key: 'organizer-onetime-unset', label: 'One-time (unset)', tag: 'no window', note: 'No window chosen — prep only.' },
+  { key: 'organizer-expired', label: 'Organizer (expired)', tag: 'cancelled', note: 'Cancelled — content locked.' },
+  { key: 'organizer-grace', label: 'Organizer (grace)', tag: 'past_due', note: 'Payment failed — prep grace.' },
+  { key: 'both', label: 'Speaker + Organizer', tag: 'both', note: 'Dual identity, full access.' },
+  { key: 'affiliated-speaker', label: 'Affiliated speaker', tag: 'event pro', note: 'Invited to a live conference — event-scoped Pro.' },
+  { key: 'owner', label: 'Owner (real)', tag: 'owner', note: 'The primary dev account.' },
+] as const
+
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -117,14 +132,26 @@ export default function LoginPage() {
         {process.env.NODE_ENV === 'development' && (
           <div className="mt-4 border border-dashed border-jsconf-border p-4">
             <p className="font-mono text-xs text-jsconf-muted uppercase tracking-wider mb-3">
-              Dev only
+              Dev only — sign in as test account
             </p>
-            <a
-              href="/api/dev-login"
-              className="flex items-center justify-center w-full h-10 bg-jsconf-surface border border-jsconf-border text-jsconf-muted hover:text-white hover:border-jsconf-muted font-mono text-xs uppercase tracking-wider transition-colors"
-            >
-              Skip magic link — sign in as test user
-            </a>
+            <div className="grid grid-cols-1 gap-1.5">
+              {DEV_ACCOUNTS.map((acc) => (
+                <a
+                  key={acc.key}
+                  href={`/api/dev-login?as=${acc.key}`}
+                  className="flex items-center justify-between gap-2 px-3 h-9 bg-jsconf-surface border border-jsconf-border text-jsconf-muted hover:text-white hover:border-jsconf-muted font-mono text-xs transition-colors"
+                  title={acc.note}
+                >
+                  <span className="uppercase tracking-wider truncate">{acc.label}</span>
+                  <span className="text-[10px] text-jsconf-muted/70 shrink-0">{acc.tag}</span>
+                </a>
+              ))}
+            </div>
+            <p className="font-mono text-[10px] text-jsconf-muted/60 mt-3 leading-relaxed">
+              Run{' '}
+              <span className="text-jsconf-muted">scripts/seed-test-accounts.mjs</span> first. See
+              docs/test-accounts.md.
+            </p>
           </div>
         )}
 

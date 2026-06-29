@@ -228,5 +228,16 @@
     "phase": 1,
     "status": "done",
     "complete": true
+  },
+  {
+    "id": "feat-021",
+    "name": "Call for Papers (CFP)",
+    "description": "Public CFP submission page per conference, organizer submission review dashboard (rate/accept/reject), and accept->slot+affiliation flow building on Phase 2. Draft/empty plan — scope and data model not yet locked. See docs/phase-7-call-for-papers.md. Notifications likely require the transactional email provider that Phase 2 left stubbed.",
+    "complexity": "high",
+    "priority": "medium",
+    "category": "core",
+    "phase": 7,
+    "status": "planned",
+    "complete": false
   }
 ]

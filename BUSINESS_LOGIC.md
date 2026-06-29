@@ -17,11 +17,17 @@ Detailed implementation plans live in `docs/`:
 | 4 — Presentation Formats | [docs/phase-4-presentation-formats.md](docs/phase-4-presentation-formats.md) |
 | 5 — Speaker Experience | [docs/phase-5-speaker-experience.md](docs/phase-5-speaker-experience.md) |
 | 6 — Polish & Responsive | [docs/phase-6-polish.md](docs/phase-6-polish.md) |
+| 7 — Call for Papers (draft) | [docs/phase-7-call-for-papers.md](docs/phase-7-call-for-papers.md) |
 
 ### Implementation status
 - **Phase 1 (Billing) — built.** Org plans live; Speaker Pro is stubbed in the catalog (`lib/plans.ts`) but not surfaced.
   Pricing uses Stripe Checkout with inline `price_data` per currency (no pre-created Stripe product IDs).
   Requires `STRIPE_WEBHOOK_SECRET` to be set for the webhook to verify signatures.
+- **Phase 2 (Conference Management) — built.** Conferences/days/slots + speaker assignment via affiliations.
+  Migrations `005_conferences` + `006_slot_speaker_email`. Invitation **emails are stubbed** (no provider wired).
+- **Phase 7 (Call for Papers) — draft only.** Empty plan with open questions; scope not yet locked. Start after Phase 6.
+- **Test accounts:** all billing/role cases are seeded — see [docs/test-accounts.md](docs/test-accounts.md)
+  (`scripts/seed-test-accounts.mjs`, dev login via `/api/dev-login?as=<key>`).
 
 ---
 
