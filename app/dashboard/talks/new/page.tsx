@@ -351,9 +351,53 @@ export default function NewTalkPage() {
             )}
             <div>
               <span className="font-mono text-[10px] text-jsconf-muted uppercase tracking-wider block mb-1">Slides</span>
-              <p className="font-mono text-sm text-foreground">
-                {form.slideUrl ? form.slideUrl : "None — skipped"}
-              </p>
+
+              {/* Uploaded file: thumbnail grid preview */}
+              {form.slideType === "file" && extractedSlides.length > 0 ? (
+                <>
+                  <p className="font-mono text-sm text-foreground mb-3">
+                    {extractedSlides.length} slide{extractedSlides.length !== 1 ? "s" : ""} from your file
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {extractedSlides.slice(0, 6).map((src, i) => (
+                      <div
+                        key={i}
+                        className="relative aspect-video border border-jsconf-border bg-jsconf-bg overflow-hidden"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={src || "/placeholder.svg"}
+                          alt={`Slide ${i + 1} preview`}
+                          className="w-full h-full object-contain"
+                        />
+                        <span className="absolute bottom-0 right-0 px-1.5 py-0.5 bg-jsconf-bg/80 font-mono text-[10px] text-jsconf-muted">
+                          {i + 1}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  {extractedSlides.length > 6 && (
+                    <p className="font-mono text-[11px] text-jsconf-muted mt-2">
+                      + {extractedSlides.length - 6} more
+                    </p>
+                  )}
+                </>
+              ) : form.slideType === "url" && form.slideUrl ? (
+                /* Embed URL: live iframe preview */
+                <>
+                  <p className="font-mono text-sm text-foreground mb-3 break-all">{form.slideUrl}</p>
+                  <div className="relative aspect-video border border-jsconf-border bg-jsconf-bg overflow-hidden">
+                    <iframe
+                      src={form.slideUrl}
+                      title="Slide embed preview"
+                      className="w-full h-full"
+                      sandbox="allow-scripts allow-same-origin allow-popups"
+                    />
+                  </div>
+                </>
+              ) : (
+                <p className="font-mono text-sm text-foreground">None — skipped</p>
+              )}
             </div>
           </div>
 
