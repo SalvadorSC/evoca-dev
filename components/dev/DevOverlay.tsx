@@ -362,7 +362,9 @@ const STORAGE_KEY = "testtracker:status";
 
 function DevOverlayInner() {
   const [visible, setVisible] = useState(true);
-  const [minimized, setMinimized] = useState(false);
+  // Minimized by default so the floating panel stays out of the way (and does
+  // not intercept clicks) unless a developer explicitly expands it.
+  const [minimized, setMinimized] = useState(true);
   const [tab, setTab] = useState<"tests" | "ideas">("tests");
   const [pos, setPos] = useState({ x: 16, y: 80 });
   const [statuses, setStatuses] = useState<Record<string, TestStatus>>(() => {
