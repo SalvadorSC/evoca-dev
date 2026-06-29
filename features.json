@@ -209,8 +209,8 @@
   },
   {
     "id": "feat-019",
-    "name": "Dev floating overlay — features & ideas tracker",
-    "description": "A draggable floating panel visible only in the development environment (NODE_ENV=development) that displays the features.json and ideas.json lists. Features can be highlighted with annotated arrows. The panel can be minimized and re-opened via a persistent button. Has no effect on production UI.",
+    "name": "Dev floating overlay — testing tracker",
+    "description": "A draggable floating panel visible only in development (NODE_ENV=development). Repurposed from a dev-completion checklist into a manual Testing Tracker: every feature (grouped by phase) and its subtasks cycle untested -> pass -> fail on click, with pass/fail/untested counts, a two-color progress bar, per-phase failing badges, and a reset button, plus a read-only Ideas tab for reference. Status persists in localStorage under 'testtracker:status'. No effect on production UI.",
     "complexity": "medium",
     "priority": "high",
     "category": "ui",
