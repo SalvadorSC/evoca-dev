@@ -12,6 +12,7 @@ import {
   type SlotType,
 } from "@/lib/billing"
 import { getOrganizerSubscriptions } from "@/lib/db"
+import { normalizeDailymotion } from "@/lib/dailymotion"
 import type { SupabaseClient } from "@supabase/supabase-js"
 
 // ─── Access guard ───────────────────────────────────────────────────────────────
@@ -249,4 +250,148 @@ export async function deleteSlot(conferenceId: string, slotId: string): Promise<
   const { error } = await supabase.from("conference_slots").delete().eq("id", slotId)
   if (error) throw new Error(error.message)
   revalidatePath(`/dashboard/conference/${conferenceId}`)
+}
+
+// ─── Stream CRUD (Phase 3 — public page / live streams) ─────────────────────────
+
+export interface StreamInput {
+  label: string
+  track?: string | null
+  /** Raw pasted Dailymotion URL or video id. */
+  source: string
+}
+
+/** Create or update a stream. Pass `streamId` to update an existing row. */
+export async function upsertStream(
+  conferenceId: string,
+  input: StreamInput,
+  streamId?: string,
+): Promise<void> {
+  const supabase = await createClient()
+  await requireOrganizerPrep(supabase)
+
+  const label = input.label.trim()
+  if (!label) throw new Error("Stream label is required.")
+
+  const normalized = normalizeDailymotion(input.source)
+  if (!normalized) {
+    throw new Error("Enter a valid Dailymotion video URL or id (e.g. dailymotion.com/video/x8abc12).")
+  }
+
+  const payload = {
+    label,
+    track: input.track?.trim() || null,
+    embed_url: normalized.embedUrl,
+    video_id: normalized.videoId,
+    provider: "dailymotion",
+  }
+
+  if (streamId) {
+    const { error } = await supabase
+      .from("conference_streams")
+      .update(payload)
+      .eq("id", streamId)
+    if (error) throw new Error(error.message)
+  } else {
+    const { data: existing } = await supabase
+      .from("conference_streams")
+      .select("sort_order")
+      .eq("conference_id", conferenceId)
+      .order("sort_order", { ascending: false })
+      .limit(1)
+    const nextOrder = existing && existing.length > 0 ? (existing[0].sort_order as number) + 1 : 0
+    const { error } = await supabase
+      .from("conference_streams")
+      .insert({ conference_id: conferenceId, ...payload, sort_order: nextOrder })
+    if (error) throw new Error(error.message)
+  }
+  revalidatePath(`/dashboard/conference/${conferenceId}`)
+}
+
+export async function deleteStream(conferenceId: string, streamId: string): Promise<void> {
+  const supabase = await createClient()
+  await requireOrganizerPrep(supabase)
+  const { error } = await supabase.from("conference_streams").delete().eq("id", streamId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/dashboard/conference/${conferenceId}`)
+}
+
+/** Mark one stream as the featured/main feed (clears the flag on the rest). */
+export async function setFeaturedStream(
+  conferenceId: string,
+  streamId: string,
+): Promise<void> {
+  const supabase = await createClient()
+  await requireOrganizerPrep(supabase)
+
+  const { error: clearErr } = await supabase
+    .from("conference_streams")
+    .update({ is_featured: false })
+    .eq("conference_id", conferenceId)
+  if (clearErr) throw new Error(clearErr.message)
+
+  const { error } = await supabase
+    .from("conference_streams")
+    .update({ is_featured: true })
+    .eq("id", streamId)
+  if (error) throw new Error(error.message)
+  revalidatePath(`/dashboard/conference/${conferenceId}`)
+}
+
+// ─── Publishing ─────────────────────────────────────────────────────────────────
+
+function slugify(input: string): string {
+  return input
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60)
+}
+
+/**
+ * Publish or unpublish a conference. On first publish, generates a unique slug
+ * from the name (suffixing a short random token on collision).
+ */
+export async function setConferencePublished(
+  conferenceId: string,
+  isPublic: boolean,
+): Promise<{ slug: string | null }> {
+  const supabase = await createClient()
+  await requireOrganizerPrep(supabase)
+
+  const { data: conf, error: fetchErr } = await supabase
+    .from("conferences")
+    .select("id, name, slug")
+    .eq("id", conferenceId)
+    .single()
+  if (fetchErr) throw new Error(fetchErr.message)
+
+  let slug: string | null = (conf?.slug as string | null) ?? null
+
+  if (isPublic && !slug) {
+    const base = slugify(conf.name as string) || "conference"
+    slug = base
+    // Resolve collisions by appending a short random suffix.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const { data: clash } = await supabase
+        .from("conferences")
+        .select("id")
+        .eq("slug", slug)
+        .neq("id", conferenceId)
+        .maybeSingle()
+      if (!clash) break
+      slug = `${base}-${Math.random().toString(36).slice(2, 6)}`
+    }
+  }
+
+  const { error } = await supabase
+    .from("conferences")
+    .update({ is_public: isPublic, slug, updated_at: new Date().toISOString() })
+    .eq("id", conferenceId)
+  if (error) throw new Error(error.message)
+
+  revalidatePath(`/dashboard/conference/${conferenceId}`)
+  if (slug) revalidatePath(`/c/${slug}`)
+  return { slug }
 }

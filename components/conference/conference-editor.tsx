@@ -22,6 +22,7 @@ import type {
   ConferenceRow,
   ConferenceDayRow,
   ConferenceSlotRow,
+  ConferenceStreamRow,
 } from "@/lib/db"
 import {
   addDay,
@@ -38,6 +39,8 @@ import {
 } from "@/app/dashboard/conference/actions"
 import { SlotDialog, SLOT_TYPE_LABELS } from "./slot-dialog"
 import { AssignSpeakerDialog } from "./assign-speaker-dialog"
+import { StreamsSection } from "./streams-section"
+import { PublishBar } from "./publish-bar"
 
 export interface SlotAssignment {
   email: string
@@ -48,6 +51,7 @@ interface ConferenceEditorProps {
   conference: ConferenceRow
   initialDays: ConferenceDayRow[]
   initialSlots: ConferenceSlotRow[]
+  initialStreams: ConferenceStreamRow[]
   accessLevel: "none" | "prep" | "live"
   eventStart: string | null
   eventEnd: string | null
@@ -67,6 +71,7 @@ export function ConferenceEditor({
   conference,
   initialDays,
   initialSlots,
+  initialStreams,
   accessLevel,
   eventStart,
   eventEnd,
@@ -95,6 +100,15 @@ export function ConferenceEditor({
   }, [initialSlots])
 
   const activeSlots = activeDay ? slotsByDay[activeDay.id] ?? [] : []
+
+  // Distinct track names across the whole schedule, for stream autocomplete.
+  const tracks = useMemo(() => {
+    const set = new Set<string>()
+    for (const s of initialSlots) {
+      if (s.track?.trim()) set.add(s.track.trim())
+    }
+    return [...set].sort()
+  }, [initialSlots])
 
   // Dialog state
   const [slotDialogOpen, setSlotDialogOpen] = useState(false)
@@ -228,6 +242,15 @@ export function ConferenceEditor({
           Prep mode — you can build the schedule now. Live presenting unlocks during your event window.
         </p>
       )}
+
+      {/* Publish / public page controls */}
+      <div className="mt-4">
+        <PublishBar
+          conferenceId={conference.id}
+          initialIsPublic={conference.is_public}
+          initialSlug={conference.slug}
+        />
+      </div>
 
       {/* Day tabs */}
       <div className="flex items-center gap-2 flex-wrap border-b border-jsconf-border mb-6 pb-3 mt-4">
@@ -417,6 +440,13 @@ export function ConferenceEditor({
           Saving…
         </div>
       )}
+
+      {/* Live streams + public page */}
+      <StreamsSection
+        conferenceId={conference.id}
+        initialStreams={initialStreams}
+        tracks={tracks}
+      />
 
       <SlotDialog
         open={slotDialogOpen}

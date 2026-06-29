@@ -5,6 +5,7 @@ import {
   getConferenceById,
   getConferenceDays,
   getSlotsForDays,
+  getConferenceStreams,
   getOrganizerSubscriptions,
 } from "@/lib/db"
 import { computeOrganizerAccess, type OrganizerSubscription } from "@/lib/billing"
@@ -22,9 +23,10 @@ export default async function ConferenceSchedulePage({
   const conference = await getConferenceById(supabase, id)
   if (!conference) notFound()
 
-  const [days, subsRaw] = await Promise.all([
+  const [days, subsRaw, streams] = await Promise.all([
     getConferenceDays(supabase, id),
     getOrganizerSubscriptions(supabase),
+    getConferenceStreams(supabase, id),
   ])
   const slots = await getSlotsForDays(
     supabase,
@@ -57,6 +59,7 @@ export default async function ConferenceSchedulePage({
       conference={conference}
       initialDays={days}
       initialSlots={slots}
+      initialStreams={streams}
       accessLevel={access.level}
       eventStart={access.eventStart}
       eventEnd={access.eventEnd}
