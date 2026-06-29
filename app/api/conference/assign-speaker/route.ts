@@ -4,8 +4,13 @@ import {
   assignSpeakerToSlot,
   unassignSpeakerFromSlot,
 } from "@/lib/affiliations"
+import { sendEmail, speakerInviteEmail } from "@/lib/email"
 
 export const dynamic = "force-dynamic"
+
+function siteUrl(req: NextRequest): string {
+  return process.env.NEXT_PUBLIC_SITE_URL || new URL(req.url).origin
+}
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -75,7 +80,24 @@ export async function POST(req: NextRequest) {
       invitedBy: user.id,
     })
 
-    // TODO(email): send an invitation email for pending invites.
+    // Notify the speaker they've been added (Phase 7 backfill of the stub).
+    try {
+      const [{ data: confRow }, { data: slotRow }] = await Promise.all([
+        supabase.from("conferences").select("name").eq("id", conferenceId).maybeSingle(),
+        supabase.from("conference_slots").select("title").eq("id", slotId).maybeSingle(),
+      ])
+      const { subject, html } = speakerInviteEmail({
+        talkTitle: (slotRow?.title as string | null) ?? null,
+        conferenceName: (confRow?.name as string) ?? "the conference",
+        signupUrl: `${siteUrl(req)}/${result.hasAccount ? "dashboard" : "signup"}`,
+        hasAccount: result.hasAccount,
+      })
+      await sendEmail({ to: email.trim().toLowerCase(), subject, html })
+    } catch (mailErr) {
+      // Email failure must not fail the assignment.
+      console.error("[v0] invite email failed:", (mailErr as Error).message)
+    }
+
     return NextResponse.json({ ok: true, action: "assign", ...result })
   } catch (err) {
     console.error("[v0] assign-speaker error:", (err as Error).message)

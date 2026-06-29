@@ -14,6 +14,7 @@ import {
   Loader2,
   CalendarDays,
   UserPlus,
+  Megaphone,
 } from "lucide-react"
 import type { SlotType } from "@/lib/billing"
 import { MAX_CONFERENCE_DAYS, slotAcceptsSpeaker } from "@/lib/billing"
@@ -197,20 +198,29 @@ export function ConferenceEditor({
           </div>
         )}
 
-        <button
-          onClick={() => {
-            if (window.confirm("Delete this conference and its entire schedule?")) {
-              run(async () => {
-                await deleteConference(conference.id)
-                router.push("/dashboard/conference")
-              })
-            }
-          }}
-          className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-red-400 hover:border-red-400 transition-colors shrink-0"
-        >
-          <Trash2 className="h-3 w-3" />
-          Delete
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <Link
+            href={`/dashboard/conference/${conference.id}/cfp`}
+            className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-white hover:border-jsconf-yellow transition-colors"
+          >
+            <Megaphone className="h-3 w-3" />
+            Call for Papers
+          </Link>
+          <button
+            onClick={() => {
+              if (window.confirm("Delete this conference and its entire schedule?")) {
+                run(async () => {
+                  await deleteConference(conference.id)
+                  router.push("/dashboard/conference")
+                })
+              }
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-red-400 hover:border-red-400 transition-colors"
+          >
+            <Trash2 className="h-3 w-3" />
+            Delete
+          </button>
+        </div>
       </div>
 
       {accessLevel === "prep" && (
