@@ -62,9 +62,17 @@ export default function PresentPage() {
   const [remoteLoading, setRemoteLoading] = useState(false)
   const [remoteError, setRemoteError] = useState<string | null>(null)
 
+  // File-based slides (Phase 4.1)
+  const [fileSlides, setFileSlides] = useState<string[]>([])
+  const [currentFileSlideIndex, setCurrentFileSlideIndex] = useState(0)
+
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const controlsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const qaPanelRef = useRef<HTMLDivElement>(null)
+
+  // Determine slide mode early (before callbacks) — determined after session load
+  const hasSlide = session?.talks?.slide_url && (session?.talks?.slide_type === "url" || session?.talks?.slide_type === "file")
+  const isFileSlide = session?.talks?.slide_type === "file"
 
   // ── Fetch session on mount ──────────────────────────────────────────────────
   useEffect(() => {
@@ -83,6 +91,19 @@ export default function PresentPage() {
       }
 
       setSession(data as unknown as SessionRow)
+      
+      // Load file-based slides if present (Phase 4.1)
+      if (data.talks?.slide_type === "file" && data.talks?.slide_url) {
+        try {
+          const manifest = await fetch(data.talks.slide_url).then(r => r.json())
+          if (Array.isArray(manifest.slides)) {
+            setFileSlides(manifest.slides)
+          }
+        } catch (err) {
+          console.error("Failed to load slide manifest:", err)
+        }
+      }
+
       setLoading(false)
       setAppUrl(`${window.location.origin}/app?room=${data.partykit_room}&session=${data.id}`)
     }
@@ -90,13 +111,27 @@ export default function PresentPage() {
     load()
   }, [sessionId])
 
-  // ── Slide iframe helpers ────────────────────────────────────────────────────
+  // ── Slide navigation helpers (supports both iframe + file slides) ──────────────
   const postToIframe = useCallback((method: "next" | "prev" | "up" | "down") => {
     iframeRef.current?.contentWindow?.postMessage({ method }, "*")
   }, [])
 
-  const slideNext = useCallback(() => { postToIframe("next"); postToIframe("down") }, [postToIframe])
-  const slidePrev = useCallback(() => { postToIframe("prev"); postToIframe("up") }, [postToIframe])
+  const slideNext = useCallback(() => {
+    if (isFileSlide && fileSlides.length > 0) {
+      setCurrentFileSlideIndex(i => Math.min(i + 1, fileSlides.length - 1))
+    } else {
+      postToIframe("next")
+    }
+  }, [isFileSlide, fileSlides.length, postToIframe])
+
+  const slidePrev = useCallback(() => {
+    if (isFileSlide && fileSlides.length > 0) {
+      setCurrentFileSlideIndex(i => Math.max(i - 1, 0))
+    } else {
+      postToIframe("prev")
+    }
+  }, [isFileSlide, fileSlides.length, postToIframe])
+
   const slideUp = useCallback(() => postToIframe("up"), [postToIframe])
   const slideDown = useCallback(() => postToIframe("down"), [postToIframe])
 
@@ -163,7 +198,7 @@ export default function PresentPage() {
     return () => window.removeEventListener("keydown", onKey)
   }, [qaOpen, slideNext, slidePrev, slideUp, slideDown]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Slide control + broadcast ───────────────────────────────────────────────
+  // ── Slide control + broadcast ───────────────────────��───────────────────────
   const sendSlide = (dir: "next" | "prev") => {
     send({ type: dir === "next" ? "slide_next" : "slide_prev" })
   }
@@ -222,7 +257,6 @@ export default function PresentPage() {
 
   // ── Derived ─────────────────────────────────────────────────────────────────
   const talk = session?.talks
-  const hasSlide = talk?.slide_url && talk.slide_type === "url"
   const talkTitle = talk?.title ?? ""
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -260,11 +294,18 @@ export default function PresentPage() {
       onMouseMove={resetControlsTimer}
       onClick={resetControlsTimer}
     >
-      {/* ── Layer 0: Slides iframe (or dark background) ── */}
-      {hasSlide ? (
+      {/* ── Layer 0: Slides (iframe, file images, or dark background) ── */}
+      {isFileSlide && fileSlides.length > 0 ? (
+        <img
+          src={fileSlides[currentFileSlideIndex]}
+          alt={`Slide ${currentFileSlideIndex + 1}`}
+          className="absolute inset-0 w-full h-full object-contain bg-[#080808]"
+          style={{ zIndex: 0 }}
+        />
+      ) : hasSlide ? (
         <iframe
           ref={iframeRef}
-          src={talk!.slide_url!}
+          src={session?.talks?.slide_url!}
           className="absolute inset-0 w-full h-full border-0"
           allow="fullscreen"
           allowFullScreen

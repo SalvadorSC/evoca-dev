@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
+import { FileSlideExtractor } from "@/components/dashboard/file-slide-extractor"
 import { ArrowLeft, ArrowRight, Check, Link2, FileText, SkipForward } from "lucide-react"
 
 type Step = 1 | 2 | 3
@@ -12,7 +13,7 @@ type FormData = {
   title: string
   description: string
   slideUrl: string
-  slideType: "url" | "none"
+  slideType: "url" | "file" | "none"
 }
 
 function slugify(text: string): string {
@@ -58,6 +59,7 @@ export default function NewTalkPage() {
   const [step, setStep] = useState<Step>(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [extractedSlides, setExtractedSlides] = useState<string[]>([])
   const [form, setForm] = useState<FormData>({
     title: "",
     description: "",
@@ -107,6 +109,31 @@ export default function NewTalkPage() {
       const suffix = Math.random().toString(36).slice(2, 6)
       const slug = `${baseSlug}-${suffix}`
 
+      // If file slides were extracted, upload them to Blob
+      let slideUrl = form.slideUrl.trim() || null
+      let slideType = form.slideType === "none" ? null : form.slideType
+
+      if (form.slideType === "file" && extractedSlides.length > 0) {
+        try {
+          const response = await fetch("/api/talks/upload-slides", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              slides: extractedSlides,
+              talkSlug: slug,
+            }),
+          })
+
+          if (!response.ok) throw new Error("Failed to upload slides")
+          const data = await response.json()
+          slideUrl = data.url
+        } catch (uploadError) {
+          console.error("Slide upload failed:", uploadError)
+          setError("Failed to upload slides. Try again.")
+          return
+        }
+      }
+
       const { error: insertError } = await supabase
         .from("talks")
         .insert({
@@ -114,8 +141,8 @@ export default function NewTalkPage() {
           title: form.title.trim(),
           description: form.description.trim() || null,
           slug,
-          slide_url: form.slideUrl.trim() || null,
-          slide_type: form.slideUrl.trim() ? form.slideType : null,
+          slide_url: slideUrl,
+          slide_type: slideUrl ? slideType : null,
         })
 
       if (insertError) {
@@ -231,13 +258,33 @@ export default function NewTalkPage() {
             )}
           </div>
 
-          {/* PDF note */}
-          <div className="border border-jsconf-border bg-jsconf-surface p-4 flex items-start gap-3 opacity-50">
-            <FileText className="h-4 w-4 text-jsconf-muted mt-0.5 shrink-0" />
-            <div>
-              <span className="font-mono text-sm text-jsconf-muted">Upload PDF / PPTX</span>
-              <p className="font-mono text-xs text-jsconf-muted mt-1">Coming soon on Pro plan</p>
+          {/* File upload option (Phase 4.1) */}
+          <div
+            className={`border p-4 cursor-pointer transition-all duration-150 ${
+              form.slideType === "file"
+                ? "border-jsconf-yellow bg-jsconf-yellow-dim"
+                : "border-jsconf-border bg-jsconf-surface hover:border-jsconf-muted"
+            }`}
+            onClick={() => update("slideType", "file")}
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <FileText className="h-4 w-4 text-jsconf-yellow" />
+              <span className="font-mono text-sm text-white">Upload PDF or PPTX</span>
             </div>
+            {form.slideType === "file" && (
+              <>
+                <FileSlideExtractor
+                  onSlidesExtracted={(slides) => {
+                    setExtractedSlides(slides)
+                  }}
+                />
+                {extractedSlides.length > 0 && (
+                  <p className="font-mono text-[11px] text-jsconf-muted mt-2">
+                    ✓ {extractedSlides.length} slide{extractedSlides.length !== 1 ? "s" : ""} extracted
+                  </p>
+                )}
+              </>
+            )}
           </div>
 
           {error && (
