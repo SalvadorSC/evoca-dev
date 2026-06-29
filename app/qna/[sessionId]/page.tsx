@@ -6,7 +6,7 @@ import { useParty } from "@/hooks/use-party"
 import { usePartyRoom } from "@/hooks/use-party-room"
 import { Header } from "@/components/shared/header"
 import { Button } from "@/components/ui/button"
-import { ChevronUp, Check, Play, Pause, RotateCcw, ChevronDown } from "lucide-react"
+import { ChevronUp, Check, Play, Pause, RotateCcw, ChevronDown, Flag, Trash2, Ban } from "lucide-react"
 
 const TIMER_OPTIONS = [5, 10, 15] as const
 const DEFAULT_TIMER_MINUTES = 10
@@ -50,15 +50,35 @@ export default function QnAPage() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
   }
 
-  const { state, send, connectionCount, isConnected } = useParty(roomName ?? "__disconnected__")
+  const { state, send, connectionCount, isConnected, isModerator } = useParty(
+    roomName ?? "__disconnected__",
+  )
 
   const handleMarkAnswered = (questionId: string) => {
     send({ type: "answer", questionId })
   }
 
+  const handleDelete = (questionId: string) => {
+    if (!window.confirm("Delete this question for everyone? This cannot be undone.")) return
+    send({ type: "delete_question", questionId })
+  }
+
+  const handleBan = (question: { authorId?: string }) => {
+    if (!question.authorId) {
+      window.alert("This question has no author id, so the author can't be banned.")
+      return
+    }
+    if (!window.confirm("Ban this author for the rest of the session? Their questions will be removed and they won't be able to post again.")) return
+    send({ type: "ban_user", authorId: question.authorId })
+  }
+
+  // Unanswered, highest-voted first, with flagged questions pushed to the bottom.
   const unansweredQuestions = state.questions
     .filter((q) => !q.answered)
-    .sort((a, b) => b.votes - a.votes)
+    .sort((a, b) => {
+      if (!!a.flagged !== !!b.flagged) return a.flagged ? 1 : -1
+      return b.votes - a.votes
+    })
 
   const answeredQuestions = state.questions
     .filter((q) => q.answered)
@@ -183,28 +203,59 @@ export default function QnAPage() {
               {unansweredQuestions.map((question, index) => (
                 <div
                   key={question.id}
-                  className={`flex items-start gap-4 p-4 border ${
-                    index === 0
+                  className={`flex flex-col gap-3 p-4 border ${
+                    question.flagged
+                      ? "border-jsconf-red/60 bg-jsconf-red/5"
+                      : index === 0
                       ? "border-jsconf-yellow shadow-[0_0_0_1px_var(--jsconf-yellow)] bg-jsconf-surface-2"
                       : "border-jsconf-border bg-jsconf-surface-2"
                   }`}
                 >
-                  <div className="flex flex-col items-center gap-0.5 shrink-0">
-                    <ChevronUp className="h-6 w-6 text-jsconf-yellow" />
-                    <span className="font-mono text-2xl font-bold text-jsconf-yellow">{question.votes}</span>
+                  <div className={`flex items-start gap-4 ${question.flagged ? "opacity-60" : ""}`}>
+                    <div className="flex flex-col items-center gap-0.5 shrink-0">
+                      <ChevronUp className="h-6 w-6 text-jsconf-yellow" />
+                      <span className="font-mono text-2xl font-bold text-jsconf-yellow">{question.votes}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      {question.flagged && (
+                        <span className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-jsconf-red bg-jsconf-red/10 px-2 py-0.5 mb-2">
+                          <Flag className="h-3 w-3" />
+                          Flagged — hidden from attendees
+                        </span>
+                      )}
+                      <p className="font-sans text-lg text-white">{question.text}</p>
+                      <p className="font-mono text-sm text-jsconf-muted mt-1">{question.name}</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleMarkAnswered(question.id)}
+                      className="shrink-0 rounded-none border-jsconf-border text-jsconf-muted hover:text-white hover:border-green-500 hover:bg-green-500/10"
+                    >
+                      <Check className="h-4 w-4 mr-2" />
+                      Answered
+                    </Button>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-sans text-lg text-white">{question.text}</p>
-                    <p className="font-mono text-sm text-jsconf-muted mt-1">{question.name}</p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleMarkAnswered(question.id)}
-                    className="shrink-0 rounded-none border-jsconf-border text-jsconf-muted hover:text-white hover:border-green-500 hover:bg-green-500/10"
-                  >
-                    <Check className="h-4 w-4 mr-2" />
-                    Answered
-                  </Button>
+
+                  {isModerator && (
+                    <div className="flex items-center gap-2 pl-10">
+                      <button
+                        onClick={() => handleDelete(question.id)}
+                        className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-jsconf-muted border border-jsconf-border px-2 py-1 hover:border-jsconf-red hover:text-jsconf-red transition-colors"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                        Delete
+                      </button>
+                      <button
+                        onClick={() => handleBan(question)}
+                        disabled={!question.authorId}
+                        className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-jsconf-muted border border-jsconf-border px-2 py-1 hover:border-jsconf-red hover:text-jsconf-red transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        title={question.authorId ? "Ban this author for the session" : "No author id — can't ban"}
+                      >
+                        <Ban className="h-3 w-3" />
+                        Ban author
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

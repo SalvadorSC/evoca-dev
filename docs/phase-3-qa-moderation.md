@@ -1,14 +1,15 @@
-k
 # Phase 3 — Q&A Moderation
 
-> Status: **Pending**
-> Blocker: None. Can ship independently of other phases.
+> Status: **Code complete — blocked on server deploy** ⚠️
+> Client code is merged in `evoca-dev`. The PartyKit server changes are written
+> but require the user to (a) merge them into `SalvadorSC/evoca-server` and
+> (b) set `SUPABASE_JWT_SECRET` + redeploy. See "Deployment" below.
 
 ---
 
 ## Goal
 
-Give moderators better control over live Q&A sessions: flagged questions stay visible (dimmed) instead of disappearing, moderators can permanently delete questions, and repeat offenders can be session-banned.
+Give moderators better control over live Q&A sessions: flagged questions stay visible (dimmed to moderators) instead of disappearing, moderators can permanently delete questions, and repeat offenders can be session-banned.
 
 ---
 
@@ -16,15 +17,65 @@ Give moderators better control over live Q&A sessions: flagged questions stay vi
 
 | Feature | Status |
 |---|---|
-| Q&A — flagged questions remain visible (dimmed) | Pending |
-| Q&A — question deletion by moderator | Pending |
-| Q&A — ban user on question removal | Pending |
+| Q&A — flagged questions visible-but-dimmed to moderators | Code complete |
+| Q&A — question deletion by moderator | Code complete |
+| Q&A — ban user on question removal | Code complete |
+
+---
+
+## ⚠️ Architecture reality (differs from the original draft below)
+
+The original plan (sections 3.1–3.3) assumed Q&A lived in Supabase with REST
+routes. **It does not.** Authoritative live Q&A state lives in a **separate
+PartyKit server** (`SalvadorSC/evoca-server`, `src/server.ts`); this repo only
+holds the client (`hooks/use-party.ts`). All moderation therefore flows through
+**server state + realtime broadcast**, not REST/DB. No `session_bans` table, no
+`/api/qna/*` routes were created.
+
+### As built
+
+**Server (`evoca-server` — changes staged in `server-patches/` of this repo):**
+- Real `jose` JWT verification (HS256) using `room.env.SUPABASE_JWT_SECRET`.
+- `authorId` on questions; in-memory, session-scoped ban set; bans enforced on submit.
+- At the flag threshold (3) a question is marked `flagged` — **filtered out for
+  attendees, included for admins** via role-aware broadcast.
+- New admin-only commands: `delete_question`, `ban_user`, `lift_ban`.
+- `sync` payload now carries the connection `role`.
+
+**Client (this repo):**
+- `lib/anon-id.ts` — stable per-browser author id (reuses the attendee token key).
+- `hooks/use-party.ts` — sends the Supabase access token as `?token=`; exposes
+  `userRole` / `isModerator` from the server's sync payload.
+- `components/attendee/ask-tab.tsx` — attaches `authorId` to submitted questions.
+- `app/qna/[sessionId]/page.tsx` — moderator view: flagged questions dimmed with
+  a red "Flagged — hidden from attendees" badge and sorted last; Delete + Ban
+  actions per question, gated by `isModerator` (server still enforces).
+- `lib/types.ts` — `flagged`/`authorId` on `Question`, `UserRole`, moderation
+  `ClientMessage`s, `role` on the sync `ServerMessage`, and an `error` message.
+
+### Decisions (locked with the user)
+1. Real JWT auth via `jose` (not the insecure base64 stub).
+2. Bans key off a stable anon id (+ Supabase user id when signed in).
+3. Flagged = hidden from attendees, dimmed for moderators.
+4. Bans/deletes live in PartyKit in-memory state (no DB schema changes).
+
+---
+
+## Deployment (required to go live)
+
+1. Apply `server-patches/server.ts` (or `server-patches/qa-moderation.patch`) to
+   `SalvadorSC/evoca-server` — see `server-patches/README.md`.
+2. `npm install jose` in that repo.
+3. `npx partykit env add SUPABASE_JWT_SECRET` (value from Supabase → Project
+   Settings → API → JWT Secret). **Caveat:** assumes the legacy HS256 secret; if
+   the project uses asymmetric/JWKS keys, switch `verifyToken` to a remote JWKS.
+4. `npx partykit deploy`.
 
 ---
 
 ## Current state (before this phase)
 
-Flagging a question hides it entirely from the moderator's view. There is no deletion option. There is no ban mechanism.
+Flagging a question hard-hides it from everyone at 3 flags. There is no deletion option. There is no ban mechanism. The client connects to PartyKit with no auth, so everyone is treated as an attendee.
 
 ---
 
@@ -100,11 +151,17 @@ CREATE TABLE session_bans (
 
 ## Definition of Done
 
-- [ ] Flagged questions render dimmed at the bottom of the list (not hidden)
-- [ ] Unflagged questions sort by votes, flagged sort after
-- [ ] Trash icon visible in moderator view on all questions
-- [ ] Deletion confirmation dialog works and removes question from all clients in realtime
-- [ ] Post-deletion ban prompt appears
-- [ ] Banned users cannot submit questions in that session
-- [ ] Moderator can see and lift bans from the moderation panel
-- [ ] `features.json` feat-016, feat-017, feat-018 marked complete
+Code-complete (typechecked); realtime behaviour pending server deploy.
+
+- [x] Flagged questions render dimmed at the bottom of the moderator list (not hidden from mods)
+- [x] Unflagged questions sort by votes, flagged sort after
+- [x] Flagged questions filtered out for attendees (server role-aware broadcast)
+- [x] Delete action visible in moderator view, with confirmation
+- [x] Delete removes the question from server state and broadcasts to all clients
+- [x] Ban action with confirmation; bans key off `authorId`
+- [x] Banned users' submissions are rejected server-side (in-memory, session-scoped)
+- [x] `lift_ban` command implemented server-side
+- [x] `features.json` feat-016, feat-017, feat-018 marked complete
+- [ ] **Verified end-to-end in browser** — blocked until the server is deployed with `SUPABASE_JWT_SECRET`
+- [ ] *(deferred)* Moderator-facing "Banned users" list + lift-ban UI (server supports it; no UI yet)
+- [ ] *(deferred)* Attendee-facing "you've been removed" toast on the ask tab

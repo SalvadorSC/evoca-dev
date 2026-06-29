@@ -177,34 +177,34 @@
   {
     "id": "feat-016",
     "name": "Q&A — flagged questions remain visible (dimmed)",
-    "description": "In the session Q&A view ([sessionId].tsx), questions that are flagged are no longer hidden. Instead they remain visible but visually dimmed and pushed to the bottom of the list, so moderators retain context.",
+    "description": "Implemented via the PartyKit server (evoca-server): flagged questions are filtered out for attendees but broadcast to moderators, who see them dimmed with a 'Flagged' badge sorted to the bottom in app/qna/[sessionId]/page.tsx. Code complete; blocked on server deploy + SUPABASE_JWT_SECRET.",
     "complexity": "low",
     "priority": "high",
     "category": "core",
     "phase": 3,
-    "status": "pending",
+    "status": "blocked",
     "complete": false
   },
   {
     "id": "feat-017",
     "name": "Q&A — question deletion by moderator",
-    "description": "Moderators can permanently delete individual questions from the Q&A view for moderation purposes. Deletion requires a confirmation step.",
+    "description": "Moderators can permanently delete individual questions from the Q&A view, with a confirmation step. The delete_question command is enforced admin-only on the PartyKit server and broadcast to all clients in realtime. Code complete; blocked on server deploy.",
     "complexity": "low",
     "priority": "high",
     "category": "core",
     "phase": 3,
-    "status": "pending",
+    "status": "blocked",
     "complete": false
   },
   {
     "id": "feat-018",
     "name": "Q&A — ban user on question ban",
-    "description": "When a moderator bans (flags + removes) a question, the author is automatically banned from submitting further questions in that session. The ban is session-scoped and is reversible by the moderator. This is a sensitive moderation action and must include a confirmation dialog with clear explanation of consequences.",
+    "description": "Moderators can ban a question's author (by stable authorId) for the rest of the session, with a confirmation dialog. The server removes the author's questions and rejects further submissions; bans are in-memory, session-scoped, and reversible via lift_ban (no UI for lifting yet). Code complete; blocked on server deploy.",
     "complexity": "medium",
     "priority": "high",
     "category": "core",
     "phase": 3,
-    "status": "pending",
+    "status": "blocked",
     "complete": false
   },
   {

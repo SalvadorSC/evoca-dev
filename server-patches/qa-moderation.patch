@@ -1,0 +1,547 @@
+From b8b59a4192a02d2a9995e028b81d220305a41e89 Mon Sep 17 00:00:00 2001
+From: v0agent <it+v0agent@vercel.com>
+Date: Mon, 29 Jun 2026 10:41:53 +0000
+Subject: [PATCH] Add Q&A moderation: JWT auth, flagged model, delete/ban/lift
+ commands
+
+- Enable real jose JWT verification using room.env.SUPABASE_JWT_SECRET (HS256)
+- Add authorId to questions; enforce in-memory session bans on submit
+- Flag threshold now marks questions flagged (hidden from attendees, dimmed for mods) instead of hard-hiding
+- Role-aware broadcast: admins receive flagged questions, attendees do not
+- New admin commands: delete_question, ban_user, lift_ban
+- Send connection role in sync payload for client UI gating
+
+Co-authored-by: v0agent <it+v0agent@vercel.com>
+---
+ package-lock.json |  10 ++
+ package.json      |   1 +
+ src/server.ts     | 258 +++++++++++++++++++++++-----------------------
+ 3 files changed, 142 insertions(+), 127 deletions(-)
+
+diff --git a/package-lock.json b/package-lock.json
+index a690ba2..0594dbf 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -10,6 +10,7 @@
+       "dependencies": {
+         "framer-motion": "^12.36.0",
+         "html-to-image": "^1.11.13",
++        "jose": "^6.2.3",
+         "partysocket": "^1.1.16",
+         "qrcode.react": "^4.2.0"
+       },
+@@ -925,6 +926,15 @@
+       "dev": true,
+       "license": "ISC"
+     },
++    "node_modules/jose": {
++      "version": "6.2.3",
++      "resolved": "https://registry.npmjs.org/jose/-/jose-6.2.3.tgz",
++      "integrity": "sha512-YYVDInQKFJfR/xa3ojUTl8c2KoTwiL1R5Wg9YCydwH0x0B9grbzlg5HC7mMjCtUJjbQ/YnGEZIhI5tCgfTb4Hw==",
++      "license": "MIT",
++      "funding": {
++        "url": "https://github.com/sponsors/panva"
++      }
++    },
+     "node_modules/merge-stream": {
+       "version": "2.0.0",
+       "resolved": "https://registry.npmjs.org/merge-stream/-/merge-stream-2.0.0.tgz",
+diff --git a/package.json b/package.json
+index 9b02d21..e54d63c 100644
+--- a/package.json
++++ b/package.json
+@@ -9,6 +9,7 @@
+   "dependencies": {
+     "framer-motion": "^12.36.0",
+     "html-to-image": "^1.11.13",
++    "jose": "^6.2.3",
+     "partysocket": "^1.1.16",
+     "qrcode.react": "^4.2.0"
+   },
+diff --git a/src/server.ts b/src/server.ts
+index 991eee1..b76277f 100644
+--- a/src/server.ts
++++ b/src/server.ts
+@@ -1,44 +1,46 @@
+ import type * as Party from "partykit/server";
+-
+-/* 
+-    One critical TODO: the JWT verification is currently a base64 decode without signature checking (flagged with comments). Before going live, uncomment the jose import and use jwtVerify with your Supabase JWT secret. I left both paths in the code so you can switch with one edit.
+-*/
++import { jwtVerify } from "jose";
+ 
+ // ============================================================
+-// CONFIGURATION — adjust these to your environment
++// CONFIGURATION
+ // ============================================================
+ 
+-const SUPABASE_JWT_SECRET = "YOUR_SUPABASE_JWT_SECRET"; // TODO: move to party.env
+-const FLAG_AUTO_HIDE_THRESHOLD = 3;
++// The Supabase JWT secret is read from PartyKit env (room.env.SUPABASE_JWT_SECRET).
++// Set it with: npx partykit env add SUPABASE_JWT_SECRET
++// At/above this many flags, a question becomes "flagged": hidden from attendees
++// but still visible (dimmed) to moderators with delete/ban actions.
++const FLAG_THRESHOLD = 3;
+ 
+ // Rate limits: [max messages, per N milliseconds]
+ const RATE_LIMITS: Record<string, [number, number]> = {
+-  reaction: [5, 3_000],   // 5 reactions per 3s per connection
+-  question: [2, 30_000],  // 2 questions per 30s per connection
+-  vote: [10, 60_000],     // 10 votes per 60s per connection
+-  flag: [5, 60_000],      // 5 flags per 60s per connection
+-  attend: [10, 60_000],   // 10 attendance changes per 60s
++  reaction: [5, 3_000],
++  question: [2, 30_000],
++  vote: [10, 60_000],
++  flag: [5, 60_000],
++  attend: [10, 60_000],
+ };
+ 
+ // Command → minimum role required
+ const COMMAND_ROLES: Record<string, ConnectionRole> = {
+-  // Public actions — anyone can do these
+   reaction: "attendee",
+   question: "attendee",
+   vote: "attendee",
+   flag: "attendee",
+   attend: "attendee",
+ 
+-  // Speaker actions
+   answer: "speaker",
+ 
+-  // Admin/organizer actions
+   set_talk: "admin",
+   set_mode: "admin",
+   update_session: "admin",
+   cancel_session: "admin",
+   session_finished: "admin",
+   push_alert: "admin",
++
++  // Moderation (Phase 3)
++  delete_question: "admin",
++  ban_user: "admin",
++  lift_ban: "admin",
+ };
+ 
+ // ============================================================
+@@ -71,6 +73,8 @@ interface Question {
+   votes: number;
+   answered: boolean;
+   hidden?: boolean;
++  flagged?: boolean;
++  authorId?: string;
+   createdAt: number;
+   [key: string]: unknown;
+ }
+@@ -92,30 +96,16 @@ interface State {
+   alert: string | null;
+ }
+ 
+-// Per-connection metadata stored via Party.Connection tags
+ interface ConnectionMeta {
+   role: ConnectionRole;
+   userId?: string;
+ }
+ 
+ // ============================================================
+-// PROFANITY FILTER (lightweight, zero-dependency)
++// PROFANITY FILTER (lightweight, zero-dependency placeholder)
+ // ============================================================
+-// In production, swap this for a proper library like `bad-words`
+-// or an API call to Anthropic/OpenAI moderation endpoint.
+-// This is a placeholder that catches obvious cases.
+-
+-const BLOCKED_PATTERNS: RegExp[] = [
+-  // Add your blocked regex patterns here. Examples:
+-  // /\bf+u+c+k+\b/i,
+-  // /\bs+h+i+t+\b/i,
+-  // /\ba+s+s+h+o+l+e+\b/i,
+-];
+-
+-// For production, install `bad-words` and use:
+-// import Filter from "bad-words";
+-// const filter = new Filter();
+-// function isOffensive(text: string): boolean { return filter.isProfane(text); }
++
++const BLOCKED_PATTERNS: RegExp[] = [];
+ 
+ function isOffensive(text: string): boolean {
+   const normalized = text.toLowerCase().replace(/[^a-z\s]/g, "");
+@@ -129,24 +119,20 @@ function isOffensive(text: string): boolean {
+ class RateLimiter {
+   private buckets: Map<string, number[]> = new Map();
+ 
+-  /**
+-   * Returns true if the action is ALLOWED, false if rate-limited.
+-   */
+   check(connectionId: string, action: string): boolean {
+     const config = RATE_LIMITS[action];
+-    if (!config) return true; // no limit configured = allow
++    if (!config) return true;
+ 
+     const [maxCount, windowMs] = config;
+     const key = `${connectionId}:${action}`;
+     const now = Date.now();
+ 
+     let timestamps = this.buckets.get(key) || [];
+-    // Prune expired timestamps
+     timestamps = timestamps.filter((t) => now - t < windowMs);
+ 
+     if (timestamps.length >= maxCount) {
+       this.buckets.set(key, timestamps);
+-      return false; // rate limited
++      return false;
+     }
+ 
+     timestamps.push(now);
+@@ -154,10 +140,9 @@ class RateLimiter {
+     return true;
+   }
+ 
+-  /** Clean up stale entries periodically */
+   cleanup() {
+     const now = Date.now();
+-    const maxWindow = 120_000; // 2 minutes
++    const maxWindow = 120_000;
+     for (const [key, timestamps] of this.buckets) {
+       const filtered = timestamps.filter((t) => now - t < maxWindow);
+       if (filtered.length === 0) {
+@@ -170,63 +155,44 @@ class RateLimiter {
+ }
+ 
+ // ============================================================
+-// JWT VERIFICATION (lightweight, for Supabase JWTs)
++// JWT VERIFICATION (Supabase JWTs, verified with jose / HS256)
+ // ============================================================
+ 
+ interface JWTPayload {
+   sub?: string;
+   role?: string;
+-  user_metadata?: {
+-    role?: string;
+-    [key: string]: unknown;
+-  };
+-  app_metadata?: {
+-    role?: string;
+-    [key: string]: unknown;
+-  };
++  user_metadata?: { role?: string; [key: string]: unknown };
++  app_metadata?: { role?: string; [key: string]: unknown };
+   exp?: number;
+   [key: string]: unknown;
+ }
+ 
+ /**
+- * Decode and verify a Supabase JWT.
++ * Verify a Supabase JWT using the project's JWT secret (HS256, symmetric).
++ * Signature + expiry are both enforced by jwtVerify. Returns null on any failure.
+  *
+- * For production, use the `jose` library for proper verification:
+- *
+- *   import { jwtVerify } from "jose";
+- *   const secret = new TextEncoder().encode(SUPABASE_JWT_SECRET);
+- *   const { payload } = await jwtVerify(token, secret);
+- *
+- * This placeholder does base64 decode + expiry check only.
+- * REPLACE WITH PROPER VERIFICATION BEFORE GOING LIVE.
++ * NOTE: assumes the legacy symmetric (HS256) Supabase JWT secret. If the project
++ * migrates to asymmetric signing keys (JWKS), swap jwtVerify's key for a remote
++ * JWKS key set (createRemoteJWKSet) pointed at the project's /.well-known JWKS.
+  */
+-async function verifyToken(token: string): Promise<JWTPayload | null> {
++async function verifyToken(
++  token: string,
++  jwtSecret: string | undefined
++): Promise<JWTPayload | null> {
++  if (!jwtSecret) {
++    console.log("[server] SUPABASE_JWT_SECRET not set — rejecting token");
++    return null;
++  }
+   try {
+-    // ---- PRODUCTION: uncomment this block ----
+-    // import { jwtVerify } from "jose";
+-    // const secret = new TextEncoder().encode(SUPABASE_JWT_SECRET);
+-    // const { payload } = await jwtVerify(token, secret);
+-    // return payload as JWTPayload;
+-
+-    // ---- DEVELOPMENT: basic decode (NO signature verification) ----
+-    const parts = token.split(".");
+-    if (parts.length !== 3) return null;
+-
+-    const payload = JSON.parse(atob(parts[1])) as JWTPayload;
+-
+-    // Check expiry
+-    if (payload.exp && payload.exp * 1000 < Date.now()) {
+-      return null; // expired
+-    }
+-
+-    return payload;
++    const secret = new TextEncoder().encode(jwtSecret);
++    const { payload } = await jwtVerify(token, secret);
++    return payload as JWTPayload;
+   } catch {
+     return null;
+   }
+ }
+ 
+ function extractRole(payload: JWTPayload): ConnectionRole {
+-  // Check multiple places where role might live in Supabase JWT
+   const role =
+     payload.app_metadata?.role ||
+     payload.user_metadata?.role ||
+@@ -252,10 +218,18 @@ function getConnectionRole(conn: Party.Connection): ConnectionRole {
+   return (conn.state as ConnectionMeta | undefined)?.role || "attendee";
+ }
+ 
++/** Attendee view: hide both explicitly-hidden and flagged questions. */
+ function getVisibleState(state: State): State {
+   return {
+     ...state,
+-    // Filter out hidden questions for broadcast
++    questions: state.questions.filter((q) => !q.hidden && !q.flagged),
++  };
++}
++
++/** Moderator view: include flagged (dimmed client-side); still drop hard-hidden. */
++function getModeratorState(state: State): State {
++  return {
++    ...state,
+     questions: state.questions.filter((q) => !q.hidden),
+   };
+ }
+@@ -277,20 +251,32 @@ export default class Server implements Party.Server {
+   };
+ 
+   private rateLimiter = new RateLimiter();
+-  private voteTracker: Map<string, Set<string>> = new Map(); // questionId → Set<connectionId>
++  private voteTracker: Map<string, Set<string>> = new Map();
++  // Server-only, in-memory, session-scoped ban list. Never broadcast to clients.
++  private bannedAuthorIds: Set<string> = new Set();
+   private cleanupInterval: ReturnType<typeof setInterval> | null = null;
+ 
+   constructor(readonly room: Party.Room) {}
+ 
+   onStart() {
+-    // Periodic cleanup of rate limiter buckets every 2 minutes
+     this.cleanupInterval = setInterval(() => {
+       this.rateLimiter.cleanup();
+     }, 120_000);
+   }
+ 
++  /**
++   * Role-aware broadcast: attendees/speakers get the visible state (no flagged),
++   * admins get the moderator state (flagged included, dimmed client-side).
++   */
++  private broadcastState() {
++    const visible = JSON.stringify({ type: "sync", state: getVisibleState(this.state) });
++    const moderator = JSON.stringify({ type: "sync", state: getModeratorState(this.state) });
++    for (const conn of this.room.getConnections()) {
++      conn.send(getConnectionRole(conn) === "admin" ? moderator : visible);
++    }
++  }
++
+   async onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+-    // ---- AUTH: extract token from query string ----
+     const url = new URL(ctx.request.url);
+     const token = url.searchParams.get("token");
+ 
+@@ -298,21 +284,22 @@ export default class Server implements Party.Server {
+     let userId: string | undefined;
+ 
+     if (token) {
+-      const payload = await verifyToken(token);
++      const payload = await verifyToken(
++        token,
++        this.room.env.SUPABASE_JWT_SECRET as string | undefined
++      );
+       if (payload) {
+         role = extractRole(payload);
+         userId = payload.sub;
+       }
+-      // Invalid/expired token → fall through to attendee (anonymous)
+     }
+ 
+-    // Store role on connection state
+     conn.setState({ role, userId } satisfies ConnectionMeta);
+ 
+-    // Send sync with visible state only (no hidden questions)
+-    conn.send(
+-      JSON.stringify({ type: "sync", state: getVisibleState(this.state) })
+-    );
++    // Send the appropriate view for this connection's role, plus its role so the
++    // client can gate moderator UI (server still enforces all actions).
++    const state = role === "admin" ? getModeratorState(this.state) : getVisibleState(this.state);
++    conn.send(JSON.stringify({ type: "sync", state, role }));
+ 
+     this.broadcastConnectionCount();
+   }
+@@ -332,10 +319,8 @@ export default class Server implements Party.Server {
+     const msgType = msg.type as string;
+     if (!msgType) return;
+ 
+-    // ---- AUTHORIZATION CHECK ----
+     const requiredRole = COMMAND_ROLES[msgType];
+     if (!requiredRole) {
+-      // Unknown command type → ignore
+       console.log(`[server] unknown command: ${msgType}`);
+       return;
+     }
+@@ -349,13 +334,10 @@ export default class Server implements Party.Server {
+           message: `Insufficient permissions for '${msgType}'. Required: ${requiredRole}, you have: ${senderRole}`,
+         })
+       );
+-      console.log(
+-        `[server] BLOCKED: ${msgType} from ${senderRole} (needs ${requiredRole})`
+-      );
++      console.log(`[server] BLOCKED: ${msgType} from ${senderRole} (needs ${requiredRole})`);
+       return;
+     }
+ 
+-    // ---- RATE LIMIT CHECK ----
+     if (!this.rateLimiter.check(sender.id, msgType)) {
+       sender.send(
+         JSON.stringify({
+@@ -380,17 +362,31 @@ export default class Server implements Party.Server {
+ 
+     if (msgType === "question") {
+       const text = (msg.text as string) || "";
++      const authorId = msg.authorId as string | undefined;
++
++      // Enforce bans: silently drop questions from banned authors.
++      if (authorId && this.bannedAuthorIds.has(authorId)) {
++        console.log(`[server] BANNED: dropped question from author ${authorId}`);
++        sender.send(
++          JSON.stringify({
++            type: "error",
++            code: "BANNED",
++            message: "You are not allowed to submit questions in this session.",
++          })
++        );
++        return;
++      }
+ 
+-      // Content moderation: silently block offensive content
+       if (isOffensive(text)) {
+         console.log(`[server] MODERATION: blocked question from ${sender.id}`);
+-        // Silent block — sender gets no error, question simply doesn't appear
+         return;
+       }
+ 
+       const question: Question = {
+         ...(msg as unknown as Question),
+         hidden: false,
++        flagged: false,
++        authorId,
+         createdAt: Date.now(),
+       };
+       this.state.questions = [question, ...this.state.questions].slice(0, 50);
+@@ -399,7 +395,6 @@ export default class Server implements Party.Server {
+     if (msgType === "vote") {
+       const questionId = msg.questionId as string;
+ 
+-      // Vote deduplication: one vote per connection per question
+       if (!this.voteTracker.has(questionId)) {
+         this.voteTracker.set(questionId, new Set());
+       }
+@@ -429,17 +424,41 @@ export default class Server implements Party.Server {
+ 
+     if (msgType === "flag") {
+       const messageId = msg.messageId as string;
+-      this.state.flags[messageId] =
+-        (this.state.flags[messageId] || 0) + 1;
++      this.state.flags[messageId] = (this.state.flags[messageId] || 0) + 1;
+ 
+-      // Auto-hide questions that exceed the flag threshold
+-      if (this.state.flags[messageId] >= FLAG_AUTO_HIDE_THRESHOLD) {
++      // At threshold: mark flagged (hidden from attendees, dimmed for mods).
++      if (this.state.flags[messageId] >= FLAG_THRESHOLD) {
+         this.state.questions = this.state.questions.map((q) =>
+-          q.id === messageId ? { ...q, hidden: true } : q
+-        );
+-        console.log(
+-          `[server] AUTO-HIDE: question ${messageId} reached ${FLAG_AUTO_HIDE_THRESHOLD} flags`
++          q.id === messageId ? { ...q, flagged: true } : q
+         );
++        console.log(`[server] FLAGGED: question ${messageId} reached ${FLAG_THRESHOLD} flags`);
++      }
++    }
++
++    // ---- MODERATION (admin only; enforced above) ----
++
++    if (msgType === "delete_question") {
++      const questionId = msg.questionId as string;
++      this.state.questions = this.state.questions.filter((q) => q.id !== questionId);
++      this.voteTracker.delete(questionId);
++      console.log(`[server] DELETE: question ${questionId} by ${sender.id}`);
++    }
++
++    if (msgType === "ban_user") {
++      const authorId = msg.authorId as string | undefined;
++      if (authorId) {
++        this.bannedAuthorIds.add(authorId);
++        // Remove the banned author's existing questions.
++        this.state.questions = this.state.questions.filter((q) => q.authorId !== authorId);
++        console.log(`[server] BAN: author ${authorId} by ${sender.id}`);
++      }
++    }
++
++    if (msgType === "lift_ban") {
++      const authorId = msg.authorId as string | undefined;
++      if (authorId) {
++        this.bannedAuthorIds.delete(authorId);
++        console.log(`[server] LIFT BAN: author ${authorId} by ${sender.id}`);
+       }
+     }
+ 
+@@ -469,16 +488,9 @@ export default class Server implements Party.Server {
+ 
+     if (msgType === "attend") {
+       const sessionId = msg.sessionId as string;
+-      const att = this.state.attendance[sessionId] || {
+-        going: [],
+-        maybe: [],
+-      };
+-      att.going = att.going.filter(
+-        (u) => u.userId !== (msg.userId as string)
+-      );
+-      att.maybe = att.maybe.filter(
+-        (u) => u.userId !== (msg.userId as string)
+-      );
++      const att = this.state.attendance[sessionId] || { going: [], maybe: [] };
++      att.going = att.going.filter((u) => u.userId !== (msg.userId as string));
++      att.maybe = att.maybe.filter((u) => u.userId !== (msg.userId as string));
+       if (msg.status === "going") {
+         att.going.push({
+           userId: msg.userId as string,
+@@ -498,19 +510,11 @@ export default class Server implements Party.Server {
+       this.state.alert = msg.text as string;
+       setTimeout(() => {
+         this.state.alert = null;
+-        this.room.broadcast(
+-          JSON.stringify({
+-            type: "sync",
+-            state: getVisibleState(this.state),
+-          })
+-        );
++        this.broadcastState();
+       }, 30000);
+     }
+ 
+-    // Broadcast updated state (with hidden questions filtered)
+-    this.room.broadcast(
+-      JSON.stringify({ type: "sync", state: getVisibleState(this.state) })
+-    );
++    this.broadcastState();
+   }
+ 
+   private broadcastConnectionCount() {
+@@ -523,4 +527,4 @@ export default class Server implements Party.Server {
+   }
+ }
+ 
+-Server satisfies Party.Worker;
+\ No newline at end of file
++Server satisfies Party.Worker;
+-- 
+2.49.0
+

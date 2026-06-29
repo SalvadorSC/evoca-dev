@@ -25,7 +25,12 @@ Detailed implementation plans live in `docs/`:
   Requires `STRIPE_WEBHOOK_SECRET` to be set for the webhook to verify signatures.
 - **Phase 2 (Conference Management) — built.** Conferences/days/slots + speaker assignment via affiliations.
   Migrations `005_conferences` + `006_slot_speaker_email`. Invitation **emails are stubbed** (no provider wired).
+- **Phase 3 (Q&A Moderation) — code complete, blocked on server deploy.** Live Q&A state lives in a
+  **separate PartyKit server** (`SalvadorSC/evoca-server`), not Supabase. Client (token auth, moderator UI,
+  flagged/delete/ban) is merged here; server changes are staged in [`server-patches/`](server-patches/README.md).
+  To go live: apply the patch to evoca-server, set `SUPABASE_JWT_SECRET`, redeploy. v0 lacks push access to that repo.
 - **Phase 7 (Call for Papers) — draft only.** Empty plan with open questions; scope not yet locked. Start after Phase 6.
+  Phase 7 owns wiring the transactional email provider (also backfills Phase 2's stubbed invite emails).
 - **Test accounts:** all billing/role cases are seeded — see [docs/test-accounts.md](docs/test-accounts.md)
   (`scripts/seed-test-accounts.mjs`, dev login via `/api/dev-login?as=<key>`).
 
