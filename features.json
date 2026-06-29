@@ -62,8 +62,8 @@
     "priority": "high",
     "category": "core",
     "phase": 2,
-    "status": "pending",
-    "complete": false
+    "status": "done",
+    "complete": true
   },
   {
     "id": "feat-007",
@@ -73,8 +73,8 @@
     "priority": "high",
     "category": "core",
     "phase": 2,
-    "status": "pending",
-    "complete": false
+    "status": "done",
+    "complete": true
   },
   {
     "id": "feat-008",
@@ -84,8 +84,8 @@
     "priority": "high",
     "category": "core",
     "phase": 2,
-    "status": "pending",
-    "complete": false
+    "status": "done",
+    "complete": true
   },
   {
     "id": "feat-009",

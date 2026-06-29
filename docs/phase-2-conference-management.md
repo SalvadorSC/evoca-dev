@@ -1,7 +1,7 @@
 # Phase 2 — Conference Management Core
 
-> Status: **Pending**
-> Blocker: Phase 1 complete (done). Requires a small follow-up migration (`005_conferences`) before any feature work.
+> Status: **Complete** ✅
+> Blocker: Phase 1 complete (done). Follow-up migrations `005_conferences` + `006_slot_speaker_email` applied.
 
 ---
 
@@ -15,9 +15,22 @@ Give organizers the tools to build a full conference program: multiple days, typ
 
 | Feature | Status |
 |---|---|
-| Conference multi-day scheduling (up to 5 days) | Pending |
-| Conference slot management | Pending |
-| Speaker assignment to conference slots | Pending |
+| Conference multi-day scheduling (up to 5 days) | Done |
+| Conference slot management | Done |
+| Speaker assignment to conference slots | Done |
+
+---
+
+## ⚠️ Implementation notes (as built)
+
+- **Migrations:** `005_conferences` (conferences, conference_days, conference_slots tables + RLS; re-pointed `event_speaker_affiliations.event_id` FK to `conferences`), and `006_slot_speaker_email` (added `conference_slots.speaker_email` for displaying pending invites before the speaker has an account).
+- **Data layer:** conference types + queries in `lib/db.ts`; affiliation access logic, slot types (`talk|keynote|workshop|lightning|break|panel`), and `MAX_CONFERENCE_DAYS=5` in `lib/billing.ts`; server-only affiliation helpers (`linkAffiliationsOnSignup`, assign/unassign) in `lib/affiliations.ts`.
+- **Server actions:** `app/dashboard/conference/actions.ts` (create/rename/delete conference, add/rename/reorder day, slot CRUD) — all gated through `computeOrganizerAccess` and RLS-scoped.
+- **Routes:** list `app/dashboard/conference/page.tsx`, editor `app/dashboard/conference/[id]/page.tsx`, assign API `app/api/conference/assign-speaker/route.ts`.
+- **Components:** `conference-list-client.tsx` (paywall-gated create), `conference-editor.tsx` (day tabs + timeline + slot management), `slot-dialog.tsx`, `assign-speaker-dialog.tsx`.
+- **Affiliation linking:** invitations match by email; existing accounts link immediately (`accepted`), unknown emails stay `pending` and auto-link on signup via the `/auth/callback` route. Event-scoped Pro is derived at runtime (`hasEventScopedPro`) — it never mutates `speakers.speaker_plan`.
+- **Nav:** added an "Events" item to the dashboard sidebar.
+- **Email sending** for invitations is stubbed (affiliation row is created; no transactional email provider wired yet) — flagged for a future phase.
 
 ---
 
