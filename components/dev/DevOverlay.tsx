@@ -4,6 +4,12 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import features from "@/features.json";
 import ideas from "@/ideas.json";
 
+type Subtask = {
+  id: string;
+  name: string;
+  complete: boolean;
+};
+
 type Item = {
   id: string;
   name: string;
@@ -11,14 +17,20 @@ type Item = {
   complexity: string;
   priority: string;
   category?: string;
+  phase?: number;
   status: string;
   complete: boolean;
+  subtasks?: Subtask[];
 };
 
-const CATEGORY_ORDER: Record<string, number> = {
-  "core": 0,
-  "nice-to-have": 1,
-  "ui": 2,
+const PHASE_LABELS: Record<number, string> = {
+  0: "DX / Tooling",
+  1: "Phase 1 — Billing Foundation",
+  2: "Phase 2 — Conference Management",
+  3: "Phase 3 — Q&A Moderation",
+  4: "Phase 4 — Presentation Formats",
+  5: "Phase 5 — Speaker Experience",
+  6: "Phase 6 — Polish & Responsive",
 };
 
 const priorityColor: Record<string, string> = {
@@ -51,16 +63,79 @@ function Badge({ label, color }: { label: string; color: string }) {
   );
 }
 
+function SubtaskRow({
+  subtask,
+  done,
+  onToggle,
+}: {
+  subtask: Subtask;
+  done: boolean;
+  onToggle: (id: string) => void;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 6,
+        padding: "3px 0 3px 20px",
+        opacity: done ? 0.45 : 1,
+      }}
+    >
+      <span
+        title={done ? "Mark as pending" : "Mark as done"}
+        onClick={() => onToggle(subtask.id)}
+        style={{
+          marginTop: 1,
+          width: 12,
+          height: 12,
+          borderRadius: 2,
+          border: `1.5px solid ${done ? "#639922" : "#ccc"}`,
+          background: done ? "#639922" : "transparent",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+          cursor: "pointer",
+          color: "#fff",
+          fontSize: 8,
+          lineHeight: 1,
+        }}
+      >
+        {done ? "✓" : ""}
+      </span>
+      <span
+        style={{
+          fontSize: 11,
+          color: "#555",
+          textDecoration: done ? "line-through" : "none",
+        }}
+      >
+        {subtask.name}
+      </span>
+    </div>
+  );
+}
+
 function ItemRow({
   item,
   done,
   onToggleDone,
+  doneOverrides,
 }: {
   item: Item;
   done: boolean;
   onToggleDone: (id: string) => void;
+  doneOverrides: Record<string, boolean>;
 }) {
   const [open, setOpen] = useState(false);
+
+  const subtasksDone = item.subtasks
+    ? item.subtasks.filter((s) =>
+        doneOverrides[s.id] !== undefined ? doneOverrides[s.id] : s.complete
+      ).length
+    : null;
+
   return (
     <div
       style={{
@@ -79,10 +154,12 @@ function ItemRow({
         }}
         onClick={() => setOpen((v) => !v)}
       >
-        {/* Done checkbox */}
         <span
           title={done ? "Mark as pending" : "Mark as done"}
-          onClick={(e) => { e.stopPropagation(); onToggleDone(item.id); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleDone(item.id);
+          }}
           style={{
             width: 14,
             height: 14,
@@ -112,13 +189,27 @@ function ItemRow({
         >
           {item.name}
         </span>
+        {subtasksDone !== null && (
+          <span style={{ fontSize: 10, color: "#888" }}>
+            {subtasksDone}/{item.subtasks!.length}
+          </span>
+        )}
         {item.category && (
           <Badge
             label={item.category === "nice-to-have" ? "nice" : item.category}
-            color={item.category === "core" ? "#3b82f6" : item.category === "nice-to-have" ? "#a855f7" : "#64748b"}
+            color={
+              item.category === "core"
+                ? "#3b82f6"
+                : item.category === "nice-to-have"
+                ? "#a855f7"
+                : "#64748b"
+            }
           />
         )}
-        <Badge label={complexityLabel[item.complexity] ?? item.complexity} color="#888" />
+        <Badge
+          label={complexityLabel[item.complexity] ?? item.complexity}
+          color="#888"
+        />
         <Badge
           label={item.priority}
           color={priorityColor[item.priority] ?? "#888"}
@@ -127,17 +218,94 @@ function ItemRow({
           {open ? "▲" : "▼"}
         </span>
       </div>
+
       {open && (
-        <p
-          style={{
-            fontSize: 11,
-            color: "#555",
-            margin: "4px 0 0 80px",
-            lineHeight: 1.5,
-          }}
-        >
-          {item.description}
-        </p>
+        <>
+          <p
+            style={{
+              fontSize: 11,
+              color: "#555",
+              margin: "4px 0 0 80px",
+              lineHeight: 1.5,
+            }}
+          >
+            {item.description}
+          </p>
+          {item.subtasks && item.subtasks.length > 0 && (
+            <div style={{ marginTop: 4 }}>
+              {item.subtasks.map((s) => {
+                const sDone =
+                  doneOverrides[s.id] !== undefined
+                    ? doneOverrides[s.id]
+                    : s.complete;
+                return (
+                  <SubtaskRow
+                    key={s.id}
+                    subtask={s}
+                    done={sDone}
+                    onToggle={onToggleDone}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+function PhaseGroup({
+  phase,
+  items,
+  isDone,
+  onToggleDone,
+  doneOverrides,
+}: {
+  phase: number;
+  items: Item[];
+  isDone: (item: Item) => boolean;
+  onToggleDone: (id: string) => void;
+  doneOverrides: Record<string, boolean>;
+}) {
+  const [collapsed, setCollapsed] = useState(false);
+  const pending = items.filter((i) => !isDone(i)).length;
+  const total = items.length;
+
+  return (
+    <div style={{ marginBottom: 2 }}>
+      <div
+        onClick={() => setCollapsed((v) => !v)}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "5px 0",
+          cursor: "pointer",
+          userSelect: "none",
+          borderBottom: "1px solid rgba(0,0,0,0.1)",
+        }}
+      >
+        <span style={{ fontSize: 10, color: "#aaa" }}>{collapsed ? "▶" : "▼"}</span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: "#333", flex: 1 }}>
+          {PHASE_LABELS[phase] ?? `Phase ${phase}`}
+        </span>
+        <span style={{ fontSize: 10, color: pending === 0 ? "#639922" : "#888" }}>
+          {pending === 0 ? "done" : `${pending}/${total} pending`}
+        </span>
+      </div>
+      {!collapsed && (
+        <div style={{ paddingLeft: 2 }}>
+          {items.map((item) => (
+            <ItemRow
+              key={item.id}
+              item={item}
+              done={isDone(item)}
+              onToggleDone={onToggleDone}
+              doneOverrides={doneOverrides}
+            />
+          ))}
+        </div>
       )}
     </div>
   );
@@ -145,7 +313,6 @@ function ItemRow({
 
 export function DevOverlay() {
   if (process.env.NODE_ENV !== "development") return null;
-
   return <DevOverlayInner />;
 }
 
@@ -156,9 +323,15 @@ function DevOverlayInner() {
   const [minimized, setMinimized] = useState(false);
   const [tab, setTab] = useState<"features" | "ideas">("features");
   const [pos, setPos] = useState({ x: 16, y: 80 });
-  const [doneOverrides, setDoneOverrides] = useState<Record<string, boolean>>(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}"); } catch { return {}; }
-  });
+  const [doneOverrides, setDoneOverrides] = useState<Record<string, boolean>>(
+    () => {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
+      } catch {
+        return {};
+      }
+    }
+  );
   const dragging = useRef(false);
   const offset = useRef({ x: 0, y: 0 });
   const panelRef = useRef<HTMLDivElement>(null);
@@ -171,18 +344,23 @@ function DevOverlayInner() {
     });
   }, []);
 
-  const onMouseDown = useCallback((e: React.MouseEvent) => {
-    dragging.current = true;
-    offset.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
-    e.preventDefault();
-  }, [pos]);
+  const onMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      dragging.current = true;
+      offset.current = { x: e.clientX - pos.x, y: e.clientY - pos.y };
+      e.preventDefault();
+    },
+    [pos]
+  );
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
       if (!dragging.current) return;
       setPos({ x: e.clientX - offset.current.x, y: e.clientY - offset.current.y });
     };
-    const onUp = () => { dragging.current = false; };
+    const onUp = () => {
+      dragging.current = false;
+    };
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
     return () => {
@@ -191,18 +369,26 @@ function DevOverlayInner() {
     };
   }, []);
 
-  const isDone = (item: Item) => doneOverrides[item.id] !== undefined ? doneOverrides[item.id] : item.complete;
-  const pending = (features as Item[]).filter((f) => !isDone(f)).length;
-  const rawItems = tab === "features" ? (features as Item[]) : (ideas as Item[]);
-  const items = [...rawItems].sort((a, b) => {
-    const aDone = isDone(a) ? 1 : 0;
-    const bDone = isDone(b) ? 1 : 0;
-    if (aDone !== bDone) return aDone - bDone;
-    // Within same done-state, sort by category
-    const aCat = CATEGORY_ORDER[a.category ?? ""] ?? 99;
-    const bCat = CATEGORY_ORDER[b.category ?? ""] ?? 99;
-    return aCat - bCat;
+  const isDone = (item: Item) =>
+    doneOverrides[item.id] !== undefined
+      ? doneOverrides[item.id]
+      : item.complete;
+
+  const featureItems = features as Item[];
+  const ideaItems = ideas as Item[];
+
+  const pendingCount = featureItems.filter((f) => !isDone(f)).length;
+
+  // Group features by phase
+  const byPhase: Record<number, Item[]> = {};
+  featureItems.forEach((f) => {
+    const p = f.phase ?? 99;
+    if (!byPhase[p]) byPhase[p] = [];
+    byPhase[p].push(f);
   });
+  const phaseKeys = Object.keys(byPhase)
+    .map(Number)
+    .sort((a, b) => a - b);
 
   if (!visible) {
     return (
@@ -223,7 +409,7 @@ function DevOverlayInner() {
           boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
         }}
       >
-        📋 Dev overlay
+        Dev overlay
       </button>
     );
   }
@@ -236,8 +422,8 @@ function DevOverlayInner() {
         top: pos.y,
         left: pos.x,
         zIndex: 9999,
-        width: 340,
-        maxHeight: minimized ? "auto" : "70vh",
+        width: 360,
+        maxHeight: minimized ? "auto" : "75vh",
         background: "#fff",
         border: "1px solid rgba(0,0,0,0.12)",
         borderRadius: 10,
@@ -248,7 +434,7 @@ function DevOverlayInner() {
         fontFamily: "system-ui, sans-serif",
       }}
     >
-      {/* Header — drag handle */}
+      {/* Header */}
       <div
         onMouseDown={onMouseDown}
         style={{
@@ -263,19 +449,31 @@ function DevOverlayInner() {
         }}
       >
         <span style={{ fontSize: 11, fontWeight: 600, flex: 1, color: "#333" }}>
-          🛠 Dev tracker — {pending} pending
+          Dev tracker — {pendingCount} pending
         </span>
         <button
           onClick={() => setMinimized((v) => !v)}
-          style={{ fontSize: 11, background: "none", border: "none", cursor: "pointer", color: "#666" }}
+          style={{
+            fontSize: 11,
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: "#666",
+          }}
         >
           {minimized ? "expand" : "—"}
         </button>
         <button
           onClick={() => setVisible(false)}
-          style={{ fontSize: 11, background: "none", border: "none", cursor: "pointer", color: "#666" }}
+          style={{
+            fontSize: 11,
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: "#666",
+          }}
         >
-          ✕
+          x
         </button>
       </div>
 
@@ -299,16 +497,37 @@ function DevOverlayInner() {
                   color: tab === t ? "#111" : "#888",
                 }}
               >
-                {t === "features" ? `Features (${(features as Item[]).length})` : `Ideas (${(ideas as Item[]).length})`}
+                {t === "features"
+                  ? `Roadmap (${featureItems.length})`
+                  : `Ideas (${ideaItems.length})`}
               </button>
             ))}
           </div>
 
-          {/* List */}
+          {/* Content */}
           <div style={{ overflowY: "auto", padding: "4px 10px 8px", flex: 1 }}>
-            {items.map((item) => (
-              <ItemRow key={item.id} item={item} done={isDone(item)} onToggleDone={toggleDone} />
-            ))}
+            {tab === "features" ? (
+              phaseKeys.map((phase) => (
+                <PhaseGroup
+                  key={phase}
+                  phase={phase}
+                  items={byPhase[phase]}
+                  isDone={isDone}
+                  onToggleDone={toggleDone}
+                  doneOverrides={doneOverrides}
+                />
+              ))
+            ) : (
+              (ideaItems as Item[]).map((item) => (
+                <ItemRow
+                  key={item.id}
+                  item={item}
+                  done={isDone(item)}
+                  onToggleDone={toggleDone}
+                  doneOverrides={doneOverrides}
+                />
+              ))
+            )}
           </div>
 
           {/* Legend */}
@@ -322,7 +541,7 @@ function DevOverlayInner() {
               color: "#aaa",
             }}
           >
-            <span>Complexity: L=low M=med H=high</span>
+            <span>L=low M=med H=high complexity</span>
             <span style={{ marginLeft: "auto" }}>Click row to expand</span>
           </div>
         </>
