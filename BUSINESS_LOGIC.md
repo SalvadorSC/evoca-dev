@@ -49,6 +49,43 @@ Detailed implementation plans live in `docs/`:
 
 ---
 
+## Feature Map — where to see each phase
+
+Jump straight to the live route or the source. Route params (`[id]`, `[slug]`, `[sessionId]`,
+`[token]`) require a real record — grab one from the dashboard. Tip: `/api/dev-login?as=<key>` to sign in fast.
+
+### Phase 1 — Billing Foundation ✅
+- **Live:** `/` (pricing) · `/dashboard/account` (manage plan)
+- **Source:** [lib/plans.ts](lib/plans.ts) · [app/api/stripe/checkout/route.ts](app/api/stripe/checkout/route.ts) · [app/api/stripe/webhook/route.ts](app/api/stripe/webhook/route.ts) · [app/api/billing/access/route.ts](app/api/billing/access/route.ts) · [components/billing](components/billing) · [app/dashboard/account/page.tsx](app/dashboard/account/page.tsx)
+
+### Phase 2 — Conference Management ✅
+- **Live:** `/dashboard/conference` (list) · `/dashboard/conference/[id]` (editor)
+- **Source:** [app/dashboard/conference/page.tsx](app/dashboard/conference/page.tsx) · [app/dashboard/conference/[id]/page.tsx](app/dashboard/conference/[id]/page.tsx) · [app/dashboard/conference/actions.ts](app/dashboard/conference/actions.ts) · [components/conference/conference-editor.tsx](components/conference/conference-editor.tsx) · [lib/affiliations.ts](lib/affiliations.ts) · [scripts/005_conferences.sql](scripts/005_conferences.sql)
+
+### Phase 3 — Q&A Moderation ✅
+- **Live:** `/qna/[sessionId]` (attendee Q&A) · `/wall` (live wall) · `/present/[sessionId]` (presenter + mod controls)
+- **Source:** [app/qna/[sessionId]/page.tsx](app/qna/[sessionId]/page.tsx) · [app/wall/page.tsx](app/wall/page.tsx) · [components/attendee/ask-tab.tsx](components/attendee/ask-tab.tsx) · [components/shared/question-card.tsx](components/shared/question-card.tsx) · [hooks/use-party.ts](hooks/use-party.ts) · [hooks/use-party-room.ts](hooks/use-party-room.ts) · [lib/party.ts](lib/party.ts) · [server-patches/README.md](server-patches/README.md) (separate PartyKit server)
+
+### Phase 4 — Presentation Formats ✅
+- **Live:** `/dashboard/talks/new` (URL embed + PDF/PPTX upload) · `/present/[sessionId]` (renders slides)
+- **Source:** [app/dashboard/talks/new/page.tsx](app/dashboard/talks/new/page.tsx) · [lib/slide-extraction.ts](lib/slide-extraction.ts) · [components/dashboard/file-slide-extractor.tsx](components/dashboard/file-slide-extractor.tsx) · [app/api/talks/upload-slides/route.ts](app/api/talks/upload-slides/route.ts) · [app/present/[sessionId]/page.tsx](app/present/[sessionId]/page.tsx)
+
+### Phase 5 — Speaker Experience ✅
+- **Live:** `/dashboard` ("Conference Talks" section) · `/present/[sessionId]` ("Phone remote" QR button) · `/remote/[token]` (phone remote)
+- **Source:** [app/remote/[token]/page.tsx](app/remote/[token]/page.tsx) · [components/remote/remote-control.tsx](components/remote/remote-control.tsx) · [app/api/remote/token/route.ts](app/api/remote/token/route.ts) · [app/api/remote/validate/route.ts](app/api/remote/validate/route.ts) · [lib/remote-token.ts](lib/remote-token.ts)
+
+### Phase 6 — Polish & Responsive ⏳ (not started)
+- **Plan:** [docs/phase-6-polish.md](docs/phase-6-polish.md)
+
+### Phase 7 — Call for Papers ✅
+- **Live:** `/cfp/[slug]` (public submission) · `/dashboard/conference/[id]/cfp` (settings + question builder) · `/dashboard/conference/[id]/cfp/review` (review dashboard)
+- **Source:** [app/cfp/[slug]/page.tsx](app/cfp/[slug]/page.tsx) · [components/cfp/cfp-submission-form.tsx](components/cfp/cfp-submission-form.tsx) · [app/api/cfp/submit/route.ts](app/api/cfp/submit/route.ts) · [lib/cfp.ts](lib/cfp.ts) · [app/dashboard/conference/cfp-actions.ts](app/dashboard/conference/cfp-actions.ts) · [components/conference/cfp-settings-manager.tsx](components/conference/cfp-settings-manager.tsx) · [components/conference/cfp-review-board.tsx](components/conference/cfp-review-board.tsx) · [scripts/007_call_for_papers.sql](scripts/007_call_for_papers.sql)
+
+### Transactional Email ✅
+- **Source:** [lib/email.ts](lib/email.ts) · docs: [docs/emails.md](docs/emails.md)
+
+---
+
 ## 1. User Identity & Roles
 
 ### Single user, multiple roles
