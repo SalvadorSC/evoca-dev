@@ -9,6 +9,7 @@ import { InteractivePhoneMockup, HeroBackground } from "@/components/shared/phon
 import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
 import { ReducedMotionToggle } from "@/components/shared/wave-background"
 import { OrganizerPricing } from "@/components/landing/organizer-pricing"
+import { ThemeSwitcher } from "@/components/theme/theme-switcher"
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const ROLES = {
@@ -114,19 +115,19 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
   const otherRole = role === "speaker" ? "Organizer" : "Speaker"
 
   return (
-    <nav className="sticky top-0 z-50 bg-[#080808]/95 backdrop-blur border-b border-[#1f1f1f] px-6 py-4 flex items-center justify-between">
+    <nav className="sticky top-0 z-50 bg-jsconf-bg/95 backdrop-blur border-b border-jsconf-border px-6 py-4 flex items-center justify-between">
       <Logo />
       <div className="flex items-center gap-4">
         <button
           onClick={onSwitchRole}
-          className="font-mono text-xs text-[#666] hover:text-white transition-colors"
+          className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors"
         >
           Switch to {otherRole}
         </button>
+        <ThemeSwitcher />
         <Link
           href="/login"
-          className="font-mono text-sm font-bold px-4 py-2 transition-colors"
-          style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
+          className="font-mono text-sm font-bold px-4 py-2 transition-colors bg-primary text-primary-foreground"
         >
           Get started free →
         </Link>

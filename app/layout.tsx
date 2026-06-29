@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import { DevOverlay } from '@/components/dev/DevOverlay'
 import { PaywallProvider } from '@/components/billing/paywall-provider'
+import { ThemeProvider } from '@/components/theme/theme-provider'
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -59,8 +60,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="font-sans antialiased bg-jsconf-bg text-white">
-        <PaywallProvider>{children}</PaywallProvider>
+      <body className="font-sans antialiased bg-jsconf-bg text-foreground">
+        <ThemeProvider>
+          <PaywallProvider>{children}</PaywallProvider>
+        </ThemeProvider>
         <Analytics />
         {process.env.NODE_ENV === 'development' && <DevOverlay />}
       </body>

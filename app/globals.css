@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* JSConf España 2026 Design System */
+  /* JSConf España 2026 Design System — Dark (default) */
   --jsconf-bg: #080808;
   --jsconf-surface: #111111;
   --jsconf-surface-2: #1a1a1a;
@@ -18,7 +18,7 @@
   --jsconf-blue: #3B82F6;
   --jsconf-orange: #F97316;
 
-  /* Tailwind mappings */
+  /* Tailwind mappings — dark */
   --background: #080808;
   --foreground: #FFFFFF;
   --card: #111111;
@@ -39,6 +39,53 @@
   --input: #2a2a2a;
   --ring: #F7E018;
   --radius: 0px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    /* JSConf España 2026 Design System — Light */
+    --jsconf-bg: #FFFFFF;
+    --jsconf-surface: #F5F5F5;
+    --jsconf-surface-2: #EBEBEB;
+    --jsconf-border: #D4D4D4;
+    --jsconf-yellow: #F7E018;
+    --jsconf-yellow-dim: rgba(247, 224, 24, 0.08);
+    --jsconf-white: #080808;
+    --jsconf-muted: #666666;
+    --jsconf-red: #DC2626;
+    --jsconf-purple: #7C3AED;
+    --jsconf-blue: #2563EB;
+    --jsconf-orange: #EA580C;
+
+    /* Tailwind mappings — light */
+    --background: #FFFFFF;
+    --foreground: #080808;
+    --card: #F5F5F5;
+    --card-foreground: #080808;
+    --popover: #F5F5F5;
+    --popover-foreground: #080808;
+    --primary: #F7E018;
+    --primary-foreground: #080808;
+    --secondary: #EBEBEB;
+    --secondary-foreground: #080808;
+    --muted: #EBEBEB;
+    --muted-foreground: #666666;
+    --accent: #EBEBEB;
+    --accent-foreground: #080808;
+    --destructive: #DC2626;
+    --destructive-foreground: #FFFFFF;
+    --border: #D4D4D4;
+    --input: #EBEBEB;
+    --ring: #F7E018;
+  }
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+.light {
+  color-scheme: light;
 }
 
 @theme inline {
