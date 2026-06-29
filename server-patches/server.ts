@@ -41,7 +41,26 @@ const COMMAND_ROLES: Record<string, ConnectionRole> = {
   delete_question: "admin",
   ban_user: "admin",
   lift_ban: "admin",
+
+  // Slide control + presenter passthrough (Phase 5) — broadcast-only, no state.
+  // Speaker role required so attendees can't hijack the deck. The phone remote
+  // connects with a speaker-scoped token, so its taps are authorized here.
+  slide_next: "speaker",
+  slide_prev: "speaker",
+  slide_up: "speaker",
+  slide_down: "speaker",
+  highlight_question: "speaker",
 };
+
+// Commands that are simply rebroadcast to the room without mutating state.
+const PASSTHROUGH_COMMANDS = new Set([
+  "session_finished",
+  "slide_next",
+  "slide_prev",
+  "slide_up",
+  "slide_down",
+  "highlight_question",
+]);
 
 // ============================================================
 // TYPES

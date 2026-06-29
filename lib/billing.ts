@@ -186,6 +186,39 @@ export function slotAcceptsSpeaker(type: SlotType): boolean {
 
 export const MAX_CONFERENCE_DAYS = 5
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Conference talk lifecycle status (Phase 5) — derived from the event window.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type ConferenceTalkStatus = "upcoming" | "live" | "past"
+
+/**
+ * Computes a conference talk's lifecycle status from its event window.
+ * After the window ends the talk is "past" → read-only for the speaker.
+ * With no window set yet, defaults to "upcoming".
+ */
+export function conferenceTalkStatus(
+  eventStart: string | null,
+  eventEnd: string | null,
+  now: Date = new Date(),
+): ConferenceTalkStatus {
+  const start = eventStart ? new Date(eventStart) : null
+  const end = eventEnd ? new Date(eventEnd) : null
+  if (end && now > end) return "past"
+  if (start && now < start) return "upcoming"
+  if (start && end && now >= start && now <= end) return "live"
+  return "upcoming"
+}
+
+/** A conference talk is read-only for the speaker once the event has ended. */
+export function isConferenceTalkReadOnly(
+  eventEnd: string | null,
+  now: Date = new Date(),
+): boolean {
+  if (!eventEnd) return false
+  return now > new Date(eventEnd)
+}
+
 export function validateEventWindow(
   startISO: string,
   endISO: string,

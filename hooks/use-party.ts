@@ -3,9 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react"
 import PartySocket from "partysocket"
 import type { AppState, ClientMessage, ServerMessage, UserRole } from "@/lib/types"
-
-const PARTY_HOST = "jsconf-live-wall.salvadorsc.partykit.dev"
-const DEFAULT_ROOM = "jsconf-wall"
+import { PARTY_HOST, DEFAULT_ROOM } from "@/lib/party"
 
 const initialState: AppState = {
   reactions: [],
