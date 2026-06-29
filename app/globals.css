@@ -189,6 +189,16 @@
   button, a, input, textarea, select {
     @apply transition-all duration-150 ease-out;
   }
+
+  /* Buttons and role=button elements always show pointer cursor */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
 }
 
 /* Typography utilities */

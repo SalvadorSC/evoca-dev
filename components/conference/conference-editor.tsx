@@ -175,7 +175,7 @@ export function ConferenceEditor({
                   setEditingName(false)
                 })
               }
-              className="px-3 py-2 bg-jsconf-yellow text-black font-mono text-xs font-bold uppercase"
+              className="px-3 py-2 bg-jsconf-yellow text-black font-mono text-xs font-bold uppercase hover:opacity-90 transition-all duration-150"
             >
               Save
             </button>
@@ -190,7 +190,7 @@ export function ConferenceEditor({
                 setNameDraft(conference.name)
                 setEditingName(true)
               }}
-              className="text-jsconf-muted hover:text-foreground shrink-0"
+              className="text-jsconf-muted hover:text-foreground transition-colors shrink-0"
               aria-label="Rename conference"
             >
               <Pencil className="h-4 w-4" />
@@ -480,7 +480,7 @@ function DayPanel({
               onRename(draft)
               setEditing(false)
             }}
-            className="px-3 py-2 bg-jsconf-yellow text-black font-mono text-xs font-bold uppercase"
+            className="px-3 py-2 bg-jsconf-yellow text-black font-mono text-xs font-bold uppercase hover:opacity-90 transition-all duration-150"
           >
             Save
           </button>
@@ -493,7 +493,7 @@ function DayPanel({
               setDraft(day.label)
               setEditing(true)
             }}
-            className="text-jsconf-muted hover:text-foreground"
+            className="text-jsconf-muted hover:text-foreground transition-colors"
             aria-label="Rename day"
           >
             <Pencil className="h-3.5 w-3.5" />

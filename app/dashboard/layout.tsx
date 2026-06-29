@@ -97,7 +97,7 @@ function SidebarNav() {
         })}
         <button
           onClick={handleSignOut}
-          className="flex-1 flex flex-col items-center gap-1 py-3 font-mono text-[10px] uppercase tracking-wider text-jsconf-muted"
+          className="flex-1 flex flex-col items-center gap-1 py-3 font-mono text-[10px] uppercase tracking-wider text-jsconf-muted hover:text-foreground hover:bg-jsconf-surface-2 transition-all duration-150"
         >
           <LogOut className="h-5 w-5" />
           Out

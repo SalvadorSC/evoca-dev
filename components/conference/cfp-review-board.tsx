@@ -220,7 +220,7 @@ function SubmissionCard({
             <p className="font-mono text-[10px] uppercase tracking-wide text-jsconf-muted mb-1.5">Your rating</p>
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((n) => (
-                <button key={n} onClick={() => setRating(n)} aria-label={`Rate ${n}`}>
+                <button key={n} onClick={() => setRating(n)} aria-label={`Rate ${n}`} className="p-0.5 hover:scale-110 transition-transform">
                   <Star
                     className={`h-6 w-6 transition-colors ${s.rating && n <= s.rating ? "fill-jsconf-yellow text-jsconf-yellow" : "text-jsconf-border hover:text-jsconf-yellow"}`}
                   />
