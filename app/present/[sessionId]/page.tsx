@@ -179,7 +179,7 @@ export default function PresentPage() {
     }
   }, [resetControlsTimer])
 
-  // ── Keyboard shortcuts ──────────────────────────────────────────────────────
+  // ── Keyboard shortcuts ───────────────────────��──────────────────────────────
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if ((e.target as HTMLElement).tagName === "INPUT") return
@@ -221,6 +221,19 @@ export default function PresentPage() {
     const supabase = createClient()
     // Broadcast to all attendees that the session is finished
     send({ type: "session_finished", sessionId })
+
+    // Persist the final Q&A so it appears in the dashboard history.
+    // Best-effort: never block ending the session on this.
+    try {
+      await fetch("/api/sessions/snapshot-questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, questions: state.questions }),
+      })
+    } catch (err) {
+      console.error("[v0] Failed to snapshot Q&A:", (err as Error).message)
+    }
+
     await finishSession(supabase, sessionId)
     router.push("/dashboard")
   }

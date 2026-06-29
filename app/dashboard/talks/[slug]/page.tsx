@@ -45,7 +45,7 @@ export default async function TalkDetailPage({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  await requireAuth()
+  const user = await requireAuth()
   const supabase = await createClient()
 
   const talk = await getTalkBySlug(supabase, slug)
@@ -204,11 +204,11 @@ export default async function TalkDetailPage({
 
                     <div className="flex items-center gap-2 shrink-0">
                       <Link
-                        href={`/qna/${session.id}`}
+                        href={isLive ? `/qna/${session.id}` : `/dashboard/sessions/${session.id}/questions`}
                         className="inline-flex items-center gap-1.5 px-3 py-2 border border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-white hover:border-white transition-all duration-150"
                       >
                         <MessageCircleQuestion className="h-3 w-3" />
-                        Q&A
+                        {isLive ? "Q&A" : "Q&A History"}
                       </Link>
                       {isLive ? (
                         <Link

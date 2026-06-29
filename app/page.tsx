@@ -524,11 +524,17 @@ function LandingContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
-  const [role, setRole] = useState<Role | null>(null)
+  // Initialize role synchronously from the URL on the first client render so
+  // `?role=speaker` never flashes the <SplitHero> chooser before swapping.
+  const urlRoleParam = searchParams.get("role")
+  const initialRole: Role | null =
+    urlRoleParam === "speaker" || urlRoleParam === "organizer" ? urlRoleParam : null
+
+  const [role, setRole] = useState<Role | null>(initialRole)
   const [organizerAccent, setOrganizerAccent] = useState(ORGANIZER_ACCENTS[0].value)
   const [waveAnimation, setWaveAnimation] = useState<WaveAnimation>("drift-cursor")
 
-  // Check URL and localStorage on mount
+  // Resolve role + accent: URL wins, then localStorage (only available post-mount).
   useEffect(() => {
     const urlRole = searchParams.get("role") as Role | null
     if (urlRole && (urlRole === "speaker" || urlRole === "organizer")) {
