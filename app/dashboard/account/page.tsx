@@ -66,9 +66,9 @@ function FieldRow({
         {icon}
         {label}
       </label>
-      <div className={`flex items-center border bg-jsconf-surface focus-within:border-jsconf-yellow transition-colors ${error ? "border-red-500" : "border-jsconf-border"}`}>
+      <div className={`flex items-center border bg-jsconf-bg focus-within:border-jsconf-yellow transition-colors ${error ? "border-red-500" : "border-jsconf-border"}`}>
         {prefix && (
-          <span className="font-mono text-xs text-jsconf-muted px-3 border-r border-jsconf-border bg-jsconf-bg h-10 flex items-center select-none">
+          <span className="font-mono text-xs text-jsconf-muted px-3 border-r border-jsconf-border bg-jsconf-surface-2 h-10 flex items-center select-none">
             {prefix}
           </span>
         )}
@@ -189,14 +189,16 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <span className="font-mono text-xs text-jsconf-muted animate-pulse uppercase tracking-widest">Loading...</span>
+      <div className="px-6 py-8 max-w-2xl mx-auto">
+        <div className="flex items-center justify-center h-64">
+          <span className="font-mono text-xs text-jsconf-muted animate-pulse uppercase tracking-widest">Loading...</span>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="max-w-xl">
+    <div className="px-6 py-8 max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
@@ -204,14 +206,14 @@ export default function AccountPage() {
           <p className="font-mono text-xs text-jsconf-muted mt-1">Your speaker profile and socials.</p>
         </div>
         {profile.is_pro && (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-jsconf-yellow text-black font-mono text-xs font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-jsconf-yellow text-primary-foreground font-mono text-xs font-bold uppercase tracking-wider">
             <Sparkles className="h-3.5 w-3.5" />
             PRO
           </div>
         )}
       </div>
 
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-5 border border-jsconf-border bg-jsconf-surface p-6">
         {/* Identity */}
         <FieldRow
           icon={<User className="h-3.5 w-3.5" />}
@@ -241,7 +243,7 @@ export default function AccountPage() {
             onChange={(e) => setProfile((p) => ({ ...p, bio: e.target.value }))}
             placeholder="A short bio shown on your feedback page..."
             rows={3}
-            className="bg-jsconf-surface border border-jsconf-border text-foreground font-sans text-sm placeholder:text-jsconf-muted p-3 resize-none focus:outline-none focus:border-jsconf-yellow transition-colors"
+            className="bg-jsconf-bg border border-jsconf-border text-foreground font-sans text-sm placeholder:text-jsconf-muted p-3 resize-none focus:outline-none focus:border-jsconf-yellow transition-colors"
           />
         </div>
 
@@ -296,7 +298,7 @@ export default function AccountPage() {
         <button
           onClick={handleSave}
           disabled={saveState === "saving"}
-          className="inline-flex items-center gap-2 px-5 py-3 bg-jsconf-yellow text-black font-mono text-xs font-bold uppercase tracking-wider hover:bg-jsconf-yellow/90 disabled:opacity-60 transition-colors"
+          className="inline-flex items-center gap-2 px-5 py-3 bg-jsconf-yellow text-primary-foreground font-mono text-xs font-bold uppercase tracking-wider hover:bg-jsconf-yellow/90 disabled:opacity-60 transition-colors"
         >
           <Save className="h-4 w-4" />
           {saveState === "saving" ? "Saving..." : "Save profile"}
