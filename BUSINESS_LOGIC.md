@@ -4,6 +4,22 @@
 > and data model rationale. Keep it updated whenever a decision changes.
 > Last updated: 2026-06-29
 
+## Phase Plan Documents
+
+Detailed implementation plans live in `docs/`:
+
+| Phase | Document |
+|---|---|
+| 0 — Dev Tooling | [docs/phase-0-dev-tooling.md](docs/phase-0-dev-tooling.md) |
+| 1 — Billing Foundation | [docs/phase-1-billing-foundation.md](docs/phase-1-billing-foundation.md) |
+| 2 — Conference Management | [docs/phase-2-conference-management.md](docs/phase-2-conference-management.md) |
+| 3 — Q&A Moderation | [docs/phase-3-qa-moderation.md](docs/phase-3-qa-moderation.md) |
+| 4 — Presentation Formats | [docs/phase-4-presentation-formats.md](docs/phase-4-presentation-formats.md) |
+| 5 — Speaker Experience | [docs/phase-5-speaker-experience.md](docs/phase-5-speaker-experience.md) |
+| 6 — Polish & Responsive | [docs/phase-6-polish.md](docs/phase-6-polish.md) |
+
+---
+
 ---
 
 ## 1. User Identity & Roles
