@@ -50,6 +50,9 @@
 .light {
   color-scheme: light;
 
+  /* Hero wave background uses near-black in light mode instead of the role accent. */
+  --wave-color: #0A0A0A;
+
   /* JSConf España 2026 Design System — Light */
   --jsconf-bg: #FFFFFF;
   --jsconf-surface: #F5F5F5;

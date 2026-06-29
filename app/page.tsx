@@ -267,7 +267,7 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
     <div>
       {/* Hero */}
       <section className="relative px-6 py-4 lg:py-12 overflow-hidden min-h-[480px]">
-        <HeroBackground items={heroItems} accentColor="var(--accent)" waveAnimation={waveAnimation} />
+        <HeroBackground items={heroItems} accentColor="var(--wave-color, var(--accent))" waveAnimation={waveAnimation} />
         <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
             <h1 className="font-display font-bold text-foreground text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
@@ -368,7 +368,7 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
   )
 }
 
-// ─── Organizer Experience ─────────────────────────────────────────────────────
+// ─── Organizer Experience ──────────────────────────────────────────────────���──
 function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) {
   const [heroItems, setHeroItems] = useState<LiveItem[]>([])
 
@@ -387,7 +387,7 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
     <div>
       {/* Hero */}
       <section className="relative px-6 py-16 lg:py-12 overflow-hidden min-h-[480px]">
-        <HeroBackground items={heroItems} accentColor="var(--accent)" waveAnimation={waveAnimation} />
+        <HeroBackground items={heroItems} accentColor="var(--wave-color, var(--accent))" waveAnimation={waveAnimation} />
         <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
             <h1 className="font-display font-bold text-foreground text-4xl lg:text-5xl xl:text-6xl mb-6 leading-tight">
