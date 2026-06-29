@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import { getSessionById, finishSession } from "@/lib/db"
 import { useParty } from "@/hooks/use-party"
 import { EmojiBurst } from "@/components/wall/emoji-burst"
-import { Pin, PinOff, ExternalLink } from "lucide-react"
+import { Pin, PinOff, ExternalLink, Smartphone } from "lucide-react"
 import { PresenterQuestionCard } from "@/components/shared/question-card"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -55,6 +55,12 @@ export default function PresentPage() {
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set())
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [ending, setEnding] = useState(false)
+
+  // Phone remote
+  const [showRemote, setShowRemote] = useState(false)
+  const [remoteUrl, setRemoteUrl] = useState<string | null>(null)
+  const [remoteLoading, setRemoteLoading] = useState(false)
+  const [remoteError, setRemoteError] = useState<string | null>(null)
 
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const controlsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -182,6 +188,24 @@ export default function PresentPage() {
     send({ type: "session_finished", sessionId })
     await finishSession(supabase, sessionId)
     router.push("/dashboard")
+  }
+
+  // ── Phone remote ────────────────────────────────────────────────────────────
+  const openRemote = async () => {
+    setShowRemote(true)
+    if (remoteUrl) return // reuse the existing token while the modal is open
+    setRemoteLoading(true)
+    setRemoteError(null)
+    try {
+      const res = await fetch(`/api/remote/token?sessionId=${sessionId}`)
+      if (!res.ok) throw new Error("Failed to create remote link")
+      const data = await res.json()
+      setRemoteUrl(data.url as string)
+    } catch {
+      setRemoteError("Couldn't create a remote link. Try again.")
+    } finally {
+      setRemoteLoading(false)
+    }
   }
 
   // ── Dismiss question ────────────────────────────────────────────────────────
@@ -434,6 +458,13 @@ export default function PresentPage() {
           <Divider />
           <ControlBtn onClick={toggleFullscreen} title="Toggle fullscreen (F)">⛶</ControlBtn>
           <ControlBtn onClick={() => setQaOpen((v) => !v)} title="Toggle Q&A (Q)">Q</ControlBtn>
+          <button
+            onClick={openRemote}
+            title="Phone remote"
+            className="text-white hover:text-jsconf-yellow transition-colors px-3 py-1.5 flex items-center"
+          >
+            <Smartphone className="h-4 w-4" />
+          </button>
           <Divider />
           <button
             onClick={() => setShowEndConfirm(true)}
@@ -445,6 +476,54 @@ export default function PresentPage() {
           </button>
         </div>
       </div>
+
+      {/* ── Phone remote modal ── */}
+      {showRemote && (
+        <div
+          className="fixed inset-0 flex items-center justify-center"
+          style={{ zIndex: 50, background: "rgba(0,0,0,0.7)" }}
+          onClick={() => setShowRemote(false)}
+        >
+          <div
+            className="flex flex-col items-center gap-5 p-8 max-w-xs w-full mx-4"
+            style={{ background: "#111", border: "1px solid #2a2a2a" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-2">
+              <Smartphone className="h-4 w-4 text-jsconf-yellow" />
+              <p className="font-display font-bold text-white text-lg uppercase tracking-wide">
+                Phone remote
+              </p>
+            </div>
+
+            {remoteLoading && (
+              <p className="font-mono text-xs text-jsconf-muted py-12">Creating link...</p>
+            )}
+
+            {remoteError && (
+              <p className="font-mono text-xs text-red-400 py-12 text-center">{remoteError}</p>
+            )}
+
+            {remoteUrl && !remoteLoading && (
+              <>
+                <div className="bg-white p-3">
+                  <QRCodeSVG value={remoteUrl} size={180} />
+                </div>
+                <p className="font-mono text-xs text-jsconf-muted text-center text-balance">
+                  Scan with your phone to control slides. No login needed — link expires in 8 hours.
+                </p>
+              </>
+            )}
+
+            <button
+              onClick={() => setShowRemote(false)}
+              className="w-full font-mono text-sm py-2 border border-jsconf-border text-jsconf-muted hover:text-white transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── End session confirmation modal ── */}
       {showEndConfirm && (

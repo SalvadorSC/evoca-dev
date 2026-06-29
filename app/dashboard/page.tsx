@@ -1,15 +1,21 @@
 import { createClient } from "@/lib/supabase/server"
 import { requireAuth } from "@/lib/auth"
 import { getUserTalks, getSessionsForTalks } from "@/lib/db"
+import { getSpeakerConferenceTalks } from "@/lib/affiliations"
 import Link from "next/link"
-import { Plus, Radio, Settings, CalendarDays } from "lucide-react"
+import { Plus, Radio, Settings, CalendarDays, Building2 } from "lucide-react"
 import { DeleteTalkButton } from "@/components/dashboard/delete-talk-button"
+import { ConferenceTalkCard } from "@/components/dashboard/conference-talk-card"
 
 const FREE_TALK_LIMIT = 5
 
 export default async function DashboardPage() {
-  await requireAuth()
+  const user = await requireAuth()
   const supabase = await createClient()
+
+  // Conference talks (slots assigned via an accepted affiliation). These do NOT
+  // count toward the free-tier personal-talk limit.
+  const conferenceTalks = await getSpeakerConferenceTalks(user.id)
 
   // Fetch talks and sessions via shared db helpers.
   // Nested selects on RLS-protected related tables return empty because the
@@ -155,6 +161,28 @@ export default async function DashboardPage() {
             )
           })}
         </div>
+      )}
+
+      {/* ── Conference talks (Phase 5) ── */}
+      {conferenceTalks.length > 0 && (
+        <section className="mt-12">
+          <div className="flex items-center gap-2 mb-2">
+            <Building2 className="h-4 w-4 text-jsconf-yellow" />
+            <h2 className="font-display font-bold text-lg text-white uppercase tracking-wide">
+              Conference Talks
+            </h2>
+          </div>
+          <div className="mb-5 p-3 bg-jsconf-yellow-dim border border-jsconf-yellow/30">
+            <p className="font-mono text-xs text-jsconf-yellow">
+              Conference talks don&apos;t use your free slot allowance.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3">
+            {conferenceTalks.map((talk) => (
+              <ConferenceTalkCard key={talk.slotId} talk={talk} />
+            ))}
+          </div>
+        </section>
       )}
     </div>
   )

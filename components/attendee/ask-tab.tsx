@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import type { ClientMessage, Question } from "@/lib/types"
 import { STORAGE_KEYS } from "@/lib/storage-keys"
+import { getAnonId } from "@/lib/anon-id"
 import { AttendeeQuestionCard } from "@/components/shared/question-card"
 
 interface AskTabProps {
@@ -40,6 +41,7 @@ export function AskTab({ send, questions, sessionId }: AskTabProps) {
     const id = crypto.randomUUID()
     const questionName = name.trim() || "Anonymous"
     const questionText = text.trim()
+    const authorId = getAnonId()
 
     send({
       type: "question",
@@ -49,6 +51,7 @@ export function AskTab({ send, questions, sessionId }: AskTabProps) {
       votes: 0,
       answered: false,
       ts: Date.now(),
+      authorId,
     })
 
     // Persist to DB when a real session is active (not demo)

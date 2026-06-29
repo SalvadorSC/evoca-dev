@@ -3,6 +3,7 @@ import { Space_Grotesk, Inter, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import { DevOverlay } from '@/components/dev/DevOverlay'
+import { PaywallProvider } from '@/components/billing/paywall-provider'
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -59,7 +60,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable}`}>
       <body className="font-sans antialiased bg-jsconf-bg text-white">
-        {children}
+        <PaywallProvider>{children}</PaywallProvider>
         <Analytics />
         {process.env.NODE_ENV === 'development' && <DevOverlay />}
       </body>
