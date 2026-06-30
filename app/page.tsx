@@ -74,6 +74,12 @@ function Nav({ role }: { role: Role }) {
     <nav className="sticky top-0 z-50 bg-jsconf-bg/95 backdrop-blur border-b border-jsconf-border px-6 py-4 flex items-center justify-between">
       <Logo size="sm" />
       <div className="flex items-center gap-4">
+        <Link
+          href="/login"
+          className="text-sm font-medium text-jsconf-muted hover:text-foreground transition-colors"
+        >
+          Log in
+        </Link>
         <CtaButton
           variant="solid"
           accent={ROLES[role].accent}
