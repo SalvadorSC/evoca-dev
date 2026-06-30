@@ -76,7 +76,7 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
             onClick={() => onSelectRole("speaker")}
             className="font-mono text-sm font-bold uppercase tracking-wide px-6 py-3 border-2 border-jsconf-yellow text-jsconf-yellow hover:bg-jsconf-yellow hover:text-jsconf-bg transition-colors"
           >
-            Get started free →
+            {ROLES.speaker.action} →
           </button>
         </div>
       </div>
@@ -93,7 +93,7 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
             onClick={() => onSelectRole("organizer")}
             className="font-mono text-sm font-bold uppercase tracking-wide px-6 py-3 border-2 border-jsconf-yellow text-jsconf-yellow hover:bg-jsconf-yellow hover:text-jsconf-bg transition-colors"
           >
-            Get started free →
+            {ROLES.organizer.action} →
           </button>
         </div>
       </div>
