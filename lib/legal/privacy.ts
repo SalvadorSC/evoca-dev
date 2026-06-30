@@ -3,7 +3,9 @@
 //
 // This is the single source of truth for the published /privacy page. It was
 // drafted to satisfy GDPR Article 13 and CCPA/CPRA disclosure requirements,
-// following the `privacy-policy` review skill.
+// following the `privacy-policy-generator` skill — generated from a scan of the
+// codebase's actual data-collection signals (Supabase auth, Stripe payments,
+// Vercel cookieless Analytics, theme local storage; no ad/cross-site trackers).
 //
 // ⚠️  IMPORTANT: This text is AI-generated and is a DRAFTING STARTING POINT ONLY.
 // It is not legal advice and creates no attorney-client relationship. Have a
@@ -139,11 +141,22 @@ We implement technical and organizational measures designed to protect personal 
 
 ---
 
-## 9. Cookies and Tracking
+## 9. Cookies and Similar Technologies
 
-> **Plain English:** We use the cookies we need to log you in and run the Service. We use privacy-friendly analytics to understand usage.
+> **Plain English:** We only use what we need to log you in, remember your theme, and measure traffic privately. We don't use advertising or cross-site tracking cookies.
 
-We use strictly necessary cookies for authentication and core functionality. We use Vercel Analytics, which is designed to measure traffic without using third-party cookies or collecting personally identifiable information for advertising. [VERIFY: if you add analytics or marketing cookies that require consent, implement a cookie consent banner that links to this policy.]
+Based on the technologies currently in use, EVOCA uses the following:
+
+| Type | Purpose | Examples in use | Duration |
+|------|---------|-----------------|----------|
+| Essential | Authentication and session management | Supabase auth session (cookie / local storage) | Session and token lifetime |
+| Preference | Remember your interface settings | \`theme\` (light/dark) in browser local storage | Until cleared by you |
+| Analytics | Privacy-friendly, aggregated traffic measurement | Vercel Analytics (cookieless by default) | Not applicable (no tracking cookie) |
+| Marketing | Advertising / cross-site tracking | None | Not applicable |
+
+We do not use advertising cookies, third-party tracking pixels, Google Analytics, Google Tag Manager, or social media trackers. Vercel Analytics is designed to measure traffic without third-party cookies and without collecting personally identifiable information for advertising. Fonts are self-hosted at build time, so loading a page does not send your data to a third-party font provider.
+
+Because we currently set only strictly necessary and functional storage and use cookieless analytics, a cookie consent banner is not strictly required. [VERIFY: if you later add analytics or marketing cookies that require consent, implement a consent banner (see appendix) that links to this policy and blocks non-essential cookies until consent is given.]
 
 ---
 
@@ -174,5 +187,18 @@ We may update this Privacy Policy from time to time. We will revise the "Last up
 
 ---
 
-*Document information — Applicable to: users of EVOCA. Business type: SaaS (real-time event engagement). Jurisdiction: [VERIFY]. GDPR applicable: Yes. CCPA applicable: Yes. Sub-processors disclosed: Supabase, Stripe, Vercel.*
+## Appendix: Cookie Consent (Recommendation)
+
+> **Plain English:** We don't need a cookie banner today because we only use essential/functional storage and cookieless analytics. If that changes, here's what to add.
+
+EVOCA currently sets only strictly necessary and functional storage and uses cookieless analytics, so a consent banner is not required at this time. If non-essential analytics or marketing cookies are introduced later, add a consent banner that:
+
+- Obtains consent **before** setting any non-essential cookies (no pre-checked boxes; "Accept All" must not be the only prominent option) — required under GDPR/ePrivacy.
+- Includes a "Do Not Sell or Share My Personal Information" link if any "sale"/"sharing" under CCPA/CPRA begins.
+- Offers a preference center where users can toggle cookie categories on and off.
+- Links to this Privacy Policy.
+
+---
+
+*Document information — Applicable to: users of EVOCA. Business type: SaaS (real-time event engagement). Data collection intensity: Moderate–Extensive (accounts + forms + payments, no advertising/cross-site tracking). Jurisdiction: [VERIFY]. GDPR applicable: Yes. CCPA applicable: Yes. Sub-processors disclosed: Supabase, Stripe, Vercel.*
 `
