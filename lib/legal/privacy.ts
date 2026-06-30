@@ -33,7 +33,7 @@ This policy works alongside our [Terms of Service](https://evoca.dev/terms).
 
 > **Plain English:** EVOCA decides how and why your personal data is processed, which makes us the "data controller." Here's how to reach us about anything privacy-related.
 
-For the purposes of the GDPR and similar laws, EVOCA is the data controller for personal data processed through the Service. You can contact us about privacy at [privacy@evoca.dev](mailto:privacy@evoca.dev) [VERIFY].
+For the purposes of the GDPR and similar laws, EVOCA is the data controller for personal data processed through the Service. You can contact us about privacy at [hello@evoca.dev](mailto:hello@evoca.dev).
 
 - **Legal entity:** [VERIFY: add the registered company name.]
 - **Mailing address:** [VERIFY: add a physical mailing address.]
@@ -121,11 +121,11 @@ Your personal data may be processed in countries outside the EEA, UK, or your ho
 
 ### 7.1 GDPR (EEA / UK)
 
-If you are in the EEA or UK, you have the right to: access your data; rectify inaccurate data; erase your data; restrict or object to processing; data portability; and withdraw consent at any time. You also have the right to lodge a complaint with your local supervisory authority. To exercise these rights, contact [privacy@evoca.dev](mailto:privacy@evoca.dev) [VERIFY]. We will respond within the timeframes required by law.
+If you are in the EEA or UK, you have the right to: access your data; rectify inaccurate data; erase your data; restrict or object to processing; data portability; and withdraw consent at any time. You also have the right to lodge a complaint with your local supervisory authority. To exercise these rights, contact [hello@evoca.dev](mailto:hello@evoca.dev). We will respond within the timeframes required by law.
 
 ### 7.2 CCPA / CPRA (California)
 
-If you are a California resident, you have the right to: know what personal information we collect and how it is used; request deletion of your personal information; correct inaccurate personal information; and opt out of the sale or sharing of personal information. **We do not sell or share personal information.** You have the right not to receive discriminatory treatment for exercising these rights. To make a request, contact [privacy@evoca.dev](mailto:privacy@evoca.dev) [VERIFY].
+If you are a California resident, you have the right to: know what personal information we collect and how it is used; request deletion of your personal information; correct inaccurate personal information; and opt out of the sale or sharing of personal information. **We do not sell or share personal information.** You have the right not to receive discriminatory treatment for exercising these rights. To make a request, contact [hello@evoca.dev](mailto:hello@evoca.dev).
 
 ### 7.3 Other Regions
 
@@ -180,8 +180,7 @@ We may update this Privacy Policy from time to time. We will revise the "Last up
 
 > **Plain English:** Questions or requests about your privacy? Here's how to reach us.
 
-- **Privacy requests:** [privacy@evoca.dev](mailto:privacy@evoca.dev) [VERIFY]
-- **General support:** [support@evoca.dev](mailto:support@evoca.dev) [VERIFY]
+- **All privacy, support and legal enquiries:** [hello@evoca.dev](mailto:hello@evoca.dev)
 - **Mailing address:** [VERIFY: add a physical mailing address — required under various regulations.]
 - **EU/UK supervisory authority:** You have the right to lodge a complaint with your local data protection authority.
 
