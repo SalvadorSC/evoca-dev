@@ -82,7 +82,7 @@ export function OrganizerPricing() {
                         className="font-mono text-[10px] font-bold uppercase tracking-widest px-2 py-0.5"
                         style={{ background: "var(--accent)", color: "var(--accent-text)" }}
                       >
-                        Popular
+                        Best value
                       </span>
                     )}
                   </div>
