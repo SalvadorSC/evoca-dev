@@ -95,7 +95,7 @@ export function Step2Wall({ onNext }: Step2WallProps) {
               </p>
             ) : (
               comments.map((reaction, i) => (
-                <ReactionCard key={reaction.id} reaction={reaction} index={i} compact />
+                <ReactionCard key={reaction.id} reaction={reaction} index={i} compact flat />
               ))
             )}
           </div>

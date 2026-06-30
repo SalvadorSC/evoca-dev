@@ -138,7 +138,7 @@ export function Step4YourReaction({ userReaction, onNext }: Step4YourReactionPro
                       </span>
                     )}
                     <div className={isUser ? "border-2 border-jsconf-yellow" : ""}>
-                      <ReactionCard reaction={reaction} index={i} compact />
+                      <ReactionCard reaction={reaction} index={i} compact flat />
                     </div>
                   </div>
                 )

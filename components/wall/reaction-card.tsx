@@ -8,17 +8,19 @@ interface ReactionCardProps {
   index: number
   /** Smaller padding/typography — useful in constrained previews. */
   compact?: boolean
+  /** Keep full opacity / no stagger — avoids flicker in a live-growing feed. */
+  flat?: boolean
 }
 
-export function ReactionCard({ reaction, index, compact = false }: ReactionCardProps) {
+export function ReactionCard({ reaction, index, compact = false, flat = false }: ReactionCardProps) {
   return (
     <div
       className={`bg-jsconf-surface-2 border border-jsconf-border animate-in slide-in-from-top duration-300 ${
         compact ? "p-2.5" : "p-4"
       }`}
       style={{
-        animationDelay: `${index * 50}ms`,
-        opacity: Math.max(0.4, 1 - index * 0.08),
+        animationDelay: flat ? "0ms" : `${index * 50}ms`,
+        opacity: flat ? 1 : Math.max(0.4, 1 - index * 0.08),
       }}
     >
       <div className={`flex items-start ${compact ? "gap-2.5" : "gap-4"}`}>
