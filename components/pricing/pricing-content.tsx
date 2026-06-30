@@ -366,7 +366,7 @@ function OrganizerPlans({
           <PlanCard
             key={planId}
             name={plan.name}
-            badge={featured ? "Popular" : undefined}
+            badge={featured ? "Best Value" : undefined}
             featured={featured}
             big={label.big}
             small={label.small}
