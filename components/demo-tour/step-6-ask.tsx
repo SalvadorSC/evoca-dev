@@ -198,7 +198,7 @@ export function Step6Ask({ onNext }: Step6AskProps) {
           <div className="flex flex-col gap-3">
             <div className="bg-jsconf-yellow-dim border border-jsconf-yellow/30 px-4 py-3">
               <p className="font-mono text-sm text-jsconf-yellow text-balance">
-                You know it&apos;s good, now it&apos;s time for your attendees.
+                You know it&apos;s good, now it&apos;s time for your attendees to feel it.
               </p>
             </div>
             <YellowButton onClick={onNext}>Finish →</YellowButton>
