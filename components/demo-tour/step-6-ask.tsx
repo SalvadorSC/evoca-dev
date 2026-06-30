@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { ChevronUp } from "lucide-react"
 import { StepShell, StepLabel, HighlightRing, YellowButton } from "./primitives"
 
@@ -23,37 +23,64 @@ interface Step6AskProps {
   onNext: () => void
 }
 
+// Votes the room piles onto the user's question before they vote it themselves.
+const PEER_VOTE_TARGET = 7
+
 export function Step6Ask({ onNext }: Step6AskProps) {
   const [subStep, setSubStep] = useState<SubStep>("post")
   const [questionText, setQuestionText] = useState("")
   const [questions, setQuestions] = useState<FakeQuestion[]>(INITIAL_QUESTIONS)
-  const [doneMessage, setDoneMessage] = useState(false)
+  const [userQId, setUserQId] = useState<string | null>(null)
+  const rampTimers = useRef<ReturnType<typeof setTimeout>[]>([])
 
   const subStepLabels: Record<SubStep, string> = {
     post: "1 / 2 — Ask a question",
-    vote: "2 / 2 — Vote for your favourite",
+    vote: "2 / 2 — Add your own vote",
     done: "All done!",
   }
 
   const handleSubmitQuestion = () => {
     if (!questionText.trim()) return
+    const id = `q-user-${Date.now()}`
     const newQ: FakeQuestion = {
-      id: `q-user-${Date.now()}`,
+      id,
       text: questionText.trim(),
       name: "You",
       votes: 0,
       voted: false,
     }
     setQuestions((qs) => [newQ, ...qs])
+    setUserQId(id)
     setQuestionText("")
-    setSubStep("vote")
   }
+
+  // Once the user's question is posted, the room quickly piles on votes
+  // (animated count up to PEER_VOTE_TARGET), then we invite the user to vote.
+  useEffect(() => {
+    if (!userQId) return
+    rampTimers.current.forEach(clearTimeout)
+    rampTimers.current = []
+
+    for (let v = 1; v <= PEER_VOTE_TARGET; v++) {
+      const t = setTimeout(() => {
+        setQuestions((qs) =>
+          qs.map((q) => (q.id === userQId ? { ...q, votes: v } : q)),
+        )
+        if (v === PEER_VOTE_TARGET) setSubStep("vote")
+      }, 350 + v * 120)
+      rampTimers.current.push(t)
+    }
+
+    return () => {
+      rampTimers.current.forEach(clearTimeout)
+      rampTimers.current = []
+    }
+  }, [userQId])
 
   const handleVote = (id: string) => {
     setQuestions((qs) =>
       qs.map((q) => (q.id === id && !q.voted ? { ...q, votes: q.votes + 1, voted: true } : q)),
     )
-    setDoneMessage(true)
     setTimeout(() => setSubStep("done"), 600)
   }
 
@@ -113,11 +140,14 @@ export function Step6Ask({ onNext }: Step6AskProps) {
             Questions ({questions.length})
           </span>
 
-          {sortedQuestions.map((q) => (
+          {sortedQuestions.map((q) => {
+            const isUserQ = q.id === userQId
+            const canVote = subStep === "vote" && isUserQ && !q.voted
+            return (
             <HighlightRing
               key={q.id}
-              active={subStep === "vote" && q.id === "q1"}
-              label="Vote for this question"
+              active={canVote}
+              label="Add your own vote"
               labelPosition="bottom"
             >
               <div
@@ -126,16 +156,23 @@ export function Step6Ask({ onNext }: Step6AskProps) {
                 }`}
               >
                 <button
-                  onClick={() => !q.voted && subStep === "vote" && handleVote(q.id)}
-                  disabled={q.voted || subStep !== "vote"}
+                  onClick={() => canVote && handleVote(q.id)}
+                  disabled={!canVote}
                   className={`flex flex-col items-center gap-0.5 p-2 border transition-all duration-150 ${
                     q.voted
                       ? "text-jsconf-yellow bg-jsconf-yellow-dim border-jsconf-yellow"
-                      : "text-jsconf-muted border-jsconf-border hover:text-jsconf-yellow hover:border-jsconf-yellow"
+                      : canVote
+                        ? "text-jsconf-muted border-jsconf-border hover:text-jsconf-yellow hover:border-jsconf-yellow"
+                        : "text-jsconf-muted border-jsconf-border"
                   } disabled:cursor-not-allowed`}
                 >
                   <ChevronUp className="h-4 w-4" />
-                  <span className="font-mono text-sm font-bold">{q.votes}</span>
+                  <span
+                    key={q.votes}
+                    className="font-mono text-sm font-bold inline-block animate-in zoom-in-50 duration-150"
+                  >
+                    {q.votes}
+                  </span>
                 </button>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-white font-sans">{q.text}</p>
@@ -148,7 +185,8 @@ export function Step6Ask({ onNext }: Step6AskProps) {
                 </div>
               </div>
             </HighlightRing>
-          ))}
+            )
+          })}
         </div>
 
         {/* Done CTA */}
