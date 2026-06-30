@@ -25,8 +25,13 @@ interface Step2WallProps {
 export function Step2Wall({ onNext }: Step2WallProps) {
   const [reactions, setReactions] = useState<Reaction[]>([])
   const [ctaVisible, setCtaVisible] = useState(false)
+  // Bumped on replay to restart the scripted feed.
+  const [runId, setRunId] = useState(0)
 
   useEffect(() => {
+    setReactions([])
+    setCtaVisible(false)
+
     const timers: ReturnType<typeof setTimeout>[] = []
 
     SCRIPT.forEach((r) => {
@@ -52,13 +57,12 @@ export function Step2Wall({ onNext }: Step2WallProps) {
     timers.push(setTimeout(() => setCtaVisible(true), lastAt + 700))
 
     return () => timers.forEach(clearTimeout)
-  }, [])
+  }, [runId])
 
-  // Most recent text comments, newest first — shown bigger below the stage so
-  // they stay readable. Emoji-only reactions are not listed here.
+  // All text comments, newest first — kept compact below the stage so every
+  // one stays visible and legible. Emoji-only reactions are not listed here.
   const comments = reactions
     .filter((r) => r.text?.trim())
-    .slice(-2)
     .reverse()
 
   return (
@@ -78,24 +82,35 @@ export function Step2Wall({ onNext }: Step2WallProps) {
           <EmojiBurst reactions={reactions} isQAMode={false} contained scale={0.62} />
         </FakeSlide>
 
-        {/* Bigger, legible comment preview — reuses the real wall ReactionCard. */}
+        {/* Legible comment preview — reuses the real wall ReactionCard, compact. */}
         <div className="flex-1 flex flex-col gap-2 min-h-0">
           <StepLabel>Live comments</StepLabel>
-          {comments.length === 0 ? (
-            <p className="font-mono text-xs text-jsconf-muted">
-              Waiting for the first reaction…
-            </p>
-          ) : (
-            comments.map((reaction, i) => (
-              <ReactionCard key={reaction.id} reaction={reaction} index={i} />
-            ))
-          )}
+          <div className="flex-1 flex flex-col gap-2 overflow-y-auto min-h-0">
+            {comments.length === 0 ? (
+              <p className="font-mono text-xs text-jsconf-muted">
+                Waiting for the first reaction…
+              </p>
+            ) : (
+              comments.map((reaction, i) => (
+                <ReactionCard key={reaction.id} reaction={reaction} index={i} compact />
+              ))
+            )}
+          </div>
         </div>
 
-        {/* CTA */}
+        {/* CTA + replay */}
         {ctaVisible && (
-          <div className="animate-in fade-in duration-500">
-            <YellowButton onClick={onNext}>{"That's you next →"}</YellowButton>
+          <div className="flex items-center gap-3 animate-in fade-in duration-500">
+            <button
+              type="button"
+              onClick={() => setRunId((n) => n + 1)}
+              className="font-mono text-xs uppercase tracking-wider text-jsconf-muted border border-jsconf-border px-4 py-3 hover:text-foreground hover:border-foreground transition-colors shrink-0"
+            >
+              {"↺ Replay"}
+            </button>
+            <div className="flex-1">
+              <YellowButton onClick={onNext}>{"That's you next →"}</YellowButton>
+            </div>
           </div>
         )}
       </div>
