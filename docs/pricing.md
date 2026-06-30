@@ -73,6 +73,15 @@ but are **not enforced in code yet**. Implementation is planned:
   (`conference_members` table, owner-only billing/member management, email invites,
   block-at-invite seat enforcement, grandfather on downgrade).
 
+### Analytics — planned
+
+- **Post-session analytics** (all tiers, incl. free) → see
+  [`docs/post-session-analytics-plan.md`](./post-session-analytics-plan.md)
+  (engagement over time, reaction peaks, top questions per talk).
+- **Event-wide engagement metrics** (Growth / Scale) → see
+  [`docs/event-engagement-plan.md`](./event-engagement-plan.md)
+  (which sessions drove the most engagement across an event).
+
 ---
 
 ## 3. Open questions for review
