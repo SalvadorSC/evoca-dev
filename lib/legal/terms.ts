@@ -116,7 +116,7 @@ You agree not to:
 
 > **Plain English:** Using EVOCA means we process some personal data (like your email and the content you submit). If you're in the EU or California, you have specific rights over your data, summarized below.
 
-We process personal data such as account email addresses, optional display names, and User Content to provide the Service. Our processing is described in more detail in our Privacy Policy. [VERIFY: publish a dedicated Privacy Policy and link it here.]
+We process personal data such as account email addresses, optional display names, and User Content to provide the Service. Our processing is described in more detail in our [Privacy Policy](https://evoca.dev/privacy).
 
 ### 8.1 GDPR (European Economic Area, UK)
 

@@ -28,5 +28,5 @@ export const siteConfig = {
   locale: "en_US",
 } as const
 
-// Marketing pages that should be crawled and ranked.
-export const publicRoutes = ["/", "/pricing", "/demo"] as const
+// Marketing + legal pages that should be crawled and ranked.
+export const publicRoutes = ["/", "/pricing", "/demo", "/terms", "/privacy"] as const

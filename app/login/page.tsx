@@ -134,6 +134,14 @@ export default function LoginPage() {
                     >
                       Terms of Service
                     </Link>
+                    {' '}and{' '}
+                    <Link
+                      href="/privacy"
+                      target="_blank"
+                      className="text-jsconf-yellow underline underline-offset-2 hover:opacity-80"
+                    >
+                      Privacy Policy
+                    </Link>
                     .
                   </label>
                 </div>
