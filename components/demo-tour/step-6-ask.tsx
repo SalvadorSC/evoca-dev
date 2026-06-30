@@ -159,10 +159,10 @@ export function Step6Ask({ onNext }: Step6AskProps) {
                     onClick={() => canVote && handleVote(q.id)}
                     disabled={!canVote}
                     className={`flex flex-col items-center gap-0.5 p-2 border transition-all duration-150 ${q.voted
-                        ? "text-jsconf-yellow bg-jsconf-yellow-dim border-jsconf-yellow"
-                        : canVote
-                          ? "text-jsconf-muted border-jsconf-border hover:text-jsconf-yellow hover:border-jsconf-yellow"
-                          : "text-jsconf-muted border-jsconf-border"
+                      ? "text-jsconf-yellow bg-jsconf-yellow-dim border-jsconf-yellow"
+                      : canVote
+                        ? "text-jsconf-muted border-jsconf-border hover:text-jsconf-yellow hover:border-jsconf-yellow"
+                        : "text-jsconf-muted border-jsconf-border"
                       } disabled:cursor-not-allowed`}
                   >
                     <ChevronUp className="h-4 w-4" />
@@ -194,7 +194,7 @@ export function Step6Ask({ onNext }: Step6AskProps) {
       {subStep === "done" && (
         <div className="fixed inset-x-0 bottom-0 z-40 p-5 bg-gradient-to-t from-jsconf-bg via-jsconf-bg to-transparent animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex flex-col gap-3">
-            <div className="bg-green-500/10 border border-green-500/80 px-4 py-3">
+            <div className="bg-green-500/20 border border-green-500/80 px-4 py-3">
               <p className="font-mono text-sm text-green-400 text-balance">
                 You know it&apos;s good, now it&apos;s time for your attendees to feel it.
               </p>
