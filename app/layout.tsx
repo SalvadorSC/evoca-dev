@@ -49,22 +49,14 @@ export const metadata: Metadata = {
     description: siteConfig.description,
     url: siteConfig.url,
     locale: siteConfig.locale,
-    // /opengraph-image is picked up automatically, but we list it explicitly
-    // so the absolute URL is always present in the tags for crawlers/Slack.
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: siteConfig.title,
-      },
-    ],
+    // The OG image is provided by the static app/opengraph-image.png file,
+    // which Next.js auto-detects and injects (with absolute URL + dimensions).
   },
   twitter: {
     card: 'summary_large_image',
     title: siteConfig.title,
     description: siteConfig.shortDescription,
-    images: ['/twitter-image'],
+    // Auto-injected from the static app/twitter-image.png file.
     creator: siteConfig.twitter,
   },
   robots: {
