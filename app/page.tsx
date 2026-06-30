@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { ChevronDown, QrCode, Trophy } from "lucide-react"
+import { ChevronDown, Trophy } from "lucide-react"
 import { STORAGE_KEYS } from "@/lib/storage-keys"
 import { InteractivePhoneMockup, HeroBackground } from "@/components/shared/phone-mockup"
 import { Logo } from "@/components/shared/logo"
@@ -74,12 +74,7 @@ function Nav({ role }: { role: Role }) {
     <nav className="sticky top-0 z-50 bg-jsconf-bg/95 backdrop-blur border-b border-jsconf-border px-6 py-4 flex items-center justify-between">
       <Logo size="sm" />
       <div className="flex items-center gap-4">
-        <Link
-          href="/login"
-          className="text-sm font-medium text-jsconf-muted hover:text-foreground transition-colors"
-        >
-          Log in
-        </Link>
+
         <CtaButton
           variant="solid"
           accent={ROLES[role].accent}
@@ -91,6 +86,17 @@ function Nav({ role }: { role: Role }) {
           )}
         >
           Get started free →
+        </CtaButton>
+        <CtaButton
+          variant="solid"
+          accent={ROLES[role].accent}
+          accentText={ROLES[role].accentText}
+          href="/login"
+          className={cn(
+            "text-sm px-4 py-2 sm:inline-flex transition-all duration-300 ease-out",
+          )}
+        >
+          Log in
         </CtaButton>
         <div className="hidden sm:block">
           <ThemeSwitcher />
