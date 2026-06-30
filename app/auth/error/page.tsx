@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Logo } from '@/components/shared/logo'
 
 export default function AuthErrorPage() {
   return (
@@ -6,8 +7,8 @@ export default function AuthErrorPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="font-display font-bold text-3xl tracking-wide mb-2 text-foreground">
-            EVOCA
+          <h1 className="flex justify-center mb-2">
+            <Logo size="xl" />
           </h1>
           <p className="font-mono text-xs text-jsconf-muted uppercase tracking-wider">
             Authentication Error

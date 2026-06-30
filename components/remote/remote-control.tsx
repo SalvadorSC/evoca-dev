@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import PartySocket from "partysocket"
 import { PARTY_HOST } from "@/lib/party"
 import { ChevronLeft, ChevronRight, Wifi, WifiOff } from "lucide-react"
+import { Logo } from "@/components/shared/logo"
 
 /**
  * Phone slide remote (Phase 5.2). Connects to the session's PartyKit room using
@@ -95,8 +96,9 @@ export function RemoteControl({ room, token }: { room: string; token: string }) 
     >
       {/* Status bar */}
       <div className="flex items-center justify-between px-5 py-4">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-jsconf-muted">
-          Evoca Remote
+        <span className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest text-jsconf-muted">
+          <Logo size="xs" showIcon={false} />
+          Remote
         </span>
         <span
           className={`flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-widest ${

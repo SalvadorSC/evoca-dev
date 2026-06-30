@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import { getCfpBySlug } from "@/lib/cfp"
 import { CfpSubmissionForm } from "@/components/cfp/cfp-submission-form"
+import { Logo } from "@/components/shared/logo"
 import { CalendarClock, Lock } from "lucide-react"
 
 export const dynamic = "force-dynamic"
@@ -71,7 +72,7 @@ export default async function CfpPage({
 
         <footer className="mt-10 flex items-center gap-2 text-jsconf-muted">
           <span className="font-mono text-xs">Powered by</span>
-          <span className="font-display font-bold text-sm text-foreground uppercase tracking-wide">Evoca</span>
+          <Logo size="sm" showIcon={false} />
         </footer>
       </div>
     </main>

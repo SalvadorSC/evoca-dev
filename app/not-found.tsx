@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useRef } from "react"
+import { Logo } from "@/components/shared/logo"
 
 export default function NotFound() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -124,9 +125,7 @@ export default function NotFound() {
         </div>
 
         {/* EVOCA branding */}
-        <span className="font-mono text-xs text-jsconf-border uppercase tracking-[0.3em] mt-16">
-          EVOCA
-        </span>
+        <Logo size="sm" className="mt-16 opacity-60" />
       </div>
     </div>
   )

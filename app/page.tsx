@@ -6,6 +6,7 @@ import Link from "next/link"
 import { ChevronDown, QrCode, Trophy } from "lucide-react"
 import { STORAGE_KEYS } from "@/lib/storage-keys"
 import { InteractivePhoneMockup, HeroBackground } from "@/components/shared/phone-mockup"
+import { Logo } from "@/components/shared/logo"
 import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
 import { ReducedMotionToggle } from "@/components/shared/wave-background"
 import { OrganizerPricing } from "@/components/landing/organizer-pricing"
@@ -37,41 +38,18 @@ const ORGANIZER_ACCENTS = [
 
 type Role = "speaker" | "organizer"
 
-// ─── Logo Component ───────────────────────────────────────────────────────────
-function Logo({ className = "" }: { className?: string }) {
-  return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      {/* Chat bubble SVG */}
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" className="shrink-0">
-        <path d="M4 6C4 4.89543 4.89543 4 6 4H22C23.1046 4 24 4.89543 24 6V18C24 19.1046 23.1046 20 22 20H10L6 24V20H6C4.89543 20 4 19.1046 4 18V6Z" stroke="currentColor" strokeWidth="2" fill="none" />
-        <circle cx="9" cy="12" r="1.5" fill="var(--accent, #F7E018)" />
-        <circle cx="14" cy="12" r="1.5" fill="var(--accent, #F7E018)" />
-        <circle cx="19" cy="12" r="1.5" fill="var(--accent, #F7E018)" />
-      </svg>
-      <span className="font-mono text-sm font-bold tracking-wide text-foreground">
-        EVOCA
-      </span>
-      {/* Pulsing dot */}
-      <span className="relative flex h-2 w-2">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: "var(--accent, #F7E018)" }} />
-        <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: "var(--accent, #F7E018)" }} />
-      </span>
-    </div>
-  )
-}
-
 // ─── Split Hero ───────────────────────────────────────────────────────────────
 function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row relative">
       {/* Center logo - absolutely positioned */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-jsconf-bg px-4 py-3 hidden lg:block">
-        <Logo />
+        <Logo size="sm" showDot />
       </div>
 
       {/* Mobile logo */}
       <div className="lg:hidden py-6 flex justify-center border-b border-jsconf-border">
-        <Logo />
+        <Logo size="sm" showDot />
       </div>
 
       {/* Speaker side */}
@@ -117,7 +95,7 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
 
   return (
     <nav className="sticky top-0 z-50 bg-jsconf-bg/95 backdrop-blur border-b border-jsconf-border px-6 py-4 flex items-center justify-between">
-      <Logo />
+      <Logo size="sm" showDot />
       <div className="flex items-center gap-4">
         <Link
           href="/pricing"
@@ -514,7 +492,7 @@ function Footer() {
   return (
     <footer className="px-6 py-8 border-t border-jsconf-border">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <Logo />
+        <Logo size="sm" showDot />
         <p className="font-sans text-sm text-jsconf-muted">Built by Salvador Sanchez</p>
         <div className="flex items-center gap-6">
           <Link href="/demo" className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors">Demo</Link>

@@ -5,6 +5,7 @@ import Link from "next/link"
 import useSWR from "swr"
 import { Check, ArrowLeft } from "lucide-react"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
+import { Logo } from "@/components/shared/logo"
 import {
   PLANS,
   ORGANIZER_PLAN_IDS,
@@ -110,7 +111,7 @@ function PricingNav() {
     <nav className="sticky top-0 z-50 bg-jsconf-bg/95 backdrop-blur border-b border-jsconf-border px-6 py-4 flex items-center justify-between">
       <Link href="/" className="flex items-center gap-2 text-jsconf-muted hover:text-foreground transition-colors">
         <ArrowLeft className="h-4 w-4" />
-        <span className="font-mono text-sm font-bold tracking-wide text-foreground">EVOCA</span>
+        <Logo size="sm" />
       </Link>
       <div className="flex items-center gap-4">
         <ThemeSwitcher />
@@ -419,7 +420,7 @@ function PricingFAQ() {
   )
 }
 
-// ─── Page ───────────────────────────────────────────────────────────────────
+// ─── Page ────────────────────────────────────���──────────────────────────────
 export function PricingContent() {
   const [audience, setAudience] = useState<Audience>("speaker")
   const { data } = useSWR<LocaleResponse>("/api/locale", fetcher, { revalidateOnFocus: false })

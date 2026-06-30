@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Zap, MessageCircleQuestion, Calendar, Monitor, Shield, Mic, Code2, ExternalLink } from "lucide-react"
 import { STORAGE_KEYS } from "@/lib/storage-keys"
+import { Logo } from "@/components/shared/logo"
 
 const ROUTES = [
   {
@@ -66,8 +67,8 @@ export function IntroModal() {
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
       <DialogContent className="bg-jsconf-surface border-jsconf-border max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-display font-bold text-white uppercase tracking-wide text-xl">
-            EVOCA
+          <DialogTitle className="flex items-center">
+            <Logo size="lg" />
           </DialogTitle>
           <DialogDescription className="sr-only">
             Introduction to EVOCA — conference engagement platform
