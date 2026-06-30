@@ -9,6 +9,7 @@ import { useParty } from "@/hooks/use-party"
 import { EmojiBurst } from "@/components/wall/emoji-burst"
 import { Pin, PinOff, ExternalLink, Smartphone } from "lucide-react"
 import { PresenterQuestionCard } from "@/components/shared/question-card"
+import { Logo } from "@/components/shared/logo"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -358,8 +359,7 @@ export default function PresentPage() {
           }}
         >
           <div className="flex items-center gap-1.5">
-            <ChatBubbleIcon className="w-4 h-4 text-jsconf-yellow" />
-            <span className="font-mono text-xs font-bold text-white tracking-widest uppercase">EVOCA.DEV</span>
+            <Logo size="sm" />
           </div>
           {appUrl && (
             <div className="bg-white p-1 max-w-[88px] m-auto">
@@ -490,8 +490,8 @@ export default function PresentPage() {
 
         {/* Bottom watermark */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 pointer-events-none">
-          <ChatBubbleIcon className="w-3 h-3 text-jsconf-muted" />
-          <span className="font-mono text-[10px] text-jsconf-muted">Powered by Evoca.dev</span>
+          <span className="font-mono text-[10px] text-jsconf-muted">Powered by</span>
+          <Logo size="xs" showIcon={false} />
         </div>
 
         {/* Bottom-center controls (auto-hide) */}

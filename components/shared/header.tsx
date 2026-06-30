@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { Menu, X, Zap, MessageCircleQuestion, Calendar, Monitor, Shield, Mic, Code2, ExternalLink } from "lucide-react"
+import { Logo } from "@/components/shared/logo"
 
 const ROUTES = [
   { path: "/app", name: "Attendee", icon: Zap, description: "React, ask questions, plan schedule" },
@@ -28,7 +29,7 @@ export function Header({ pageName, connectionCount, isConnected = true, currentT
         <div className="h-full px-4 flex items-center justify-between">
           {/* Left: Logo */}
           <div className="flex items-center gap-2">
-            <span className="font-display font-bold text-lg tracking-wide text-white">EVOCA</span>
+            <Logo size="lg" />
           </div>
 
           {/* Right: page name + connection + hamburger */}

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useEffect, useRef } from "react"
 import { Mic2, User, Zap, LogOut, CalendarRange } from "lucide-react"
+import { Logo } from "@/components/shared/logo"
 
 const NAV_ITEMS = [
   { label: "Talks", href: "/dashboard", icon: Mic2 },
@@ -61,7 +62,7 @@ function SidebarNav() {
         {/* Logo */}
         <div className="px-5 py-5 border-b border-jsconf-border">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <span className="font-display font-bold text-lg tracking-wide text-foreground">EVOCA</span>
+            <Logo size="lg" />
           </Link>
           <span className="font-mono text-[10px] text-jsconf-muted uppercase tracking-widest mt-0.5 block">
             Speaker Dashboard

@@ -6,6 +6,7 @@ import Link from "next/link"
 import { ChevronDown, QrCode, Trophy } from "lucide-react"
 import { STORAGE_KEYS } from "@/lib/storage-keys"
 import { InteractivePhoneMockup, HeroBackground } from "@/components/shared/phone-mockup"
+import { Logo } from "@/components/shared/logo"
 import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
 import { ReducedMotionToggle } from "@/components/shared/wave-background"
 import { OrganizerPricing } from "@/components/landing/organizer-pricing"
@@ -19,46 +20,35 @@ const ROLES = {
     accentDim: "rgba(247, 224, 24, 0.12)",
     accentText: "#000",
     wipeDirection: "left" as const,
-    label: "I'm a Speaker"
+    label: "I'm a Speaker",
+    action: "I'm giving a talk"
   },
   organizer: {
-    accent: "#00E887",
-    accentDim: "rgba(0, 232, 135, 0.12)",
+    accent: "#F7E018",
+    accentDim: "rgba(247, 224, 24, 0.12)",
     accentText: "#000",
     wipeDirection: "right" as const,
-    label: "I'm an Organizer"
+    label: "I'm an Organizer",
+    action: "I want to host an event"
   }
 }
 
 const ORGANIZER_ACCENTS = [
+  { label: "Yellow", value: "#F7E018" },
   { label: "Green", value: "#00E887" },
   { label: "Teal", value: "#00E8E0" },
 ]
 
-type Role = "speaker" | "organizer"
-
-// ─── Logo Component ───────────────────────────────────────────────────────────
-function Logo({ className = "" }: { className?: string }) {
-  return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      {/* Chat bubble SVG */}
-      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" className="shrink-0">
-        <path d="M4 6C4 4.89543 4.89543 4 6 4H22C23.1046 4 24 4.89543 24 6V18C24 19.1046 23.1046 20 22 20H10L6 24V20H6C4.89543 20 4 19.1046 4 18V6Z" stroke="currentColor" strokeWidth="2" fill="none" />
-        <circle cx="9" cy="12" r="1.5" fill="var(--accent, #F7E018)" />
-        <circle cx="14" cy="12" r="1.5" fill="var(--accent, #F7E018)" />
-        <circle cx="19" cy="12" r="1.5" fill="var(--accent, #F7E018)" />
-      </svg>
-      <span className="font-mono text-sm font-bold tracking-wide text-foreground">
-        EVOCA
-      </span>
-      {/* Pulsing dot */}
-      <span className="relative flex h-2 w-2">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: "var(--accent, #F7E018)" }} />
-        <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: "var(--accent, #F7E018)" }} />
-      </span>
-    </div>
-  )
+// Convert a hex accent into a dim rgba(…, 0.12) for backgrounds.
+function accentDim(hex: string): string {
+  const h = hex.replace("#", "")
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  return `rgba(${r}, ${g}, ${b}, 0.12)`
 }
+
+type Role = "speaker" | "organizer"
 
 // ─── Split Hero ───────────────────────────────────────────────────────────────
 function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
@@ -66,12 +56,12 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
     <div className="min-h-screen flex flex-col lg:flex-row relative">
       {/* Center logo - absolutely positioned */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-jsconf-bg px-4 py-3 hidden lg:block">
-        <Logo />
+        <Logo size="sm" />
       </div>
 
       {/* Mobile logo */}
       <div className="lg:hidden py-6 flex justify-center border-b border-jsconf-border">
-        <Logo />
+        <Logo size="sm" />
       </div>
 
       {/* Speaker side */}
@@ -86,7 +76,7 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
             onClick={() => onSelectRole("speaker")}
             className="font-mono text-sm font-bold uppercase tracking-wide px-6 py-3 border-2 border-jsconf-yellow text-jsconf-yellow hover:bg-jsconf-yellow hover:text-jsconf-bg transition-colors"
           >
-            Get started free →
+            {ROLES.speaker.action} →
           </button>
         </div>
       </div>
@@ -101,9 +91,9 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
           </p>
           <button
             onClick={() => onSelectRole("organizer")}
-            className="font-mono text-sm font-bold uppercase tracking-wide px-6 py-3 border-2 border-[#00E887] text-[#00E887] hover:bg-[#00E887] hover:text-black transition-colors"
+            className="font-mono text-sm font-bold uppercase tracking-wide px-6 py-3 border-2 border-jsconf-yellow text-jsconf-yellow hover:bg-jsconf-yellow hover:text-jsconf-bg transition-colors"
           >
-            Get started free →
+            {ROLES.organizer.action} →
           </button>
         </div>
       </div>
@@ -113,11 +103,12 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
-  const otherRole = role === "speaker" ? "Organizer" : "Speaker"
+  const otherRole: Role = role === "speaker" ? "organizer" : "speaker"
+  const otherAccent = ROLES[otherRole].accent
 
   return (
     <nav className="sticky top-0 z-50 bg-jsconf-bg/95 backdrop-blur border-b border-jsconf-border px-6 py-4 flex items-center justify-between">
-      <Logo />
+      <Logo size="sm" />
       <div className="flex items-center gap-4">
         <Link
           href="/pricing"
@@ -127,19 +118,29 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
         </Link>
         <button
           onClick={onSwitchRole}
-          className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors hidden sm:inline"
+          className="font-mono text-xs font-bold px-3 py-2 border-2 transition-colors hidden sm:inline-block"
+          style={{ borderColor: otherAccent, color: otherAccent }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = otherAccent
+            e.currentTarget.style.color = ROLES[otherRole].accentText
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent"
+            e.currentTarget.style.color = otherAccent
+          }}
         >
-          Switch to {otherRole}
+          {ROLES[otherRole].action} →
         </button>
-        <div className="hidden sm:block">
-          <ThemeSwitcher />
-        </div>
         <Link
           href="/login"
-          className="font-mono text-sm font-bold px-4 py-2 transition-colors bg-primary text-primary-foreground hidden sm:inline-block"
+          className="font-mono text-sm font-bold px-4 py-2 transition-opacity hover:opacity-90 hidden sm:inline-block"
+          style={{ backgroundColor: ROLES[role].accent, color: ROLES[role].accentText }}
         >
           Get started free →
         </Link>
+        <div className="hidden sm:block">
+          <ThemeSwitcher />
+        </div>
       </div>
     </nav>
   )
@@ -202,7 +203,7 @@ function ProWaitlistForm() {
 
   if (state === "done") {
     return (
-      <p className="font-mono text-xs text-[#00E887] uppercase tracking-wider">
+      <p className="font-mono text-xs uppercase tracking-wider" style={{ color: "var(--accent)" }}>
         You&apos;re on the list. We&apos;ll reach out when Pro launches.
       </p>
     )
@@ -294,7 +295,7 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/login"
-                className="font-mono text-sm font-bold px-6 py-3"
+                className="font-mono text-sm font-bold px-6 py-3 transition-opacity hover:opacity-90"
                 style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
               >
                 Start for free →
@@ -433,7 +434,7 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/login"
-                className="font-mono text-sm font-bold px-6 py-3"
+                className="font-mono text-sm font-bold px-6 py-3 transition-opacity hover:opacity-90"
                 style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
               >
                 Set up your event →
@@ -514,7 +515,7 @@ function Footer() {
   return (
     <footer className="px-6 py-8 border-t border-jsconf-border">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <Logo />
+        <Logo size="sm" />
         <p className="font-sans text-sm text-jsconf-muted">Built by Salvador Sanchez</p>
         <div className="flex items-center gap-6">
           <Link href="/demo" className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors">Demo</Link>
@@ -596,7 +597,7 @@ function LandingContent() {
     const tokens = ROLES[r]
     const finalAccent = accent || tokens.accent
     document.documentElement.style.setProperty("--accent", finalAccent)
-    document.documentElement.style.setProperty("--accent-dim", r === "organizer" ? `rgba(0, 232, 135, 0.12)` : tokens.accentDim)
+    document.documentElement.style.setProperty("--accent-dim", accentDim(finalAccent))
     document.documentElement.style.setProperty("--accent-text", tokens.accentText)
   }, [])
 

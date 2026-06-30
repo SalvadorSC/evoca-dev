@@ -425,6 +425,30 @@ export function InteractivePhoneMockup({
     }
   }, [runNextSim])
 
+  // Stop generating comments while the tab is backgrounded so they don't
+  // accumulate and flood the wall all at once when the user returns.
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden) {
+        // Gate all in-flight sim callbacks and clear pending timers.
+        simRunningRef.current = false
+        if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
+        if (resetTimerRef.current) clearTimeout(resetTimerRef.current)
+        setSim(null)
+      } else if (!hasInteractedRef.current && !isHoveringRef.current) {
+        // Resume by restarting the idle countdown, like a fresh start.
+        if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
+        idleTimerRef.current = setTimeout(() => {
+          simRunningRef.current = true
+          setSim(EMPTY_SIM)
+          setTimeout(() => { if (simRunningRef.current) runNextSim() }, 600)
+        }, IDLE_MS)
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibility)
+    return () => document.removeEventListener("visibilitychange", handleVisibility)
+  }, [runNextSim]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Stub send for the real tabs (no PartyKit — user actions only update local display)
   const stubSend = useCallback((_msg: ClientMessage) => {
     markInteraction()

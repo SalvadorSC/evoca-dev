@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useState } from 'react'
+import { Logo } from '@/components/shared/logo'
 
 // Mirrors scripts/seed-test-accounts.mjs + /api/dev-login. See docs/test-accounts.md.
 const DEV_ACCOUNTS = [
@@ -56,8 +57,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="mb-8 text-center">
-          <h1 className="font-display font-bold text-3xl tracking-wide mb-2 text-foreground">
-            EVOCA
+          <h1 className="flex justify-center mb-2">
+            <Logo size="xl" />
           </h1>
           <p className="font-mono text-xs text-jsconf-muted uppercase tracking-wider">
             Sign in to manage your talks

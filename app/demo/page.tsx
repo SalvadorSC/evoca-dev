@@ -371,12 +371,12 @@ function FullDemoView({ sessionId }: { sessionId: string }) {
             </div>
           </Link>
           <Link href="/?role=organizer" className="group block">
-            <div className="h-full border-l-4 border-[#00E887] bg-jsconf-surface border border-l-[#00E887] border-t-jsconf-border border-r-jsconf-border border-b-jsconf-border p-5 flex flex-col gap-2 hover:bg-jsconf-surface-2 transition-colors">
+            <div className="h-full border-l-4 border-jsconf-yellow bg-jsconf-surface border border-l-jsconf-yellow border-t-jsconf-border border-r-jsconf-border border-b-jsconf-border p-5 flex flex-col gap-2 hover:bg-jsconf-surface-2 transition-colors">
               <span className="font-display font-bold text-white text-base uppercase tracking-wide">I&apos;m organizing a conference</span>
               <p className="font-sans text-sm text-jsconf-muted leading-relaxed">
                 Bring Live Wall to your event.
               </p>
-              <span className="font-mono text-xs text-[#00E887] mt-auto group-hover:underline">Learn more</span>
+              <span className="font-mono text-xs text-jsconf-yellow mt-auto group-hover:underline">Learn more</span>
             </div>
           </Link>
         </div>
