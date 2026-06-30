@@ -114,7 +114,8 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
         </div>
         <Link
           href="/login"
-          className="font-mono text-sm font-bold px-4 py-2 transition-colors bg-primary text-primary-foreground hidden sm:inline-block"
+          className="font-mono text-sm font-bold px-4 py-2 transition-colors hidden sm:inline-block"
+          style={{ backgroundColor: ROLES[role].accent, color: ROLES[role].accentText }}
         >
           Get started free →
         </Link>
