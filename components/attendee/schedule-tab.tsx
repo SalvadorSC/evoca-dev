@@ -405,7 +405,7 @@ export function ScheduleTab({ send, sessions: liveSessions, attendance }: Schedu
           {/* Header Row */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
             <span style={{ fontWeight: 700, fontSize: "1rem", letterSpacing: "0.05em", color: "#FFFFFF", fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" }}>
-              EVO<span style={{ color: "#F7E018" }}>CA</span>
+              EVOCA
             </span>
             <span style={{ fontSize: "0.65rem", color: "#888888", fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" }}>
               2026

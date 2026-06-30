@@ -44,12 +44,12 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
     <div className="min-h-screen flex flex-col lg:flex-row relative">
       {/* Center logo - absolutely positioned */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-jsconf-bg px-4 py-3 hidden lg:block">
-        <Logo size="sm" showDot />
+        <Logo size="sm" />
       </div>
 
       {/* Mobile logo */}
       <div className="lg:hidden py-6 flex justify-center border-b border-jsconf-border">
-        <Logo size="sm" showDot />
+        <Logo size="sm" />
       </div>
 
       {/* Speaker side */}
@@ -95,7 +95,7 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
 
   return (
     <nav className="sticky top-0 z-50 bg-jsconf-bg/95 backdrop-blur border-b border-jsconf-border px-6 py-4 flex items-center justify-between">
-      <Logo size="sm" showDot />
+      <Logo size="sm" />
       <div className="flex items-center gap-4">
         <Link
           href="/pricing"
@@ -492,7 +492,7 @@ function Footer() {
   return (
     <footer className="px-6 py-8 border-t border-jsconf-border">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <Logo size="sm" showDot />
+        <Logo size="sm" />
         <p className="font-sans text-sm text-jsconf-muted">Built by Salvador Sanchez</p>
         <div className="flex items-center gap-6">
           <Link href="/demo" className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors">Demo</Link>
