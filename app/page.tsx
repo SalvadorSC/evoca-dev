@@ -52,61 +52,6 @@ function accentDim(hex: string): string {
 
 type Role = "speaker" | "organizer"
 
-// ─── Split Hero ───────────────────────────────────────────────────────────────
-function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
-  return (
-    <div className="min-h-screen flex flex-col lg:flex-row relative">
-      {/* Center logo - absolutely positioned */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-jsconf-bg px-4 py-3 hidden lg:block">
-        <Logo size="sm" />
-      </div>
-
-      {/* Mobile logo */}
-      <div className="lg:hidden py-6 flex justify-center border-b border-jsconf-border">
-        <Logo size="sm" />
-      </div>
-
-      {/* Speaker side */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-jsconf-border relative">
-        <div className="max-w-md text-center lg:text-left">
-          <p className="font-mono text-xs text-jsconf-muted uppercase tracking-widest mb-2">I&apos;m a</p>
-          <h1 className="font-display font-bold text-foreground text-5xl lg:text-6xl xl:text-7xl mb-4">Speaker</h1>
-          <p className="font-sans text-jsconf-muted text-base lg:text-lg mb-8">
-            Turn any talk into a live experience
-          </p>
-          <CtaButton
-            variant="outline"
-            accent="var(--jsconf-yellow)"
-            accentText="var(--jsconf-bg)"
-            onClick={() => onSelectRole("speaker")}
-          >
-            {ROLES.speaker.action} →
-          </CtaButton>
-        </div>
-      </div>
-
-      {/* Organizer side */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12 relative">
-        <div className="max-w-md text-center lg:text-left">
-          <p className="font-mono text-xs text-jsconf-muted uppercase tracking-widest mb-2">I&apos;m an</p>
-          <h1 className="font-display font-bold text-foreground text-5xl lg:text-6xl xl:text-7xl mb-4">Organizer</h1>
-          <p className="font-sans text-jsconf-muted text-base lg:text-lg mb-8">
-            One platform for your schedule, speakers and live engagement
-          </p>
-          <CtaButton
-            variant="outline"
-            accent="var(--jsconf-yellow)"
-            accentText="var(--jsconf-bg)"
-            onClick={() => onSelectRole("organizer")}
-          >
-            {ROLES.organizer.action} →
-          </CtaButton>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 // ─── Navigation ───────────────────────────────────────────────────────────────
 function Nav({ role }: { role: Role }) {
   // The primary CTA only appears once the visitor has scrolled past the hero
@@ -562,12 +507,13 @@ function LandingContent() {
   const router = useRouter()
 
   // Initialize role synchronously from the URL on the first client render so
-  // `?role=speaker` never flashes the <SplitHero> chooser before swapping.
+  // `?role=speaker` is honored immediately. Otherwise default to "organizer" —
+  // organizers bring speakers + attendees with them, so it's the primary audience.
   const urlRoleParam = searchParams.get("role")
-  const initialRole: Role | null =
-    urlRoleParam === "speaker" || urlRoleParam === "organizer" ? urlRoleParam : null
+  const initialRole: Role =
+    urlRoleParam === "speaker" || urlRoleParam === "organizer" ? urlRoleParam : "organizer"
 
-  const [role, setRole] = useState<Role | null>(initialRole)
+  const [role, setRole] = useState<Role>(initialRole)
   const [organizerAccent, setOrganizerAccent] = useState(ORGANIZER_ACCENTS[0].value)
   const [waveAnimation, setWaveAnimation] = useState<WaveAnimation>("drift-cursor")
 
@@ -588,7 +534,13 @@ function LandingContent() {
         : ROLES.speaker.accent
       if (storedRole === "organizer") setOrganizerAccent(storedAccent)
       applyAccent(storedRole, storedAccent)
+      return
     }
+
+    // No URL or stored preference: apply the default organizer accent.
+    const storedAccent = localStorage.getItem(STORAGE_KEYS.organizerAccent) || ORGANIZER_ACCENTS[0].value
+    setOrganizerAccent(storedAccent)
+    applyAccent("organizer", storedAccent)
   }, [searchParams, organizerAccent])
 
   const applyAccent = useCallback((r: Role, accent?: string) => {
@@ -624,27 +576,17 @@ function LandingContent() {
 
   return (
     <div className="min-h-screen bg-jsconf-bg text-foreground">
-      {!role ? (
-        <SplitHero onSelectRole={handleSelectRole} />
-      ) : (
-        <>
-          <Nav role={role} />
-          {role === "speaker"
-            ? <SpeakerExperience waveAnimation={waveAnimation} onSwitchRole={handleSwitchRole} />
-            : <OrganizerExperience waveAnimation={waveAnimation} onSwitchRole={handleSwitchRole} />}
+      <Nav role={role} />
+      {role === "speaker"
+        ? <SpeakerExperience waveAnimation={waveAnimation} onSwitchRole={handleSwitchRole} />
+        : <OrganizerExperience waveAnimation={waveAnimation} onSwitchRole={handleSwitchRole} />}
 
-
-          {showDevToggle && role === "organizer" && (
-            <DevColorToggle onColorChange={handleOrganizerColorChange} />
-          )}
-      {showDevToggle && role && (
+      {showDevToggle && role === "organizer" && (
+        <DevColorToggle onColorChange={handleOrganizerColorChange} />
+      )}
+      {showDevToggle && (
         <ReducedMotionToggle value={waveAnimation} onChange={setWaveAnimation} />
       )}
-
-          {showDevToggle && role === "organizer" && (
-            <DevColorToggle onColorChange={handleOrganizerColorChange} />
-          )}
-        </>)}
     </div>
   )
 }
