@@ -27,7 +27,7 @@ interface CtaButtonBaseProps {
 const baseClasses =
   "inline-flex items-center justify-center gap-2 text-center font-mono text-xs font-bold uppercase tracking-wider px-6 py-3 border-2 cursor-pointer select-none " +
   "transition-[transform,box-shadow,background-color,color] duration-150 ease-out " +
-  "hover:-translate-y-0.5 hover:shadow-[0_8px_22px_-6px_color-mix(in_srgb,var(--cta-accent)_50%,transparent)] " +
+  "hover:-translate-y-0.5 hover:shadow-[0_6px_18px_-8px_rgba(0,0,0,0.45)] " +
   "active:translate-y-0 active:shadow-none active:scale-[0.98] " +
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cta-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-jsconf-bg"
 

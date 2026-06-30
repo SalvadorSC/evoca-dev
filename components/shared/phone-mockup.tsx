@@ -546,7 +546,9 @@ function SimOverlayReact({ sim }: { sim: SimState }) {
       className="absolute inset-0 bg-jsconf-bg pointer-events-none"
       style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }}
     >
-      <div className="flex flex-col gap-5 pt-1 pb-4">
+      {/* gap-5 + pb-4 mirrors the real ReactTab wrapper exactly so the layout
+          does not shift when the sim overlay toggles on/off. */}
+      <div className="flex flex-col gap-5 pb-4">
 
         {/* Name field */}
         <div className="flex flex-col gap-2">

@@ -13,6 +13,7 @@ import { ReducedMotionToggle } from "@/components/shared/wave-background"
 import { OrganizerPricing } from "@/components/landing/organizer-pricing"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { cn } from "@/lib/utils"
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const ROLES = {
@@ -108,8 +109,9 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 function Nav({ role }: { role: Role }) {
-  // The "Pricing" link and primary CTA only appear once the visitor has
-  // scrolled past the hero section (the hero carries its own CTAs).
+  // The primary CTA only appears once the visitor has scrolled past the hero
+  // section (the hero carries its own CTAs). It stays mounted and fades in so
+  // the appearance is smooth rather than a harsh pop.
   const [pastHero, setPastHero] = useState(false)
 
   useEffect(() => {
@@ -127,25 +129,18 @@ function Nav({ role }: { role: Role }) {
     <nav className="sticky top-0 z-50 bg-jsconf-bg/95 backdrop-blur border-b border-jsconf-border px-6 py-4 flex items-center justify-between">
       <Logo size="sm" />
       <div className="flex items-center gap-4">
-        {pastHero && (
-          <>
-            <Link
-              href={`/pricing?for=${role}`}
-              className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors hidden sm:inline"
-            >
-              Pricing
-            </Link>
-            <CtaButton
-              variant="solid"
-              accent={ROLES[role].accent}
-              accentText={ROLES[role].accentText}
-              href="/login"
-              className="text-sm px-4 py-2 hidden sm:inline-flex"
-            >
-              Get started free →
-            </CtaButton>
-          </>
-        )}
+        <CtaButton
+          variant="solid"
+          accent={ROLES[role].accent}
+          accentText={ROLES[role].accentText}
+          href="/login"
+          className={cn(
+            "text-sm px-4 py-2 hidden sm:inline-flex transition-all duration-300 ease-out",
+            pastHero ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1 pointer-events-none",
+          )}
+        >
+          Get started free →
+        </CtaButton>
         <div className="hidden sm:block">
           <ThemeSwitcher />
         </div>
@@ -174,7 +169,7 @@ function FeatureCard({ icon, title, description, badge }: { icon: string; title:
   )
 }
 
-// ─── Pro Waitlist Form ─────────────────────────────���──────────────────────────
+// ─── Pro Waitlist Form ─────────────────────────────���─────────���────────────────
 function ProWaitlistForm() {
   const [email, setEmail] = useState("")
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle")
@@ -305,12 +300,12 @@ function SpeakerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: Wav
                 Start for free →
               </CtaButton>
               <CtaButton variant="ghost" href={demoHref} className="text-sm">
-                See it live →
+                See it live
               </CtaButton>
             </div>
             <div className="mt-4">
               <CtaButton variant="ghost" onClick={onSwitchRole} className="text-sm">
-                {ROLES.organizer.action} →
+                {ROLES.organizer.action}
               </CtaButton>
             </div>
           </div>
@@ -351,15 +346,15 @@ function SpeakerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: Wav
 
       {/* Social proof */}
       <section className="px-6 py-8 bg-jsconf-surface border-y border-jsconf-border">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-center">
           <span
-            className="inline-flex items-center gap-1.5 font-mono text-sm font-bold px-3 py-1"
+            className="inline-flex items-center justify-center gap-1.5 font-mono text-xs sm:text-sm font-bold px-3 py-1.5 leading-snug text-balance"
             style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
           >
-            <Trophy className="h-3.5 w-3.5" aria-hidden="true" />
+            <Trophy className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             Winner — JSConf España 2026 Hackathon
           </span>
-          <span className="font-sans text-sm text-jsconf-muted">Built at JSConf. Loved by the community.</span>
+          <span className="font-sans text-sm text-jsconf-muted text-balance">Built at JSConf. Loved by the community.</span>
         </div>
       </section>
 
@@ -442,12 +437,12 @@ function OrganizerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: W
                 Set up your event →
               </CtaButton>
               <CtaButton variant="ghost" href={demoHref} className="text-sm">
-                See it live →
+                See it live
               </CtaButton>
             </div>
             <div className="mt-4">
               <CtaButton variant="ghost" onClick={onSwitchRole} className="text-sm">
-                {ROLES.speaker.action} →
+                {ROLES.speaker.action}
               </CtaButton>
             </div>
           </div>
@@ -487,15 +482,15 @@ function OrganizerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: W
 
       {/* Social proof */}
       <section className="px-6 py-8 bg-jsconf-surface border-y border-jsconf-border">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-center">
           <span
-            className="inline-flex items-center gap-1.5 font-mono text-sm font-bold px-3 py-1"
+            className="inline-flex items-center justify-center gap-1.5 font-mono text-xs sm:text-sm font-bold px-3 py-1.5 leading-snug text-balance"
             style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
           >
-            <Trophy className="h-3.5 w-3.5" aria-hidden="true" />
+            <Trophy className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             Winner — JSConf España 2026 Hackathon
           </span>
-          <span className="font-sans text-sm text-jsconf-muted">Built at JSConf. Loved by the community.</span>
+          <span className="font-sans text-sm text-jsconf-muted text-balance">Built at JSConf. Loved by the community.</span>
         </div>
       </section>
 
