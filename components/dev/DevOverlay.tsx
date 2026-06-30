@@ -354,7 +354,22 @@ function PhaseGroup({
 
 // ─── Root ────────────────────────────────────────────────────────────────────
 export function DevOverlay() {
+  // Hidden by default. Enable from the browser console with:
+  //   localStorage.setItem("test", "true")   (then reload)
+  // Disable again with:
+  //   localStorage.removeItem("test")         (then reload)
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    try {
+      setEnabled(localStorage.getItem("test") === "true");
+    } catch {
+      setEnabled(false);
+    }
+  }, []);
+
   if (process.env.NODE_ENV !== "development") return null;
+  if (!enabled) return null;
   return <DevOverlayInner />;
 }
 
