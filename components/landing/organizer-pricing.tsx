@@ -6,6 +6,7 @@ import { Check } from "lucide-react"
 import {
   PLANS,
   ORGANIZER_PLAN_IDS,
+  ORGANIZER_FREE_LIMITS,
   formatPrice,
   type Currency,
   type PlanId,
@@ -19,9 +20,9 @@ interface LocaleResponse {
 }
 
 const FEATURES: Record<PlanId, string[]> = {
-  organizer_onetime: ["Full organizer tools", "7-day live window", "Reactions, Q&A & presenting"],
-  organizer_monthly: ["Unlimited events", "All features, always on", "Cancel anytime"],
-  organizer_annual: ["Everything in Growth", "Best value", "Priority support"],
+  organizer_onetime: ["Full organizer tools", "7-day live window", "Unlimited attendees", "1 admin user"],
+  organizer_monthly: ["Unlimited events", "Up to 3 admin users", "All features, always on", "Cancel anytime"],
+  organizer_annual: ["Everything in Growth", "Unlimited admin users", "Priority support"],
   speaker_pro_monthly: [],
   speaker_pro_annual: [],
 }
@@ -57,6 +58,16 @@ export function OrganizerPricing() {
           </h2>
           <p className="font-sans text-jsconf-muted text-base">
             Run a single conference or organize all year. Prices in {currency}.
+          </p>
+          <p className="font-sans text-jsconf-muted text-sm mt-2">
+            Small event? Start free with up to {ORGANIZER_FREE_LIMITS.maxAttendees} attendees.{" "}
+            <Link
+              href="/pricing?for=organizer"
+              className="font-mono text-xs font-bold uppercase tracking-wider"
+              style={{ color: "var(--accent)" }}
+            >
+              Compare plans →
+            </Link>
           </p>
         </div>
 

@@ -9,6 +9,7 @@ import { Logo } from "@/components/shared/logo"
 import {
   PLANS,
   ORGANIZER_PLAN_IDS,
+  ORGANIZER_FREE_LIMITS,
   formatPrice,
   type Currency,
   type PlanId,
@@ -28,26 +29,35 @@ const ORGANIZER_FEATURES: Record<PlanId, string[]> = {
   organizer_onetime: [
     "Full organizer toolkit",
     "7-day live event window",
+    "Unlimited attendees",
     "Unlimited talks & sessions",
+    "1 admin user",
     "Live reactions, Q&A & polls",
-    "Presenter & moderation tools",
   ],
   organizer_monthly: [
     "Everything in One-time Event",
     "Unlimited events, always on",
+    "Up to 3 admin users",
     "Call for Papers & review board",
-    "Speaker management",
     "Cancel anytime",
   ],
   organizer_annual: [
     "Everything in Growth",
+    "Unlimited admin users",
     "Two months free vs monthly",
     "Priority support",
-    "Early access to new features",
   ],
   speaker_pro_monthly: [],
   speaker_pro_annual: [],
 }
+
+const ORGANIZER_FREE_FEATURES = [
+  `Up to ${ORGANIZER_FREE_LIMITS.maxAttendees} attendees per event`,
+  "1 admin user",
+  "Unlimited talks & sessions",
+  "Live reactions, Q&A & polls",
+  "No credit card required",
+]
 
 const SPEAKER_PRO_FEATURES = [
   "Unlimited talks (vs 5 on Free)",
@@ -77,6 +87,14 @@ const FAQ_ITEMS: { q: string; a: string }[] = [
   {
     q: "What happens to Q&A after the talk?",
     a: "When you end a session, the questions are saved to your dashboard so you can revisit them anytime under the talk's Q&A History.",
+  },
+  {
+    q: "Is there a free plan for organizers?",
+    a: `Yes. Small events can use the free organizer tier with up to ${ORGANIZER_FREE_LIMITS.maxAttendees} attendees, one admin user and the full live engagement toolkit — no credit card required. Upgrade when you outgrow it.`,
+  },
+  {
+    q: "Can I add more admins to manage my event?",
+    a: "Growth includes up to 3 admin users so your team can co-manage the event, and Scale supports unlimited admins. The free and One-time tiers include a single admin.",
   },
   {
     q: "Can I run a single conference without a subscription?",
@@ -357,7 +375,21 @@ function OrganizerPlans({
   prices: LocaleResponse["prices"] | null
 }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto w-full">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto w-full">
+      <PlanCard
+        name="Free"
+        big={formatPrice(0, currency)}
+        small="forever"
+        description="For small events getting started with live engagement."
+        features={ORGANIZER_FREE_FEATURES}
+      >
+        <Link
+          href="/login?role=organizer"
+          className="text-center font-mono text-xs font-bold uppercase tracking-wider py-3 border-2 border-jsconf-yellow text-jsconf-yellow hover:bg-jsconf-yellow hover:text-jsconf-bg transition-colors"
+        >
+          Get started free
+        </Link>
+      </PlanCard>
       {ORGANIZER_PLAN_IDS.map((planId) => {
         const plan = PLANS[planId]
         const label = organizerPriceLabel(planId, currency, prices)
@@ -420,9 +452,9 @@ function PricingFAQ() {
   )
 }
 
-// ─── Page ────────────────────────────────────���──────────────────────────────
-export function PricingContent() {
-  const [audience, setAudience] = useState<Audience>("speaker")
+// ─── Page ────────────────────────────────────���──��───────────────────────────
+export function PricingContent({ initialAudience = "speaker" }: { initialAudience?: Audience }) {
+  const [audience, setAudience] = useState<Audience>(initialAudience)
   const { data } = useSWR<LocaleResponse>("/api/locale", fetcher, { revalidateOnFocus: false })
   const currency = data?.currency ?? "EUR"
   const prices = data?.prices ?? null

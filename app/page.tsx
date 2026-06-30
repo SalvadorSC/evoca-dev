@@ -111,7 +111,7 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
       <Logo size="sm" />
       <div className="flex items-center gap-4">
         <Link
-          href="/pricing"
+          href={`/pricing?for=${role}`}
           className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors hidden sm:inline"
         >
           Pricing
@@ -378,7 +378,7 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
           </div>
           <div className="mt-6 text-center">
             <Link
-              href="/pricing"
+              href="/pricing?for=speaker"
               className="font-mono text-sm font-bold uppercase tracking-wider text-foreground border-b-2 pb-0.5 hover:opacity-70 transition-opacity"
               style={{ borderColor: "var(--accent)" }}
             >
@@ -413,8 +413,9 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
 
   const organizerFAQ = [
     { q: "How do I invite speakers?", a: "Send a link or email. They set up their own talks." },
+    { q: "Is there a free plan?", a: "Yes. Small events run free with up to 100 attendees and one admin. Paid plans add unlimited attendees and more admin seats." },
+    { q: "Can I add more admins?", a: "Growth includes up to 3 admin users and Scale is unlimited, so your team can co-manage the event." },
     { q: "Can I brand it with my event colors?", a: "Coming soon." },
-    { q: "How many attendees can join?", a: "Unlimited on all plans." },
     { q: "Do I need technical setup?", a: "No. Create event, invite speakers, share the link." },
   ]
 
