@@ -7,6 +7,7 @@ import { PaywallProvider } from '@/components/billing/paywall-provider'
 import { ThemeProvider } from '@/components/theme/theme-provider'
 import { siteConfig } from '@/lib/site-config'
 import { StructuredData } from '@/components/seo/structured-data'
+import { LegalFooter } from '@/components/shared/legal-footer'
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -113,6 +114,7 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-jsconf-bg text-foreground">
         <ThemeProvider>
           <PaywallProvider>{children}</PaywallProvider>
+          <LegalFooter />
         </ThemeProvider>
         <Analytics />
         {process.env.NODE_ENV === 'development' && <DevOverlay />}
