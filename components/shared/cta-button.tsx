@@ -40,9 +40,10 @@ function variantClasses(variant: CtaVariant): string {
     return "bg-transparent text-foreground border-[var(--cta-accent)] hover:bg-[color-mix(in_srgb,var(--cta-accent)_14%,transparent)]"
   }
   if (variant === "rainbow") {
-    // Transparent border (overridden by the cta-rainbow pseudo-element) with
-    // subtle bg tint and white text so it reads on any accent background.
-    return "cta-rainbow bg-transparent text-foreground border-transparent hover:bg-[color-mix(in_srgb,var(--cta-accent)_10%,transparent)]"
+    // Opaque page-colored body so the animated conic-gradient pseudo-element only
+    // shows through the 2px border gap (border, not background). background-clip:
+    // padding-box on .cta-rainbow keeps this fill inside the border.
+    return "cta-rainbow bg-jsconf-bg text-foreground border-transparent hover:bg-jsconf-surface"
   }
   return "bg-transparent text-[var(--cta-accent)] border-[var(--cta-accent)] hover:bg-[var(--cta-accent)] hover:text-[var(--cta-accent-text)]"
 }
