@@ -10,6 +10,7 @@ import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
 import { ReducedMotionToggle } from "@/components/shared/wave-background"
 import { OrganizerPricing } from "@/components/landing/organizer-pricing"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const ROLES = {
@@ -260,6 +261,10 @@ function FAQ({ items }: { items: { q: string; a: string }[] }) {
 
 // ─── Speaker Experience ───────────────────────────────────────────────────────
 function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) {
+  const isMobile = useIsMobile()
+  // On phones, "See it live" sends visitors to the guided story tour instead
+  // of the desktop-oriented demo page.
+  const demoHref = isMobile ? "/demo/tour" : "/demo"
   const [heroItems, setHeroItems] = useState<LiveItem[]>([])
 
   const handleActivity = useCallback((item: LiveItem) => {
@@ -295,7 +300,7 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
                 Start for free →
               </Link>
               <Link
-                href="/demo"
+                href={demoHref}
                 className="font-mono text-sm font-bold px-6 py-3 border-2 text-foreground hover:bg-white/5 transition-colors"
                 style={{ borderColor: "var(--accent)" }}
               >
@@ -395,6 +400,10 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
 
 // ─── Organizer Experience ──────────────────────────────────────────────────���──
 function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) {
+  const isMobile = useIsMobile()
+  // On phones, "See it live" sends visitors to the guided story tour instead
+  // of the desktop-oriented demo page.
+  const demoHref = isMobile ? "/demo/tour" : "/demo"
   const [heroItems, setHeroItems] = useState<LiveItem[]>([])
 
   const handleActivity = useCallback((item: LiveItem) => {
@@ -430,7 +439,7 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
                 Set up your event →
               </Link>
               <Link
-                href="/demo"
+                href={demoHref}
                 className="font-mono text-sm font-bold px-6 py-3 border-2 text-foreground hover:bg-white/5 transition-colors"
                 style={{ borderColor: "var(--accent)" }}
               >
