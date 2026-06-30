@@ -15,7 +15,7 @@ interface FakeQuestion {
 }
 
 const INITIAL_QUESTIONS: FakeQuestion[] = [
-  { id: "q1", text: "What's the recommended approach for handling rate limits in production?", name: "Jordan P.", votes: 7, voted: false },
+  { id: "q1", text: "What's the recommended approach for handling rate limits in production?", name: "Jordan P.", votes: 6, voted: false },
   { id: "q2", text: "Does this work with edge functions?", name: "Lena M.", votes: 3, voted: false },
 ]
 
@@ -23,8 +23,9 @@ interface Step6AskProps {
   onNext: () => void
 }
 
-// Votes the room piles onto the user's question before they vote it themselves.
-const PEER_VOTE_TARGET = 7
+// The room piles votes onto the user's question up to this count; the user then
+// casts the deciding 7th vote, surpassing the top question (6).
+const PEER_VOTE_TARGET = 6
 
 export function Step6Ask({ onNext }: Step6AskProps) {
   const [subStep, setSubStep] = useState<SubStep>("post")
@@ -81,7 +82,7 @@ export function Step6Ask({ onNext }: Step6AskProps) {
     setQuestions((qs) =>
       qs.map((q) => (q.id === id && !q.voted ? { ...q, votes: q.votes + 1, voted: true } : q)),
     )
-    setTimeout(() => setSubStep("done"), 600)
+    setTimeout(() => setSubStep("done"), 500)
   }
 
   const sortedQuestions = [...questions].sort((a, b) => b.votes - a.votes)
@@ -189,18 +190,21 @@ export function Step6Ask({ onNext }: Step6AskProps) {
           })}
         </div>
 
-        {/* Done CTA */}
-        {subStep === "done" && (
-          <div className="flex flex-col gap-3 animate-in fade-in duration-500">
-            <div className="bg-green-500/10 border border-green-500/30 px-4 py-3">
-              <p className="font-mono text-sm text-green-400">
-                You&apos;ve seen everything. That&apos;s the full experience.
+      </div>
+
+      {/* Floating done CTA — appears ~0.5s after the user votes their question */}
+      {subStep === "done" && (
+        <div className="fixed inset-x-0 bottom-0 z-40 p-5 bg-gradient-to-t from-jsconf-bg via-jsconf-bg to-transparent animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="flex flex-col gap-3">
+            <div className="bg-jsconf-yellow-dim border border-jsconf-yellow/30 px-4 py-3">
+              <p className="font-mono text-sm text-jsconf-yellow text-balance">
+                You know it&apos;s good, now it&apos;s time for your attendees.
               </p>
             </div>
             <YellowButton onClick={onNext}>Finish →</YellowButton>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </StepShell>
   )
 }
