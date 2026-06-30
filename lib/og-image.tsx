@@ -54,6 +54,7 @@ export function renderOgImage() {
             flexDirection: "column",
             fontSize: 66,
             fontWeight: "bold",
+            fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
             lineHeight: 1.1,
             color: FG,
             marginTop: 40,
