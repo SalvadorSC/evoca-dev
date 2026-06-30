@@ -112,6 +112,7 @@ interface FakeSlideProps {
   speaker?: string
   progress?: number // 0–100
   showProgress?: boolean
+  showHeader?: boolean
 }
 
 export function FakeSlide({
@@ -119,18 +120,21 @@ export function FakeSlide({
   speaker = "Alex Rivera",
   progress = 62,
   showProgress = true,
+  showHeader = true,
 }: FakeSlideProps) {
   return (
     <div className="bg-jsconf-surface border border-jsconf-border p-5 flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <span className="font-mono text-[10px] uppercase tracking-widest text-jsconf-muted">
-          Live Presentation
-        </span>
-        <span className="flex items-center gap-1.5 font-mono text-[10px] text-jsconf-yellow uppercase tracking-wider">
-          <span className="w-1.5 h-1.5 rounded-full bg-jsconf-yellow animate-pulse" />
-          Live
-        </span>
-      </div>
+      {showHeader && (
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-jsconf-muted">
+            Live Presentation
+          </span>
+          <span className="flex items-center gap-1.5 font-mono text-[10px] text-jsconf-yellow uppercase tracking-wider">
+            <span className="w-1.5 h-1.5 rounded-full bg-jsconf-yellow animate-pulse" />
+            Live
+          </span>
+        </div>
+      )}
 
       <div className="bg-jsconf-surface-2 border border-jsconf-border aspect-video flex flex-col items-center justify-center gap-3 px-4">
         <p className="font-display font-bold text-base text-center text-white leading-snug text-balance uppercase tracking-wide">

@@ -88,7 +88,7 @@ export function Step2Wall({ onNext }: Step2WallProps) {
         {/* Full-width talk stage with reactions overlaying it */}
         <div className="relative flex-1 overflow-hidden border border-jsconf-border">
           {/* The talk fills the stage */}
-          <FakeSlide showProgress={false} />
+          <FakeSlide showProgress={false} showHeader={false} />
 
           {/* Floating emoji layer — rises over the lower half of the stage */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 top-1/2 overflow-hidden">
