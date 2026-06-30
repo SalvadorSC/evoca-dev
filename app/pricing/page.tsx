@@ -7,6 +7,12 @@ export const metadata: Metadata = {
     "Simple, transparent pricing for speakers and organizers. Start free with 5 talks, no credit card. Upgrade when you need unlimited talks, analytics and more.",
 }
 
-export default function PricingPage() {
-  return <PricingContent />
+export default async function PricingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ for?: string }>
+}) {
+  const { for: audienceParam } = await searchParams
+  const initialAudience = audienceParam === "organizer" ? "organizer" : "speaker"
+  return <PricingContent initialAudience={initialAudience} />
 }

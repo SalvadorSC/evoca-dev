@@ -7,11 +7,13 @@ import { ChevronDown, QrCode, Trophy } from "lucide-react"
 import { STORAGE_KEYS } from "@/lib/storage-keys"
 import { InteractivePhoneMockup, HeroBackground } from "@/components/shared/phone-mockup"
 import { Logo } from "@/components/shared/logo"
+import { CtaButton } from "@/components/shared/cta-button"
 import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
 import { ReducedMotionToggle } from "@/components/shared/wave-background"
 import { OrganizerPricing } from "@/components/landing/organizer-pricing"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
 import { useIsMobile } from "@/hooks/use-mobile"
+import { cn } from "@/lib/utils"
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const ROLES = {
@@ -50,94 +52,40 @@ function accentDim(hex: string): string {
 
 type Role = "speaker" | "organizer"
 
-// ─── Split Hero ───────────────────────────────────────────────────────────────
-function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
-  return (
-    <div className="min-h-screen flex flex-col lg:flex-row relative">
-      {/* Center logo - absolutely positioned */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-jsconf-bg px-4 py-3 hidden lg:block">
-        <Logo size="sm" />
-      </div>
-
-      {/* Mobile logo */}
-      <div className="lg:hidden py-6 flex justify-center border-b border-jsconf-border">
-        <Logo size="sm" />
-      </div>
-
-      {/* Speaker side */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12 border-b lg:border-b-0 lg:border-r border-jsconf-border relative">
-        <div className="max-w-md text-center lg:text-left">
-          <p className="font-mono text-xs text-jsconf-muted uppercase tracking-widest mb-2">I&apos;m a</p>
-          <h1 className="font-display font-bold text-foreground text-5xl lg:text-6xl xl:text-7xl mb-4">Speaker</h1>
-          <p className="font-sans text-jsconf-muted text-base lg:text-lg mb-8">
-            Turn any talk into a live experience
-          </p>
-          <button
-            onClick={() => onSelectRole("speaker")}
-            className="font-mono text-sm font-bold uppercase tracking-wide px-6 py-3 border-2 border-jsconf-yellow text-jsconf-yellow hover:bg-jsconf-yellow hover:text-jsconf-bg transition-colors"
-          >
-            {ROLES.speaker.action} →
-          </button>
-        </div>
-      </div>
-
-      {/* Organizer side */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8 lg:p-12 relative">
-        <div className="max-w-md text-center lg:text-left">
-          <p className="font-mono text-xs text-jsconf-muted uppercase tracking-widest mb-2">I&apos;m an</p>
-          <h1 className="font-display font-bold text-foreground text-5xl lg:text-6xl xl:text-7xl mb-4">Organizer</h1>
-          <p className="font-sans text-jsconf-muted text-base lg:text-lg mb-8">
-            One platform for your schedule, speakers and live engagement
-          </p>
-          <button
-            onClick={() => onSelectRole("organizer")}
-            className="font-mono text-sm font-bold uppercase tracking-wide px-6 py-3 border-2 border-jsconf-yellow text-jsconf-yellow hover:bg-jsconf-yellow hover:text-jsconf-bg transition-colors"
-          >
-            {ROLES.organizer.action} →
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 // ─── Navigation ───────────────────────────────────────────────────────────────
-function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
-  const otherRole: Role = role === "speaker" ? "organizer" : "speaker"
-  const otherAccent = ROLES[otherRole].accent
+function Nav({ role }: { role: Role }) {
+  // The primary CTA only appears once the visitor has scrolled past the hero
+  // section (the hero carries its own CTAs). It stays mounted and fades in so
+  // the appearance is smooth rather than a harsh pop.
+  const [pastHero, setPastHero] = useState(false)
+
+  useEffect(() => {
+    const hero = document.querySelector("[data-hero]")
+    if (!hero) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setPastHero(!entry.isIntersecting),
+      { threshold: 0 },
+    )
+    observer.observe(hero)
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <nav className="sticky top-0 z-50 bg-jsconf-bg/95 backdrop-blur border-b border-jsconf-border px-6 py-4 flex items-center justify-between">
       <Logo size="sm" />
       <div className="flex items-center gap-4">
-        <Link
-          href="/pricing"
-          className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors hidden sm:inline"
-        >
-          Pricing
-        </Link>
-        <button
-          onClick={onSwitchRole}
-          className="font-mono text-xs font-bold px-3 py-2 border-2 transition-colors hidden sm:inline-block"
-          style={{ borderColor: otherAccent, color: otherAccent }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = otherAccent
-            e.currentTarget.style.color = ROLES[otherRole].accentText
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent"
-            e.currentTarget.style.color = otherAccent
-          }}
-        >
-          {ROLES[otherRole].action} →
-        </button>
-        <Link
+        <CtaButton
+          variant="solid"
+          accent={ROLES[role].accent}
+          accentText={ROLES[role].accentText}
           href="/login"
-          className="font-mono text-sm font-bold px-4 py-2 transition-opacity hover:opacity-90 hidden sm:inline-block"
-          style={{ backgroundColor: ROLES[role].accent, color: ROLES[role].accentText }}
+          className={cn(
+            "text-sm px-4 py-2 hidden sm:inline-flex transition-all duration-300 ease-out",
+            pastHero ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1 pointer-events-none",
+          )}
         >
           Get started free →
-        </Link>
+        </CtaButton>
         <div className="hidden sm:block">
           <ThemeSwitcher />
         </div>
@@ -166,7 +114,7 @@ function FeatureCard({ icon, title, description, badge }: { icon: string; title:
   )
 }
 
-// ─── Pro Waitlist Form ─────────────────────────────���──────────────────────────
+// ─── Pro Waitlist Form ─────────────────────────────���─────────���────────────────
 function ProWaitlistForm() {
   const [email, setEmail] = useState("")
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle")
@@ -261,7 +209,7 @@ function FAQ({ items }: { items: { q: string; a: string }[] }) {
 }
 
 // ─── Speaker Experience ───────────────────────────────────────────────────────
-function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) {
+function SpeakerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: WaveAnimation; onSwitchRole: () => void }) {
   const isMobile = useIsMobile()
   // On phones, "See it live" sends visitors to the guided story tour instead
   // of the desktop-oriented demo page.
@@ -282,7 +230,7 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
   return (
     <div>
       {/* Hero */}
-      <section className="relative px-6 py-4 lg:py-12 overflow-hidden min-h-[480px]">
+      <section data-hero className="relative px-6 py-4 lg:py-12 overflow-hidden min-h-[480px]">
         <HeroBackground items={heroItems} accentColor="var(--wave-color, var(--accent))" waveAnimation={waveAnimation} />
         <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
@@ -293,20 +241,17 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
               Slides, live reactions, Q&A and analytics — all in one place. Your audience participates, you stay in control.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link
-                href="/login"
-                className="font-mono text-sm font-bold px-6 py-3 transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
-              >
+              <CtaButton variant="solid" href="/login" className="text-sm">
                 Start for free →
-              </Link>
-              <Link
-                href={demoHref}
-                className="font-mono text-sm font-bold px-6 py-3 border-2 text-foreground hover:bg-white/5 transition-colors"
-                style={{ borderColor: "var(--accent)" }}
-              >
-                See it live →
-              </Link>
+              </CtaButton>
+              <CtaButton variant="ghost" href={demoHref} className="text-sm">
+                See it live
+              </CtaButton>
+            </div>
+            <div className="mt-4">
+              <CtaButton variant="ghost" onClick={onSwitchRole} className="text-sm">
+                {ROLES.organizer.action}
+              </CtaButton>
             </div>
           </div>
           <div className="flex-shrink-0 hidden lg:block">
@@ -346,15 +291,15 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
 
       {/* Social proof */}
       <section className="px-6 py-8 bg-jsconf-surface border-y border-jsconf-border">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-center">
           <span
-            className="inline-flex items-center gap-1.5 font-mono text-sm font-bold px-3 py-1"
+            className="inline-flex items-center justify-center gap-1.5 font-mono text-xs sm:text-sm font-bold px-3 py-1.5 leading-snug text-balance"
             style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
           >
-            <Trophy className="h-3.5 w-3.5" aria-hidden="true" />
+            <Trophy className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             Winner — JSConf España 2026 Hackathon
           </span>
-          <span className="font-sans text-sm text-jsconf-muted">Built at JSConf. Loved by the community.</span>
+          <span className="font-sans text-sm text-jsconf-muted text-balance">Built at JSConf. Loved by the community.</span>
         </div>
       </section>
 
@@ -378,7 +323,7 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
           </div>
           <div className="mt-6 text-center">
             <Link
-              href="/pricing"
+              href="/pricing?for=speaker"
               className="font-mono text-sm font-bold uppercase tracking-wider text-foreground border-b-2 pb-0.5 hover:opacity-70 transition-opacity"
               style={{ borderColor: "var(--accent)" }}
             >
@@ -400,7 +345,7 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
 }
 
 // ─── Organizer Experience ──────────────────────────────────────────────────���──
-function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) {
+function OrganizerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: WaveAnimation; onSwitchRole: () => void }) {
   const isMobile = useIsMobile()
   // On phones, "See it live" sends visitors to the guided story tour instead
   // of the desktop-oriented demo page.
@@ -413,15 +358,16 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
 
   const organizerFAQ = [
     { q: "How do I invite speakers?", a: "Send a link or email. They set up their own talks." },
+    { q: "Is there a free plan?", a: "Yes. Small events run free with up to 100 attendees and one admin. Paid plans add unlimited attendees and more admin seats." },
+    { q: "Can I add more admins?", a: "Growth includes up to 3 admin users and Scale is unlimited, so your team can co-manage the event." },
     { q: "Can I brand it with my event colors?", a: "Coming soon." },
-    { q: "How many attendees can join?", a: "Unlimited on all plans." },
     { q: "Do I need technical setup?", a: "No. Create event, invite speakers, share the link." },
   ]
 
   return (
     <div>
       {/* Hero */}
-      <section className="relative px-6 py-16 lg:py-12 overflow-hidden min-h-[480px]">
+      <section data-hero className="relative px-6 py-16 lg:py-12 overflow-hidden min-h-[480px]">
         <HeroBackground items={heroItems} accentColor="var(--wave-color, var(--accent))" waveAnimation={waveAnimation} />
         <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
@@ -432,20 +378,17 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
               Manage your event, onboard speakers and give every session live engagement — without the Slido price tag.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link
-                href="/login"
-                className="font-mono text-sm font-bold px-6 py-3 transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
-              >
+              <CtaButton variant="solid" href="/login" className="text-sm">
                 Set up your event →
-              </Link>
-              <Link
-                href={demoHref}
-                className="font-mono text-sm font-bold px-6 py-3 border-2 text-foreground hover:bg-white/5 transition-colors"
-                style={{ borderColor: "var(--accent)" }}
-              >
-                See it live →
-              </Link>
+              </CtaButton>
+              <CtaButton variant="ghost" href={demoHref} className="text-sm">
+                See it live
+              </CtaButton>
+            </div>
+            <div className="mt-4">
+              <CtaButton variant="ghost" onClick={onSwitchRole} className="text-sm">
+                {ROLES.speaker.action}
+              </CtaButton>
             </div>
           </div>
           <div className="flex-shrink-0 hidden lg:block">
@@ -484,15 +427,15 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
 
       {/* Social proof */}
       <section className="px-6 py-8 bg-jsconf-surface border-y border-jsconf-border">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-4 text-center">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-center">
           <span
-            className="inline-flex items-center gap-1.5 font-mono text-sm font-bold px-3 py-1"
+            className="inline-flex items-center justify-center gap-1.5 font-mono text-xs sm:text-sm font-bold px-3 py-1.5 leading-snug text-balance"
             style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
           >
-            <Trophy className="h-3.5 w-3.5" aria-hidden="true" />
+            <Trophy className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             Winner — JSConf España 2026 Hackathon
           </span>
-          <span className="font-sans text-sm text-jsconf-muted">Built at JSConf. Loved by the community.</span>
+          <span className="font-sans text-sm text-jsconf-muted text-balance">Built at JSConf. Loved by the community.</span>
         </div>
       </section>
 
@@ -564,12 +507,13 @@ function LandingContent() {
   const router = useRouter()
 
   // Initialize role synchronously from the URL on the first client render so
-  // `?role=speaker` never flashes the <SplitHero> chooser before swapping.
+  // `?role=speaker` is honored immediately. Otherwise default to "organizer" —
+  // organizers bring speakers + attendees with them, so it's the primary audience.
   const urlRoleParam = searchParams.get("role")
-  const initialRole: Role | null =
-    urlRoleParam === "speaker" || urlRoleParam === "organizer" ? urlRoleParam : null
+  const initialRole: Role =
+    urlRoleParam === "speaker" || urlRoleParam === "organizer" ? urlRoleParam : "organizer"
 
-  const [role, setRole] = useState<Role | null>(initialRole)
+  const [role, setRole] = useState<Role>(initialRole)
   const [organizerAccent, setOrganizerAccent] = useState(ORGANIZER_ACCENTS[0].value)
   const [waveAnimation, setWaveAnimation] = useState<WaveAnimation>("drift-cursor")
 
@@ -590,7 +534,13 @@ function LandingContent() {
         : ROLES.speaker.accent
       if (storedRole === "organizer") setOrganizerAccent(storedAccent)
       applyAccent(storedRole, storedAccent)
+      return
     }
+
+    // No URL or stored preference: apply the default organizer accent.
+    const storedAccent = localStorage.getItem(STORAGE_KEYS.organizerAccent) || ORGANIZER_ACCENTS[0].value
+    setOrganizerAccent(storedAccent)
+    applyAccent("organizer", storedAccent)
   }, [searchParams, organizerAccent])
 
   const applyAccent = useCallback((r: Role, accent?: string) => {
@@ -626,27 +576,17 @@ function LandingContent() {
 
   return (
     <div className="min-h-screen bg-jsconf-bg text-foreground">
-      {!role ? (
-        <SplitHero onSelectRole={handleSelectRole} />
-      ) : (
-        <>
-          <Nav role={role} onSwitchRole={handleSwitchRole} />
-          {role === "speaker"
-            ? <SpeakerExperience waveAnimation={waveAnimation} />
-            : <OrganizerExperience waveAnimation={waveAnimation} />}
+      <Nav role={role} />
+      {role === "speaker"
+        ? <SpeakerExperience waveAnimation={waveAnimation} onSwitchRole={handleSwitchRole} />
+        : <OrganizerExperience waveAnimation={waveAnimation} onSwitchRole={handleSwitchRole} />}
 
-
-          {showDevToggle && role === "organizer" && (
-            <DevColorToggle onColorChange={handleOrganizerColorChange} />
-          )}
-      {showDevToggle && role && (
+      {showDevToggle && role === "organizer" && (
+        <DevColorToggle onColorChange={handleOrganizerColorChange} />
+      )}
+      {showDevToggle && (
         <ReducedMotionToggle value={waveAnimation} onChange={setWaveAnimation} />
       )}
-
-          {showDevToggle && role === "organizer" && (
-            <DevColorToggle onColorChange={handleOrganizerColorChange} />
-          )}
-        </>)}
     </div>
   )
 }

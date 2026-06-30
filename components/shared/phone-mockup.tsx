@@ -250,6 +250,11 @@ export function InteractivePhoneMockup({
   const [sim, setSim] = useState<SimState | null>(null)
   const [activeTab, setActiveTab] = useState<"wall" | "qa">("wall")
   const [resetKey, setResetKey] = useState(0)
+  // Questions the visitor submits in the Ask tab. There's no PartyKit here, so
+  // we record them locally and seed each with a believable 5–10 peer votes
+  // (same trick as the demo tour) so the list feels alive.
+  const [askQuestions, setAskQuestions] = useState<Question[]>([])
+  const voteRampTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
   const phoneTab = activeTab === "wall" ? "react" : "ask"
 
   const lastInteractionRef = useRef<number>(Date.now())
@@ -276,6 +281,9 @@ export function InteractivePhoneMockup({
         hasInteractedRef.current = false
         simRunningRef.current = true
         setResetKey((k) => k + 1) // remount tabs to clear any typed input
+        voteRampTimersRef.current.forEach(clearTimeout) // cancel any pending vote animations
+        voteRampTimersRef.current = []
+        setAskQuestions([]) // clear visitor-submitted questions on reset
         setSim(EMPTY_SIM)
         setTimeout(() => { if (simRunningRef.current) runNextSim() }, 600)
       }
@@ -421,6 +429,7 @@ export function InteractivePhoneMockup({
     return () => {
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
       if (resetTimerRef.current) clearTimeout(resetTimerRef.current)
+      voteRampTimersRef.current.forEach(clearTimeout)
       simRunningRef.current = false
     }
   }, [runNextSim])
@@ -466,6 +475,41 @@ export function InteractivePhoneMockup({
         persistent: true,
       }
       onActivity(item)
+    }
+
+    // Record the submitted question in the Ask tab list, starting at 1 vote and
+    // animating up to a believable target (5–10) like the demo tour does. This makes
+    // the question feel like it's getting peer engagement in real time.
+    if (_msg.type === "question") {
+      const qId = _msg.id ?? crypto.randomUUID()
+      const targetVotes = Math.floor(Math.random() * 6) + 5
+
+      // Start with 1 vote immediately
+      setAskQuestions((prev) => [
+        {
+          type: "question",
+          id: qId,
+          name: _msg.name || "Anonymous",
+          text: _msg.text,
+          votes: 1,
+          answered: false,
+          ts: Date.now(),
+        },
+        ...prev,
+      ])
+
+      // Animate votes from 2 up to targetVotes (350ms initial delay, 120ms per step)
+      voteRampTimersRef.current.forEach(clearTimeout)
+      voteRampTimersRef.current = []
+
+      for (let v = 2; v <= targetVotes; v++) {
+        const t = setTimeout(() => {
+          setAskQuestions((qs) =>
+            qs.map((q) => (q.id === qId ? { ...q, votes: v } : q)),
+          )
+        }, 350 + (v - 1) * 120)
+        voteRampTimersRef.current.push(t)
+      }
     }
   }, [markInteraction, onActivity])
 
@@ -520,7 +564,7 @@ export function InteractivePhoneMockup({
 
             <TabsContent value="ask" className="mt-0 flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] relative">
               <div style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }} className="pb-8">
-                <AskTab key={resetKey} send={stubSend} questions={[]} />
+                <AskTab key={resetKey} send={stubSend} questions={askQuestions} />
               </div>
             </TabsContent>
           </Tabs>
@@ -546,7 +590,9 @@ function SimOverlayReact({ sim }: { sim: SimState }) {
       className="absolute inset-0 bg-jsconf-bg pointer-events-none"
       style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }}
     >
-      <div className="flex flex-col gap-5 pt-1 pb-4">
+      {/* gap-5 + pb-4 mirrors the real ReactTab wrapper exactly so the layout
+          does not shift when the sim overlay toggles on/off. */}
+      <div className="flex flex-col gap-5 pb-4">
 
         {/* Name field */}
         <div className="flex flex-col gap-2">
@@ -571,7 +617,7 @@ function SimOverlayReact({ sim }: { sim: SimState }) {
           <div className={`bg-jsconf-surface border px-3 py-2 font-sans text-sm min-h-[72px] ${isTypingText ? "border-jsconf-yellow" : "border-jsconf-border"}`}>
             {sim.typedText
               ? <span className="text-foreground">{sim.typedText}</span>
-              : <span className="text-jsconf-muted">Share your thoughts...</span>
+              : <span className="text-jsconf-muted">Share your thoughts</span>
             }
             {isTypingText && sim.typedText && <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />}
           </div>

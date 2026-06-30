@@ -104,9 +104,11 @@ export function WaveBackground({
   )
 }
 
-// ─── Reduced Motion Toggle ─────────────────────────────────────────────────────
-// A single switch that toggles between "drift-cursor" (on) and "none" (off).
-// Shown only in the dev overlay context but exported for reuse.
+// ─── Reduce Motion Toggle ──────────────────────────────────────────────────────
+// A single switch framed around what it does for the user: turning it ON makes
+// the page "motion free" (waveAnimation = "none"); OFF restores the animated
+// "drift-cursor" background. Themed with app tokens so it adapts to light/dark
+// and the active accent. Exported for reuse.
 export function ReducedMotionToggle({
   value,
   onChange,
@@ -114,7 +116,8 @@ export function ReducedMotionToggle({
   value: WaveAnimation
   onChange: (v: WaveAnimation) => void
 }) {
-  const isAnimating = value !== "none"
+  // When reduced, the background does not move ("motion free").
+  const reduced = value === "none"
 
   return (
     <div
@@ -125,8 +128,9 @@ export function ReducedMotionToggle({
         zIndex: 9999,
         fontFamily: "monospace",
         fontSize: 11,
-        background: "rgba(10,10,10,0.92)",
-        border: "1px solid rgba(255,255,255,0.1)",
+        background: "color-mix(in srgb, var(--jsconf-surface) 92%, transparent)",
+        border: "1px solid var(--jsconf-border)",
+        color: "var(--foreground)",
         backdropFilter: "blur(8px)",
         padding: "7px 10px",
         display: "flex",
@@ -135,19 +139,22 @@ export function ReducedMotionToggle({
         userSelect: "none",
       }}
     >
-      <span style={{ color: "#888", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-        Wave FX
+      <span style={{ color: "var(--jsconf-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+        Reduce motion
       </span>
 
       {/* Switch */}
       <div
-        onClick={() => onChange(isAnimating ? "none" : "drift-cursor")}
+        role="switch"
+        aria-checked={reduced}
+        aria-label="Reduce motion (motion free background)"
+        onClick={() => onChange(reduced ? "drift-cursor" : "none")}
         style={{
           position: "relative",
           width: 32,
           height: 18,
           borderRadius: 9,
-          background: isAnimating ? "#F7E018" : "#333",
+          background: reduced ? "var(--accent)" : "var(--jsconf-border)",
           cursor: "pointer",
           transition: "background 200ms",
           flexShrink: 0,
@@ -157,18 +164,18 @@ export function ReducedMotionToggle({
           style={{
             position: "absolute",
             top: 3,
-            left: isAnimating ? 17 : 3,
+            left: reduced ? 17 : 3,
             width: 12,
             height: 12,
             borderRadius: "50%",
-            background: isAnimating ? "#000" : "#666",
+            background: reduced ? "var(--accent-text, #000)" : "var(--jsconf-muted)",
             transition: "left 200ms, background 200ms",
           }}
         />
       </div>
 
-      <span style={{ color: isAnimating ? "#fff" : "#555", minWidth: 18, transition: "color 200ms" }}>
-        {isAnimating ? "on" : "off"}
+      <span style={{ color: reduced ? "var(--foreground)" : "var(--jsconf-muted)", minWidth: 18, transition: "color 200ms" }}>
+        {reduced ? "on" : "off"}
       </span>
     </div>
   )

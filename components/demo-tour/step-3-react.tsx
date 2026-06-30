@@ -91,11 +91,10 @@ export function Step3React({ onReactionSent }: Step3ReactProps) {
                     key={e}
                     type="button"
                     onClick={() => handleEmojiPick(e)}
-                    className={`flex items-center justify-center text-3xl size-14 border transition-all duration-150 ${
-                      emoji === e
-                        ? "bg-jsconf-yellow-dim border-jsconf-yellow scale-110"
-                        : "bg-jsconf-surface border-jsconf-border hover:border-jsconf-yellow/50"
-                    }`}
+                    className={`flex items-center justify-center text-3xl size-14 border transition-all duration-150 ${emoji === e
+                      ? "bg-jsconf-yellow-dim border-jsconf-yellow scale-110"
+                      : "bg-jsconf-surface border-jsconf-border hover:border-jsconf-yellow/50"
+                      }`}
                   >
                     {e}
                   </button>

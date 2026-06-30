@@ -42,9 +42,27 @@ export interface Plan {
   recurringInterval?: "month" | "year"
   /** One-time plans grant access for this many days from activation. */
   accessDays?: number
+  /**
+   * Number of admin users that can co-manage an event on this plan.
+   * `null` means unlimited. Used for display today; enforcement is a
+   * follow-up (see ORGANIZER_FREE_LIMITS and docs/pricing.md).
+   */
+  adminSeats?: number | null
   /** Whether this plan is live in the UI. Speaker Pro stays false in Phase 1. */
   live: boolean
 }
+
+/**
+ * Free organizer tier — advertised now, enforced later. Small events can run
+ * on this without a subscription. There is no Stripe plan for it (it's the
+ * absence of a paid plan), so it lives here rather than in PLANS.
+ */
+export const ORGANIZER_FREE_LIMITS = {
+  /** Hard cap on attendees per event on the free tier. */
+  maxAttendees: 100,
+  /** Admin users included on the free tier. */
+  adminSeats: 1,
+} as const
 
 // EUR is the base. USD values are pre-rounded equivalents (see BUSINESS_LOGIC.md).
 export const PLANS: Record<PlanId, Plan> = {
@@ -57,6 +75,7 @@ export const PLANS: Record<PlanId, Plan> = {
     interval: "one_time",
     amount: { EUR: 4900, USD: 5400 },
     accessDays: 7,
+    adminSeats: 1,
     live: true,
   },
   organizer_monthly: {
@@ -69,6 +88,7 @@ export const PLANS: Record<PlanId, Plan> = {
     recurringInterval: "month",
     amount: { EUR: 2900, USD: 3200 },
     displayMonthly: { EUR: 2900, USD: 3200 },
+    adminSeats: 3,
     live: true,
   },
   organizer_annual: {
@@ -82,6 +102,7 @@ export const PLANS: Record<PlanId, Plan> = {
     // €89/mo billed yearly => €1068/yr. USD: $99/mo => $1188/yr.
     amount: { EUR: 106800, USD: 118800 },
     displayMonthly: { EUR: 8900, USD: 9900 },
+    adminSeats: null, // unlimited
     live: true,
   },
   // ── Speaker Pro: stubbed, not shown in UI (Phase 1) ──
