@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Space_Grotesk, Inter, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import './globals.css'
 import { DevOverlay } from '@/components/dev/DevOverlay'
 import { PaywallProvider } from '@/components/billing/paywall-provider'
@@ -72,6 +73,7 @@ export default function RootLayout({
           <PaywallProvider>{children}</PaywallProvider>
         </ThemeProvider>
         <Analytics />
+        <SpeedInsights />
         {process.env.NODE_ENV === 'development' && <DevOverlay />}
       </body>
     </html>
