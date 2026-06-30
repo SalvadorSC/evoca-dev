@@ -123,7 +123,7 @@ export function ReducedMotionToggle({
     <div
       style={{
         position: "fixed",
-        bottom: 73,
+        bottom: 48,
         right: 16,
         zIndex: 9999,
         fontFamily: "monospace",
