@@ -474,6 +474,7 @@ function Footer() {
         <p className="font-sans text-sm text-jsconf-muted">Built by Salvador Sanchez</p>
         <div className="flex items-center gap-6">
           <Link href="/demo" className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors">Demo</Link>
+          <Link href="/terms" className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors">Terms</Link>
           <Link href="/login" className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors">Login</Link>
         </div>
       </div>
