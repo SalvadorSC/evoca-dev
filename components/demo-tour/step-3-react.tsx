@@ -92,8 +92,8 @@ export function Step3React({ onReactionSent }: Step3ReactProps) {
                     type="button"
                     onClick={() => handleEmojiPick(e)}
                     className={`flex items-center justify-center text-3xl size-14 border transition-all duration-150 ${emoji === e
-                        ? "bg-jsconf-yellow-dim border-jsconf-yellow scale-110"
-                        : "bg-jsconf-surface border-jsconf-border hover:border-jsconf-yellow/50"
+                      ? "bg-jsconf-yellow-dim border-jsconf-yellow scale-110"
+                      : "bg-jsconf-surface border-jsconf-border hover:border-jsconf-yellow/50"
                       }`}
                   >
                     {e}
@@ -118,7 +118,7 @@ export function Step3React({ onReactionSent }: Step3ReactProps) {
               </label>
               <textarea
                 id="tour-text"
-                placeholder="Share your thoughts."
+                placeholder="Share your thoughts"
                 value={text}
                 onFocus={() => subStep === "text" && setSubStep("text")}
                 onChange={(e) => setText(e.target.value.slice(0, 160))}

@@ -78,7 +78,7 @@ export function ReactTab({ send }: ReactTabProps) {
         </label>
         <Textarea
           id="reaction"
-          placeholder="Share your thoughts."
+          placeholder="Share your thoughts"
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, 160))}
           maxLength={160}
