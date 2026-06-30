@@ -617,7 +617,7 @@ function SimOverlayReact({ sim }: { sim: SimState }) {
           <div className={`bg-jsconf-surface border px-3 py-2 font-sans text-sm min-h-[72px] ${isTypingText ? "border-jsconf-yellow" : "border-jsconf-border"}`}>
             {sim.typedText
               ? <span className="text-foreground">{sim.typedText}</span>
-              : <span className="text-jsconf-muted">Share your thoughts...</span>
+              : <span className="text-jsconf-muted">Share your thoughts.</span>
             }
             {isTypingText && sim.typedText && <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />}
           </div>
