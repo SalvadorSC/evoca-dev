@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import type { Reaction } from "@/lib/types"
 import { StepShell, StepLabel, FakeSlide, YellowButton } from "./primitives"
 import { EmojiBurst } from "@/components/wall/emoji-burst"
+import { ReactionCard } from "@/components/wall/reaction-card"
 
 // A scripted feed that mirrors how reactions actually surface on the live wall.
 // Emoji-only reactions float up over the talk; reactions with text pop in as
@@ -53,6 +54,13 @@ export function Step2Wall({ onNext }: Step2WallProps) {
     return () => timers.forEach(clearTimeout)
   }, [])
 
+  // Most recent text comments, newest first — shown bigger below the stage so
+  // they stay readable. Emoji-only reactions are not listed here.
+  const comments = reactions
+    .filter((r) => r.text?.trim())
+    .slice(-2)
+    .reverse()
+
   return (
     <StepShell label="Step 2: Live wall">
       <div className="flex flex-col h-full p-5 pb-8 gap-4">
@@ -66,15 +74,23 @@ export function Step2Wall({ onNext }: Step2WallProps) {
 
         {/* Full-width talk stage. The real wall component renders reactions
             (floating emojis + comment cards) inside the slide screen. */}
-        <div className="flex-1 flex flex-col justify-center">
-          <FakeSlide showProgress={false} showHeader={false}>
-            <EmojiBurst reactions={reactions} isQAMode={false} contained scale={0.62} />
-          </FakeSlide>
-        </div>
+        <FakeSlide showProgress={false} showHeader={false}>
+          <EmojiBurst reactions={reactions} isQAMode={false} contained scale={0.62} />
+        </FakeSlide>
 
-        <p className="font-mono text-xs text-jsconf-muted text-center text-balance">
-          Every reaction the audience sends lands here in real time.
-        </p>
+        {/* Bigger, legible comment preview — reuses the real wall ReactionCard. */}
+        <div className="flex-1 flex flex-col gap-2 min-h-0">
+          <StepLabel>Live comments</StepLabel>
+          {comments.length === 0 ? (
+            <p className="font-mono text-xs text-jsconf-muted">
+              Waiting for the first reaction…
+            </p>
+          ) : (
+            comments.map((reaction, i) => (
+              <ReactionCard key={reaction.id} reaction={reaction} index={i} />
+            ))
+          )}
+        </div>
 
         {/* CTA */}
         {ctaVisible && (

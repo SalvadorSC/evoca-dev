@@ -135,7 +135,7 @@ export function EmojiBurst({ reactions, isQAMode, contained = false, scale = 1 }
             style={{ bottom: `${card.slot * cardSlotGap}px` }}
           >
             <div
-              className="flex items-center gap-2"
+              className="flex items-start gap-2"
               style={{
                 background: "rgba(17,17,17,0.92)",
                 border: "1px solid #2a2a2a",
@@ -144,10 +144,10 @@ export function EmojiBurst({ reactions, isQAMode, contained = false, scale = 1 }
                 padding: `${8 * scale}px ${12 * scale}px`,
               }}
             >
-              <span style={{ fontSize: `${1 * scale}rem`, lineHeight: 1 }}>{card.emoji}</span>
+              <span style={{ fontSize: `${1 * scale}rem`, lineHeight: 1.4 }}>{card.emoji}</span>
               <span
-                className="font-sans text-white truncate"
-                style={{ fontSize: `${1 * scale}rem`, lineHeight: 1.4 }}
+                className="font-sans text-white"
+                style={{ fontSize: `${1 * scale}rem`, lineHeight: 1.4, wordBreak: "break-word" }}
               >
                 {card.text}
               </span>
