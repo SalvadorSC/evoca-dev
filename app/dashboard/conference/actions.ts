@@ -13,6 +13,7 @@ import {
 } from "@/lib/billing"
 import { getOrganizerSubscriptions } from "@/lib/db"
 import { normalizeDailymotion } from "@/lib/dailymotion"
+import { DAILYMOTION_ENABLED } from "@/lib/flags"
 import type { SupabaseClient } from "@supabase/supabase-js"
 
 // ─── Access guard ───────────────────────────────────────────────────────────────
@@ -267,6 +268,9 @@ export async function upsertStream(
   input: StreamInput,
   streamId?: string,
 ): Promise<void> {
+  if (!DAILYMOTION_ENABLED) {
+    throw new Error("Live streams are not available in this environment.")
+  }
   const supabase = await createClient()
   await requireOrganizerPrep(supabase)
 
@@ -309,6 +313,9 @@ export async function upsertStream(
 }
 
 export async function deleteStream(conferenceId: string, streamId: string): Promise<void> {
+  if (!DAILYMOTION_ENABLED) {
+    throw new Error("Live streams are not available in this environment.")
+  }
   const supabase = await createClient()
   await requireOrganizerPrep(supabase)
   const { error } = await supabase.from("conference_streams").delete().eq("id", streamId)
@@ -321,6 +328,9 @@ export async function setFeaturedStream(
   conferenceId: string,
   streamId: string,
 ): Promise<void> {
+  if (!DAILYMOTION_ENABLED) {
+    throw new Error("Live streams are not available in this environment.")
+  }
   const supabase = await createClient()
   await requireOrganizerPrep(supabase)
 

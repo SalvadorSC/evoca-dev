@@ -10,6 +10,7 @@ import type {
 } from "@/lib/db"
 import type { SlotType } from "@/lib/billing"
 import { StreamPlayer } from "./stream-player"
+import { DAILYMOTION_ENABLED } from "@/lib/flags"
 
 const SLOT_TYPE_LABELS: Record<string, string> = {
   keynote: "Keynote",
@@ -82,47 +83,49 @@ export function PublicConferenceView({
       </header>
 
       <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col gap-10">
-        {/* Stream */}
-        <section>
-          {activeStream ? (
-            <>
-              <StreamPlayer embedUrl={activeStream.embed_url} title={activeStream.label} />
-              <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
-                <div>
-                  <h2 className="font-display font-bold text-lg text-foreground">
-                    {activeStream.label}
-                  </h2>
-                  {activeStream.track && (
-                    <span className="font-mono text-[11px] uppercase tracking-wider text-jsconf-muted">
-                      {activeStream.track}
-                    </span>
-                  )}
+        {/* Stream — hidden when the Dailymotion integration is feature-flagged off */}
+        {DAILYMOTION_ENABLED && (
+          <section>
+            {activeStream ? (
+              <>
+                <StreamPlayer embedUrl={activeStream.embed_url} title={activeStream.label} />
+                <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
+                  <div>
+                    <h2 className="font-display font-bold text-lg text-foreground">
+                      {activeStream.label}
+                    </h2>
+                    {activeStream.track && (
+                      <span className="font-mono text-[11px] uppercase tracking-wider text-jsconf-muted">
+                        {activeStream.track}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              {/* Track / stream switcher */}
-              {sortedStreams.length > 1 && (
-                <div className="mt-4 flex items-center gap-2 flex-wrap">
-                  {sortedStreams.map((stream) => (
-                    <button
-                      key={stream.id}
-                      onClick={() => setActiveStreamId(stream.id)}
-                      className={`px-3 py-2 font-mono text-xs uppercase tracking-wider border transition-colors ${
-                        activeStream.id === stream.id
-                          ? "bg-jsconf-yellow text-primary-foreground border-jsconf-yellow font-bold"
-                          : "border-jsconf-border text-jsconf-muted hover:text-foreground hover:border-foreground"
-                      }`}
-                    >
-                      {stream.track || stream.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <StreamPlayer embedUrl={null} />
-          )}
-        </section>
+                {/* Track / stream switcher */}
+                {sortedStreams.length > 1 && (
+                  <div className="mt-4 flex items-center gap-2 flex-wrap">
+                    {sortedStreams.map((stream) => (
+                      <button
+                        key={stream.id}
+                        onClick={() => setActiveStreamId(stream.id)}
+                        className={`px-3 py-2 font-mono text-xs uppercase tracking-wider border transition-colors ${
+                          activeStream.id === stream.id
+                            ? "bg-jsconf-yellow text-primary-foreground border-jsconf-yellow font-bold"
+                            : "border-jsconf-border text-jsconf-muted hover:text-foreground hover:border-foreground"
+                        }`}
+                      >
+                        {stream.track || stream.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <StreamPlayer embedUrl={null} />
+            )}
+          </section>
+        )}
 
         {/* Schedule */}
         {sortedDays.length > 0 && (

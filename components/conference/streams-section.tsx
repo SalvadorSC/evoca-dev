@@ -11,6 +11,7 @@ import {
   type StreamInput,
 } from "@/app/dashboard/conference/actions"
 import { StreamPlayer } from "./stream-player"
+import { DAILYMOTION_ENABLED } from "@/lib/flags"
 
 interface StreamsSectionProps {
   conferenceId: string
@@ -26,6 +27,9 @@ export function StreamsSection({ conferenceId, initialStreams, tracks }: Streams
   const [editing, setEditing] = useState<ConferenceStreamRow | null>(null)
 
   const streams = [...initialStreams].sort((a, b) => a.sort_order - b.sort_order)
+
+  // Feature-flagged: hide the entire section when Dailymotion is disabled.
+  if (!DAILYMOTION_ENABLED) return null
 
   function run(fn: () => Promise<void>) {
     startTransition(async () => {
