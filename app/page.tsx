@@ -118,13 +118,16 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
         </Link>
         <button
           onClick={onSwitchRole}
-          className="role-switch-btn font-mono text-xs font-bold px-3 py-2 border-2 transition-colors hidden sm:inline-block"
-          style={{
-            "--switch-accent": otherAccent,
-            "--switch-accent-text": ROLES[otherRole].accentText,
-            borderColor: otherAccent,
-            color: otherAccent,
-          } as React.CSSProperties}
+          className="font-mono text-xs font-bold px-3 py-2 border-2 transition-colors hidden sm:inline-block"
+          style={{ borderColor: otherAccent, color: otherAccent }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = otherAccent
+            e.currentTarget.style.color = ROLES[otherRole].accentText
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "transparent"
+            e.currentTarget.style.color = otherAccent
+          }}
         >
           {ROLES[otherRole].action} →
         </button>
