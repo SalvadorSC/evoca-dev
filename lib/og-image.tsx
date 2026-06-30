@@ -33,7 +33,7 @@ export function renderOgImage() {
         }}
       >
         {/* Brand row: logo icon + EVOCA wordmark */}
-        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+        <div style={{ display: "flex", flexDirection: 'row', alignItems: "center", justifyContent: 'center', gap: 2 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={logoDataUri} width={60} height={60} alt="" />
