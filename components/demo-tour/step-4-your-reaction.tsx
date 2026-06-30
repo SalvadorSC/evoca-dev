@@ -8,24 +8,22 @@ import { EmojiBurst } from "@/components/wall/emoji-burst"
 import { ReactionCard } from "@/components/wall/reaction-card"
 
 // The first three reactions are pre-seeded (already on the wall) so the room
-// feels alive and continuous — they are NOT re-animated. A fresh reaction then
-// arrives, the user's reaction lands as the 5th, and two more follow.
+// feels alive and continuous — they are NOT re-animated. The user's reaction
+// then lands as the 4th, and two brand new reactions follow.
 const PRESEED: { id: string; name: string; emoji: string; text: string }[] = [
   { id: "r1", name: "Priya", emoji: "🔥", text: "This is exactly what we needed!" },
-  { id: "r2", name: "Marco", emoji: "👏", text: "" },
+  { id: "r2", name: "Marco", emoji: "👏", text: "Great talk so far." },
   { id: "r3", name: "Dana", emoji: "🤯", text: "Mind blown. Shipping this today." },
 ]
 
-// Animated arrivals. `userId` is spliced in as the 5th reaction.
-const BEFORE_USER: { id: string; name: string; emoji: string; text: string; at: number }[] = [
-  { id: "r4", name: "Sam", emoji: "🚀", text: "", at: 700 },
-]
+// Brand new reactions that arrive AFTER the user's, so the user feels part of
+// the live flow.
 const AFTER_USER: { id: string; name: string; emoji: string; text: string; at: number }[] = [
-  { id: "r6", name: "Lena", emoji: "💚", text: "When can I use this at my meetup?", at: 2200 },
-  { id: "r7", name: "Theo", emoji: "😂", text: "", at: 3000 },
+  { id: "r5", name: "Lena", emoji: "💚", text: "When can I use this at my meetup?", at: 1600 },
+  { id: "r6", name: "Theo", emoji: "🙌", text: "Same energy in this room!", at: 2600 },
 ]
-const USER_AT = 1500
-const LAST_AT = 3000
+const USER_AT = 600
+const LAST_AT = 2600
 
 interface Step4YourReactionProps {
   userReaction: UserReaction
@@ -59,9 +57,8 @@ export function Step4YourReaction({ userReaction, onNext }: Step4YourReactionPro
     )
     // ctaVisible intentionally not reset so the Replay + CTA stay on screen.
 
-    // New arrival → user (5th) → two more, all freshly animated.
+    // User reaction (4th) → two brand new reactions, all freshly animated.
     const animated = [
-      ...BEFORE_USER,
       {
         id: userId,
         name: userReaction.name || "Anonymous",
