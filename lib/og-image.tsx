@@ -1,4 +1,3 @@
-import { InteractivePhoneMockup } from "@/components/shared/phone-mockup"
 import { ImageResponse } from "next/og"
 
 // Shared 1200x630 social card. Recreates the marketing hero as a clean, static
@@ -33,68 +32,64 @@ export function renderOgImage() {
         }}
       >
         {/* Brand row: logo icon + EVOCA wordmark */}
-        <div style={{ display: "flex", flexDirection: 'row', alignItems: "center", justifyContent: 'center', gap: 2 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logoDataUri} width={60} height={60} alt="" />
-            <span
-              style={{
-                fontSize: 48,
-                fontWeight: 700,
-                letterSpacing: "0.08em",
-                color: FG,
-              }}
-            >
-              EVOCA
-            </span>
-          </div>
-
-          {/* Headline */}
-          <div
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={logoDataUri} width={60} height={60} alt="" />
+          <span
             style={{
-              display: "flex",
-              flexDirection: "column",
-              fontSize: 66,
-              fontWeight: "800",
-              fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-              lineHeight: 1.1,
+              fontSize: 48,
+              fontWeight: 700,
+              letterSpacing: "0.08em",
               color: FG,
-              marginTop: 40,
-              maxWidth: 1010,
-              letterSpacing: "-0.02em",
             }}
           >
-            One platform for your schedule, speakers and live engagement
-          </div>
+            EVOCA
+          </span>
+        </div>
 
-          {/* Description */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              fontSize: 30,
-              lineHeight: 1.45,
-              color: MUTED,
-              marginTop: 28,
-              maxWidth: 860,
-            }}
-          >
-            Manage your event, onboard speakers and give every session live engagement.
-          </div>
+        {/* Headline */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            fontSize: 66,
+            fontWeight: 800,
+            lineHeight: 1.1,
+            color: FG,
+            marginTop: 40,
+            maxWidth: 1010,
+            letterSpacing: "-0.02em",
+          }}
+        >
+          One platform for your schedule, speakers and live engagement
+        </div>
 
-          {/* Footer: accent bar + domain */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginTop: 56,
-            }}
-          >
-            <div style={{ display: "flex", width: 200, height: 8, backgroundColor: ACCENT, borderRadius: 4 }} />
-            <span style={{ fontSize: 26, color: MUTED }}>evoca.dev</span>
-          </div>
-          <InteractivePhoneMockup onActivity={() => { }} />
+        {/* Description */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            fontSize: 30,
+            lineHeight: 1.45,
+            color: MUTED,
+            marginTop: 28,
+            maxWidth: 860,
+          }}
+        >
+          Manage your event, onboard speakers and give every session live engagement.
+        </div>
+
+        {/* Footer: accent bar + domain */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 56,
+          }}
+        >
+          <div style={{ display: "flex", width: 200, height: 8, backgroundColor: ACCENT, borderRadius: 4 }} />
+          <span style={{ fontSize: 26, color: MUTED }}>evoca.dev</span>
         </div>
       </div>
     ),
