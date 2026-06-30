@@ -1,14 +1,35 @@
 import { ImageResponse } from "next/og"
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
 
-// Shared 1200x630 social card used by both /opengraph-image and /twitter-image
-// so the OG and Twitter previews stay visually identical and in sync.
-export const ogSize = { width: 1200, height: 630 }
-export const ogContentType = "image/png"
+// Shared 1200x630 social card. Recreates the marketing hero as a clean, static
+// composition: EVOCA brand mark + headline on the left, the live "REACT" phone
+// screenshot on the right. No nav, no buttons, no animated background.
+export const OG_SIZE = { width: 1200, height: 630 }
+export const OG_CONTENT_TYPE = "image/png"
 
-export function renderSocialCard() {
-  const accent = "#f7e018"
-  const bg = "#080808"
+// Brand colors (mirrors the dark theme tokens).
+const BG = "#080808"
+const FG = "#fafafa"
+const MUTED = "#a1a1aa"
+const ACCENT = "#f7e018"
 
+// EVOCA chat-bubble mark as an inline SVG data URI (white stroke + dots).
+const logoSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 28 28" fill="none"><path d="M4 6C4 4.89543 4.89543 4 6 4H22C23.1046 4 24 4.89543 24 6V18C24 19.1046 23.1046 20 22 20H10L6 24V20H6C4.89543 20 4 19.1046 4 18V6Z" stroke="${FG}" stroke-width="2" fill="none"/><circle cx="9" cy="12" r="1.5" fill="${FG}"/><circle cx="14" cy="12" r="1.5" fill="${FG}"/><circle cx="19" cy="12" r="1.5" fill="${FG}"/></svg>`
+const logoDataUri = `data:image/svg+xml;utf8,${encodeURIComponent(logoSvg)}`
+
+// Read assets from disk (these routes run on the Node runtime).
+const assetsDir = join(process.cwd(), "assets")
+const fontsDir = join(assetsDir, "fonts")
+
+const spaceGrotesk700 = readFileSync(join(fontsDir, "SpaceGrotesk-Bold.ttf"))
+const inter400 = readFileSync(join(fontsDir, "Inter-Regular.ttf"))
+const inter600 = readFileSync(join(fontsDir, "Inter-SemiBold.ttf"))
+
+// Phone screenshot inlined as a base64 data URI so Satori can render it.
+const phoneDataUri = `data:image/png;base64,${readFileSync(join(assetsDir, "og-phone.png")).toString("base64")}`
+
+export function renderOgImage() {
   return new ImageResponse(
     (
       <div
@@ -16,69 +37,108 @@ export function renderSocialCard() {
           width: "100%",
           height: "100%",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          background: bg,
-          padding: "72px",
-          fontFamily: "sans-serif",
+          alignItems: "stretch",
+          backgroundColor: BG,
+          fontFamily: "Inter",
         }}
       >
-        {/* Brand mark + wordmark */}
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+        {/* Left column: brand + headline + description + footer */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            flex: 1,
+            padding: "72px 0 72px 80px",
+          }}
+        >
+          {/* Brand row: logo icon + EVOCA wordmark */}
+          <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logoDataUri} width={60} height={60} alt="" />
+            <span
+              style={{
+                fontFamily: "Space Grotesk",
+                fontSize: 48,
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                color: FG,
+              }}
+            >
+              EVOCA
+            </span>
+          </div>
+
+          {/* Headline */}
           <div
             style={{
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: 84,
-              height: 84,
-              borderRadius: 20,
-              background: accent,
-              color: bg,
-              fontSize: 52,
-              fontWeight: 800,
-            }}
-          >
-            E
-          </div>
-          <div
-            style={{
-              fontSize: 56,
-              fontWeight: 800,
-              color: "#ffffff",
+              flexDirection: "column",
+              fontFamily: "Space Grotesk",
+              fontSize: 60,
+              fontWeight: 700,
+              lineHeight: 1.1,
+              color: FG,
+              marginTop: 38,
+              maxWidth: 640,
               letterSpacing: "-0.02em",
             }}
           >
-            EVOCA
+            One platform for your schedule, speakers and live engagement
           </div>
-        </div>
 
-        {/* Headline */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+          {/* Description */}
           <div
             style={{
-              fontSize: 72,
-              fontWeight: 800,
-              color: "#ffffff",
-              lineHeight: 1.05,
-              letterSpacing: "-0.03em",
-              maxWidth: 980,
+              display: "flex",
+              flexDirection: "column",
+              fontSize: 28,
+              lineHeight: 1.45,
+              color: MUTED,
+              marginTop: 26,
+              maxWidth: 600,
             }}
           >
-            Turn any talk into a live experience
+            Real-time reactions, live Q&amp;A, and audience participation for speakers and organizers.
           </div>
-          <div style={{ fontSize: 32, color: "#a1a1aa", maxWidth: 900, lineHeight: 1.3 }}>
-            Real-time reactions, live Q&A, and audience participation for speakers and organizers.
+
+          {/* Footer: accent bar + domain */}
+          <div style={{ display: "flex", alignItems: "center", gap: 24, marginTop: 50 }}>
+            <div style={{ display: "flex", width: 180, height: 8, backgroundColor: ACCENT, borderRadius: 4 }} />
+            <span style={{ fontSize: 26, fontWeight: 600, color: FG }}>evoca.dev</span>
           </div>
         </div>
 
-        {/* Footer accent bar + domain */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ display: "flex", height: 10, width: 220, borderRadius: 999, background: accent }} />
-          <div style={{ fontSize: 30, color: "#ffffff", fontWeight: 600 }}>evoca.dev</div>
+        {/* Right column: phone screenshot */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: 460,
+            position: "relative",
+          }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={phoneDataUri}
+            height={620}
+            alt="EVOCA live reaction screen on a phone"
+            style={{
+              transform: "rotate(6deg) translateY(40px)",
+              filter: "drop-shadow(0 30px 60px rgba(0,0,0,0.6))",
+            }}
+          />
         </div>
       </div>
     ),
-    { ...ogSize },
+    {
+      ...OG_SIZE,
+      fonts: [
+        { name: "Space Grotesk", data: spaceGrotesk700, weight: 700, style: "normal" },
+        { name: "Inter", data: inter400, weight: 400, style: "normal" },
+        { name: "Inter", data: inter600, weight: 600, style: "normal" },
+      ],
+    },
   )
 }
