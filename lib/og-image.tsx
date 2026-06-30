@@ -53,7 +53,7 @@ export function renderOgImage() {
             display: "flex",
             flexDirection: "column",
             fontSize: 66,
-            fontWeight: 800,
+            fontWeight: "bold",
             lineHeight: 1.1,
             color: FG,
             marginTop: 40,
