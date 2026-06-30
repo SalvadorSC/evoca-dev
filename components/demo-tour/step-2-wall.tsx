@@ -79,7 +79,7 @@ export function Step2Wall({ onNext }: Step2WallProps) {
         {/* Full-width talk stage. The real wall component renders reactions
             (floating emojis + comment cards) inside the slide screen. */}
         <FakeSlide showProgress={false} showHeader={false}>
-          <EmojiBurst reactions={reactions} isQAMode={false} contained scale={0.62} />
+          <EmojiBurst key={runId} reactions={reactions} isQAMode={false} contained scale={0.62} />
         </FakeSlide>
 
         {/* Legible comment preview — reuses the real wall ReactionCard, compact. */}
@@ -104,9 +104,10 @@ export function Step2Wall({ onNext }: Step2WallProps) {
             <button
               type="button"
               onClick={() => setRunId((n) => n + 1)}
-              className="font-mono text-xs uppercase tracking-wider text-jsconf-muted border border-jsconf-border px-4 py-3 hover:text-foreground hover:border-foreground transition-colors shrink-0"
+              aria-label="Replay reactions"
+              className="text-2xl leading-none text-jsconf-muted border border-jsconf-border px-4 py-2 hover:text-foreground hover:border-foreground transition-colors shrink-0"
             >
-              {"↺ Replay"}
+              {"↺"}
             </button>
             <div className="flex-1">
               <YellowButton onClick={onNext}>{"That's you next →"}</YellowButton>
