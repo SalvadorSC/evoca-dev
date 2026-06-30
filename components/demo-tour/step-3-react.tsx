@@ -85,13 +85,13 @@ export function Step3React({ onReactionSent }: Step3ReactProps) {
               <label className="font-mono text-xs uppercase tracking-wide text-jsconf-muted">
                 How are you feeling?
               </label>
-              <div className="grid grid-cols-6 gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {EMOJI_OPTIONS.map((e) => (
                   <button
                     key={e}
                     type="button"
                     onClick={() => handleEmojiPick(e)}
-                    className={`text-2xl p-3 border transition-all duration-150 ${
+                    className={`flex items-center justify-center text-3xl size-14 border transition-all duration-150 ${
                       emoji === e
                         ? "bg-jsconf-yellow-dim border-jsconf-yellow scale-110"
                         : "bg-jsconf-surface border-jsconf-border hover:border-jsconf-yellow/50"

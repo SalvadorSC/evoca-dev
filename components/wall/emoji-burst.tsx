@@ -46,7 +46,9 @@ export function EmojiBurst({ reactions, isQAMode, contained = false, scale = 1 }
   const spawnEmoji = useCallback((emoji: string, id: string) => {
     const x = isQAMode
       ? Math.random() > 0.5 ? 5 + Math.random() * 8 : 87 + Math.random() * 8
-      : 10 + Math.random() * 80
+      : contained
+        ? 4 + Math.random() * 34 // contained: cluster on the left side only
+        : 10 + Math.random() * 80
     const rotation = -15 + Math.random() * 30
 
     const item: FloatingEmoji = { id: `${id}-${Date.now()}`, emoji, x, rotation }
@@ -54,7 +56,7 @@ export function EmojiBurst({ reactions, isQAMode, contained = false, scale = 1 }
     setTimeout(() => {
       setFloatingEmojis((prev) => prev.filter((e) => e.id !== item.id))
     }, 2800)
-  }, [isQAMode])
+  }, [isQAMode, contained])
 
   const spawnTextCard = useCallback((emoji: string, text: string, id: string) => {
     const slot = slotRef.current % CARD_SLOTS
@@ -87,7 +89,7 @@ export function EmojiBurst({ reactions, isQAMode, contained = false, scale = 1 }
   const floatAnimClass = contained ? "animate-emoji-float-contained" : "animate-emoji-float"
   const cardAnimClass = contained ? "animate-text-card-in-contained" : "animate-text-card-in"
 
-  const baseEmojiRem = isQAMode ? 1.5 : 2
+  const baseEmojiRem = contained ? 1.25 : isQAMode ? 1.5 : 2
   const cardSlotGap = (contained ? 40 : 56) * scale
   const cardMaxWidth = contained ? "82%" : `${260 * scale}px`
 
@@ -98,7 +100,10 @@ export function EmojiBurst({ reactions, isQAMode, contained = false, scale = 1 }
         className={`${positionClass} inset-x-0 pointer-events-none overflow-hidden`}
         style={
           contained
-            ? { inset: 0 }
+            ? // Only the bottom 40% of the slide — emojis rise from the bottom
+              // and are clipped (disappear) around the 40% height line. Sits
+              // behind the text cards (lower z-index).
+              { top: "60%", bottom: 0, left: 0, right: 0, zIndex: 1 }
             : { bottom: 0, top: "50%", zIndex: 50 }
         }
       >
@@ -124,7 +129,7 @@ export function EmojiBurst({ reactions, isQAMode, contained = false, scale = 1 }
         className={`${positionClass} pointer-events-none`}
         style={
           contained
-            ? { bottom: `${10 * scale}px`, left: `${10 * scale}px`, width: "82%" }
+            ? { bottom: `${10 * scale}px`, left: `${10 * scale}px`, width: "82%", zIndex: 2 }
             : { bottom: "80px", left: "16px", zIndex: 50, width: `${260 * scale}px` }
         }
       >
@@ -168,8 +173,8 @@ export function EmojiBurst({ reactions, isQAMode, contained = false, scale = 1 }
 
         @keyframes emoji-float-contained {
           0%   { transform: translateY(0)      rotate(var(--rot, 0deg)); opacity: 1; }
-          80%  { opacity: 1; }
-          100% { transform: translateY(-150px) rotate(var(--rot, 0deg)); opacity: 0; }
+          70%  { opacity: 1; }
+          100% { transform: translateY(-90px)  rotate(var(--rot, 0deg)); opacity: 0; }
         }
         .animate-emoji-float-contained {
           animation: emoji-float-contained 2.8s ease-out forwards;
