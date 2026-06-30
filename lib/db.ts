@@ -47,8 +47,23 @@ export interface ConferenceRow {
   user_id: string
   subscription_id: string | null
   name: string
+  slug: string | null
+  is_public: boolean
   created_at: string
   updated_at: string
+}
+
+export interface ConferenceStreamRow {
+  id: string
+  conference_id: string
+  track: string | null
+  label: string
+  embed_url: string | null
+  provider: string
+  video_id: string | null
+  is_featured: boolean
+  sort_order: number
+  created_at: string
 }
 
 export interface ConferenceDayRow {
@@ -174,7 +189,7 @@ export async function getUserConferences(
 ): Promise<ConferenceRow[]> {
   const { data } = await supabase
     .from("conferences")
-    .select("id, user_id, subscription_id, name, created_at, updated_at")
+    .select("id, user_id, subscription_id, name, slug, is_public, created_at, updated_at")
     .order("created_at", { ascending: false })
   return data ?? []
 }
@@ -186,10 +201,39 @@ export async function getConferenceById(
 ): Promise<ConferenceRow | null> {
   const { data } = await supabase
     .from("conferences")
-    .select("id, user_id, subscription_id, name, created_at, updated_at")
+    .select("id, user_id, subscription_id, name, slug, is_public, created_at, updated_at")
     .eq("id", id)
     .single()
   return data ?? null
+}
+
+/** Fetch a published conference by its public slug (anonymous-readable via RLS). */
+export async function getPublicConferenceBySlug(
+  supabase: SupabaseClient,
+  slug: string,
+): Promise<ConferenceRow | null> {
+  const { data } = await supabase
+    .from("conferences")
+    .select("id, user_id, subscription_id, name, slug, is_public, created_at, updated_at")
+    .eq("slug", slug)
+    .eq("is_public", true)
+    .single()
+  return data ?? null
+}
+
+/** Fetch all streams for a conference, ordered. */
+export async function getConferenceStreams(
+  supabase: SupabaseClient,
+  conferenceId: string,
+): Promise<ConferenceStreamRow[]> {
+  const { data } = await supabase
+    .from("conference_streams")
+    .select(
+      "id, conference_id, track, label, embed_url, provider, video_id, is_featured, sort_order, created_at",
+    )
+    .eq("conference_id", conferenceId)
+    .order("sort_order", { ascending: true })
+  return data ?? []
 }
 
 /** Fetch days for a conference, ordered. */

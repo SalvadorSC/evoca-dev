@@ -354,7 +354,22 @@ function PhaseGroup({
 
 // ─── Root ────────────────────────────────────────────────────────────────────
 export function DevOverlay() {
+  // Hidden by default. Enable from the browser console with:
+  //   localStorage.setItem("test", "true")   (then reload)
+  // Disable again with:
+  //   localStorage.removeItem("test")         (then reload)
+  const [enabled, setEnabled] = useState(false);
+
+  useEffect(() => {
+    try {
+      setEnabled(localStorage.getItem("test") === "true");
+    } catch {
+      setEnabled(false);
+    }
+  }, []);
+
   if (process.env.NODE_ENV !== "development") return null;
+  if (!enabled) return null;
   return <DevOverlayInner />;
 }
 
@@ -362,7 +377,9 @@ const STORAGE_KEY = "testtracker:status";
 
 function DevOverlayInner() {
   const [visible, setVisible] = useState(true);
-  const [minimized, setMinimized] = useState(false);
+  // Minimized by default so the floating panel stays out of the way (and does
+  // not intercept clicks) unless a developer explicitly expands it.
+  const [minimized, setMinimized] = useState(true);
   const [tab, setTab] = useState<"tests" | "ideas">("tests");
   const [pos, setPos] = useState({ x: 16, y: 80 });
   const [statuses, setStatuses] = useState<Record<string, TestStatus>>(() => {

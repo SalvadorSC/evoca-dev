@@ -10,6 +10,7 @@ import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
 import { ReducedMotionToggle } from "@/components/shared/wave-background"
 import { OrganizerPricing } from "@/components/landing/organizer-pricing"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const ROLES = {
@@ -120,7 +121,7 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
       <div className="flex items-center gap-4">
         <Link
           href="/pricing"
-          className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors"
+          className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors hidden sm:inline"
         >
           Pricing
         </Link>
@@ -130,10 +131,12 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
         >
           Switch to {otherRole}
         </button>
-        <ThemeSwitcher />
+        <div className="hidden sm:block">
+          <ThemeSwitcher />
+        </div>
         <Link
           href="/login"
-          className="font-mono text-sm font-bold px-4 py-2 transition-colors bg-primary text-primary-foreground"
+          className="font-mono text-sm font-bold px-4 py-2 transition-colors bg-primary text-primary-foreground hidden sm:inline-block"
         >
           Get started free →
         </Link>
@@ -258,6 +261,10 @@ function FAQ({ items }: { items: { q: string; a: string }[] }) {
 
 // ─── Speaker Experience ───────────────────────────────────────────────────────
 function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) {
+  const isMobile = useIsMobile()
+  // On phones, "See it live" sends visitors to the guided story tour instead
+  // of the desktop-oriented demo page.
+  const demoHref = isMobile ? "/demo/tour" : "/demo"
   const [heroItems, setHeroItems] = useState<LiveItem[]>([])
 
   const handleActivity = useCallback((item: LiveItem) => {
@@ -293,7 +300,7 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
                 Start for free →
               </Link>
               <Link
-                href="/demo"
+                href={demoHref}
                 className="font-mono text-sm font-bold px-6 py-3 border-2 text-foreground hover:bg-white/5 transition-colors"
                 style={{ borderColor: "var(--accent)" }}
               >
@@ -393,6 +400,10 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
 
 // ─── Organizer Experience ──────────────────────────────────────────────────���──
 function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) {
+  const isMobile = useIsMobile()
+  // On phones, "See it live" sends visitors to the guided story tour instead
+  // of the desktop-oriented demo page.
+  const demoHref = isMobile ? "/demo/tour" : "/demo"
   const [heroItems, setHeroItems] = useState<LiveItem[]>([])
 
   const handleActivity = useCallback((item: LiveItem) => {
@@ -428,7 +439,7 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
                 Set up your event →
               </Link>
               <Link
-                href="/demo"
+                href={demoHref}
                 className="font-mono text-sm font-bold px-6 py-3 border-2 text-foreground hover:bg-white/5 transition-colors"
                 style={{ borderColor: "var(--accent)" }}
               >

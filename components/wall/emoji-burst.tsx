@@ -21,11 +21,20 @@ interface TextReactionCard {
 interface EmojiBurstProps {
   reactions: Reaction[]
   isQAMode: boolean
+  /**
+   * When true, the burst is positioned `absolute` within the nearest
+   * positioned ancestor (e.g. a slide preview) instead of `fixed` to the
+   * viewport. Used by the demo tour to render the real wall behaviour inside
+   * the mini talk stage.
+   */
+  contained?: boolean
+  /** Multiplier applied to emoji/card sizing. Defaults to 1 (real wall). */
+  scale?: number
 }
 
 const CARD_SLOTS = 5
 
-export function EmojiBurst({ reactions, isQAMode }: EmojiBurstProps) {
+export function EmojiBurst({ reactions, isQAMode, contained = false, scale = 1 }: EmojiBurstProps) {
   const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmoji[]>([])
   const [textCards, setTextCards] = useState<TextReactionCard[]>([])
   const processedIds = useRef(new Set<string>())
@@ -37,7 +46,9 @@ export function EmojiBurst({ reactions, isQAMode }: EmojiBurstProps) {
   const spawnEmoji = useCallback((emoji: string, id: string) => {
     const x = isQAMode
       ? Math.random() > 0.5 ? 5 + Math.random() * 8 : 87 + Math.random() * 8
-      : 10 + Math.random() * 80
+      : contained
+        ? 4 + Math.random() * 34 // contained: cluster on the left side only
+        : 10 + Math.random() * 80
     const rotation = -15 + Math.random() * 30
 
     const item: FloatingEmoji = { id: `${id}-${Date.now()}`, emoji, x, rotation }
@@ -45,7 +56,7 @@ export function EmojiBurst({ reactions, isQAMode }: EmojiBurstProps) {
     setTimeout(() => {
       setFloatingEmojis((prev) => prev.filter((e) => e.id !== item.id))
     }, 2800)
-  }, [isQAMode])
+  }, [isQAMode, contained])
 
   const spawnTextCard = useCallback((emoji: string, text: string, id: string) => {
     const slot = slotRef.current % CARD_SLOTS
@@ -74,21 +85,36 @@ export function EmojiBurst({ reactions, isQAMode }: EmojiBurstProps) {
     })
   }, [reactions, spawnEmoji, spawnTextCard])
 
+  const positionClass = contained ? "absolute" : "fixed"
+  const floatAnimClass = contained ? "animate-emoji-float-contained" : "animate-emoji-float"
+  const cardAnimClass = contained ? "animate-text-card-in-contained" : "animate-text-card-in"
+
+  const baseEmojiRem = contained ? 1.25 : isQAMode ? 1.5 : 2
+  const cardSlotGap = (contained ? 40 : 56) * scale
+  const cardMaxWidth = contained ? "82%" : `${260 * scale}px`
+
   return (
     <>
-      {/* Floating emoji layer — capped at 50vh */}
+      {/* Floating emoji layer */}
       <div
-        className="fixed inset-x-0 pointer-events-none overflow-hidden"
-        style={{ bottom: 0, top: "50%", zIndex: 50 }}
+        className={`${positionClass} inset-x-0 pointer-events-none overflow-hidden`}
+        style={
+          contained
+            ? // Only the bottom 40% of the slide — emojis rise from the bottom
+              // and are clipped (disappear) around the 40% height line. Sits
+              // behind the text cards (lower z-index).
+              { top: "60%", bottom: 0, left: 0, right: 0, zIndex: 1 }
+            : { bottom: 0, top: "50%", zIndex: 50 }
+        }
       >
         {floatingEmojis.map((item) => (
           <div
             key={item.id}
-            className="absolute animate-emoji-float"
+            className={`absolute ${floatAnimClass}`}
             style={{
               left: `${item.x}%`,
               bottom: 0,
-              fontSize: isQAMode ? "1.5rem" : "2rem",
+              fontSize: `${baseEmojiRem * scale}rem`,
               transform: `rotate(${item.rotation}deg)`,
               "--rot": `${item.rotation}deg`,
             } as React.CSSProperties}
@@ -100,28 +126,34 @@ export function EmojiBurst({ reactions, isQAMode }: EmojiBurstProps) {
 
       {/* Text reaction cards — bottom-left stack */}
       <div
-        className="fixed pointer-events-none"
-        style={{ bottom: "80px", left: "16px", zIndex: 50, width: "260px" }}
+        className={`${positionClass} pointer-events-none`}
+        style={
+          contained
+            ? { bottom: `${10 * scale}px`, left: `${10 * scale}px`, width: "82%", zIndex: 2 }
+            : { bottom: "80px", left: "16px", zIndex: 50, width: `${260 * scale}px` }
+        }
       >
         {textCards.map((card) => (
           <div
             key={card.id}
-            className="absolute animate-text-card-in"
-            style={{ bottom: `${card.slot * 56}px` }}
+            className={`absolute left-0 right-0 ${cardAnimClass}`}
+            style={{ bottom: `${card.slot * cardSlotGap}px` }}
           >
             <div
-              className="flex items-center gap-2 px-3 py-2"
+              className="flex items-start gap-2"
               style={{
                 background: "rgba(17,17,17,0.92)",
                 border: "1px solid #2a2a2a",
                 backdropFilter: "blur(8px)",
-                maxWidth: "260px",
+                width: "fit-content",
+                maxWidth: cardMaxWidth,
+                padding: `${8 * scale}px ${12 * scale}px`,
               }}
             >
-              <span style={{ fontSize: "1rem", lineHeight: 1 }}>{card.emoji}</span>
+              <span style={{ fontSize: `${1 * scale}rem`, lineHeight: 1.4 }}>{card.emoji}</span>
               <span
-                className="font-sans text-white truncate"
-                style={{ fontSize: "1rem", lineHeight: 1.4 }}
+                className="font-sans text-white"
+                style={{ fontSize: `${1 * scale}rem`, lineHeight: 1.4, overflowWrap: "anywhere" }}
               >
                 {card.text}
               </span>
@@ -140,6 +172,15 @@ export function EmojiBurst({ reactions, isQAMode }: EmojiBurstProps) {
           animation: emoji-float 2.8s ease-out forwards;
         }
 
+        @keyframes emoji-float-contained {
+          0%   { transform: translateY(0)      rotate(var(--rot, 0deg)); opacity: 1; }
+          70%  { opacity: 1; }
+          100% { transform: translateY(-90px)  rotate(var(--rot, 0deg)); opacity: 0; }
+        }
+        .animate-emoji-float-contained {
+          animation: emoji-float-contained 2.8s ease-out forwards;
+        }
+
         @keyframes text-card-in {
           0%   { opacity: 0; transform: translateX(-12px); }
           10%  { opacity: 1; transform: translateX(0); }
@@ -147,6 +188,9 @@ export function EmojiBurst({ reactions, isQAMode }: EmojiBurstProps) {
           100% { opacity: 0; transform: translateX(-8px); }
         }
         .animate-text-card-in {
+          animation: text-card-in 4s ease-out forwards;
+        }
+        .animate-text-card-in-contained {
           animation: text-card-in 4s ease-out forwards;
         }
       `}</style>
