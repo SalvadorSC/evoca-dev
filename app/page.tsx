@@ -20,14 +20,16 @@ const ROLES = {
     accentDim: "rgba(247, 224, 24, 0.12)",
     accentText: "#000",
     wipeDirection: "left" as const,
-    label: "I'm a Speaker"
+    label: "I'm a Speaker",
+    action: "I'm giving a talk"
   },
   organizer: {
     accent: "#00E887",
     accentDim: "rgba(0, 232, 135, 0.12)",
     accentText: "#000",
     wipeDirection: "right" as const,
-    label: "I'm an Organizer"
+    label: "I'm an Organizer",
+    action: "I want to host an event"
   }
 }
 
@@ -91,7 +93,8 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
 function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
-  const otherRole = role === "speaker" ? "Organizer" : "Speaker"
+  const otherRole: Role = role === "speaker" ? "organizer" : "speaker"
+  const otherAccent = ROLES[otherRole].accent
 
   return (
     <nav className="sticky top-0 z-50 bg-jsconf-bg/95 backdrop-blur border-b border-jsconf-border px-6 py-4 flex items-center justify-between">
@@ -105,13 +108,13 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
         </Link>
         <button
           onClick={onSwitchRole}
-          className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors hidden sm:inline"
+          className="font-mono text-xs font-bold px-3 py-2 border-2 transition-colors hidden sm:inline-block hover:text-black"
+          style={{ borderColor: otherAccent, color: otherAccent }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = otherAccent }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent" }}
         >
-          Switch to {otherRole}
+          {ROLES[otherRole].action} →
         </button>
-        <div className="hidden sm:block">
-          <ThemeSwitcher />
-        </div>
         <Link
           href="/login"
           className="font-mono text-sm font-bold px-4 py-2 transition-colors hidden sm:inline-block"
@@ -119,6 +122,9 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
         >
           Get started free →
         </Link>
+        <div className="hidden sm:block">
+          <ThemeSwitcher />
+        </div>
       </div>
     </nav>
   )
