@@ -5,14 +5,10 @@ import { usePathname } from 'next/navigation'
 
 // Routes where a footer bar would overlap immersive, real-time content.
 const HIDDEN_PREFIXES = ['/present', '/wall', '/remote', '/qna']
-// Routes that already render their own footer with legal links.
-const HIDDEN_EXACT = ['/']
-
 export function LegalFooter() {
   const pathname = usePathname()
 
   if (!pathname) return null
-  if (HIDDEN_EXACT.includes(pathname)) return null
   if (HIDDEN_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return null
 
   return (
