@@ -85,7 +85,7 @@ export function HighlightRing({
       {active && (
         <>
           <div
-            className="pointer-events-none absolute inset-0 border-2 border-jsconf-yellow animate-pulse z-10"
+            className="pointer-events-none absolute -inset-1.5 border-2 border-jsconf-yellow animate-pulse z-10"
             aria-hidden="true"
           />
           <div

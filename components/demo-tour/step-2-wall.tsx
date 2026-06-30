@@ -30,7 +30,8 @@ export function Step2Wall({ onNext }: Step2WallProps) {
 
   useEffect(() => {
     setReactions([])
-    setCtaVisible(false)
+    // Note: ctaVisible is intentionally NOT reset here so the Replay + CTA
+    // buttons stay on screen while the feed replays.
 
     const timers: ReturnType<typeof setTimeout>[] = []
 
@@ -102,12 +103,12 @@ export function Step2Wall({ onNext }: Step2WallProps) {
 
         {/* CTA + replay */}
         {ctaVisible && (
-          <div className="flex items-center gap-3 animate-in fade-in duration-500">
+          <div className="flex items-stretch gap-3 animate-in fade-in duration-500">
             <button
               type="button"
               onClick={() => setRunId((n) => n + 1)}
               aria-label="Replay reactions"
-              className="flex items-center justify-center py-4 px-4 text-2xl leading-none text-jsconf-muted border border-jsconf-border hover:text-foreground hover:border-foreground transition-colors shrink-0"
+              className="flex items-center justify-center px-4 text-2xl leading-none text-jsconf-muted border border-jsconf-border hover:text-foreground hover:border-foreground transition-colors shrink-0"
             >
               {"↺"}
             </button>
