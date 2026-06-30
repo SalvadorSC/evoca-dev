@@ -111,12 +111,14 @@ interface FakeSlideProps {
   title?: string
   speaker?: string
   progress?: number // 0–100
+  showProgress?: boolean
 }
 
 export function FakeSlide({
   title = "Building Real-time Experiences at Scale",
   speaker = "Alex Rivera",
   progress = 62,
+  showProgress = true,
 }: FakeSlideProps) {
   return (
     <div className="bg-jsconf-surface border border-jsconf-border p-5 flex flex-col gap-3">
@@ -138,15 +140,17 @@ export function FakeSlide({
       </div>
 
       {/* Progress bar */}
-      <div className="flex items-center gap-2">
-        <div className="flex-1 h-0.5 bg-jsconf-border">
-          <div
-            className="h-full bg-jsconf-yellow transition-all duration-1000"
-            style={{ width: `${progress}%` }}
-          />
+      {showProgress && (
+        <div className="flex items-center gap-2">
+          <div className="flex-1 h-0.5 bg-jsconf-border">
+            <div
+              className="h-full bg-jsconf-yellow transition-all duration-1000"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <span className="font-mono text-[10px] text-jsconf-muted shrink-0">{progress}%</span>
         </div>
-        <span className="font-mono text-[10px] text-jsconf-muted shrink-0">{progress}%</span>
-      </div>
+      )}
     </div>
   )
 }
