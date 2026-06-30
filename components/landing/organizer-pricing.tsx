@@ -3,6 +3,7 @@
 import Link from "next/link"
 import useSWR from "swr"
 import { Check } from "lucide-react"
+import { CtaButton } from "@/components/shared/cta-button"
 import {
   PLANS,
   ORGANIZER_PLAN_IDS,
@@ -113,17 +114,13 @@ export function OrganizerPricing() {
                   ))}
                 </ul>
 
-                <Link
+                <CtaButton
+                  variant={featured ? "solid" : "outline"}
                   href="/login?role=organizer"
-                  className="text-center font-mono text-xs font-bold uppercase tracking-wider py-3 border-2 transition-colors"
-                  style={
-                    featured
-                      ? { background: "var(--accent)", color: "var(--accent-text)", borderColor: "var(--accent)" }
-                      : { borderColor: "var(--accent)", color: "var(--accent)" }
-                  }
+                  className="w-full"
                 >
                   Get started
-                </Link>
+                </CtaButton>
               </div>
             )
           })}

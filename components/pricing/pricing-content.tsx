@@ -6,6 +6,7 @@ import useSWR from "swr"
 import { Check, ArrowLeft } from "lucide-react"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
 import { Logo } from "@/components/shared/logo"
+import { CtaButton } from "@/components/shared/cta-button"
 import {
   PLANS,
   ORGANIZER_PLAN_IDS,
@@ -339,12 +340,15 @@ function SpeakerPlans({ currency }: { currency: Currency }) {
           description="Everything you need to make your talks interactive."
           features={FREE_FEATURES}
         >
-          <Link
+          <CtaButton
+            variant="outline"
+            accent="var(--jsconf-yellow)"
+            accentText="var(--jsconf-bg)"
             href="/login?role=speaker"
-            className="text-center font-mono text-xs font-bold uppercase tracking-wider py-3 border-2 border-jsconf-yellow text-jsconf-yellow hover:bg-jsconf-yellow hover:text-jsconf-bg transition-colors"
+            className="w-full"
           >
             Get started free
-          </Link>
+          </CtaButton>
         </PlanCard>
 
         <PlanCard
@@ -383,12 +387,15 @@ function OrganizerPlans({
         description="For small events getting started with live engagement."
         features={ORGANIZER_FREE_FEATURES}
       >
-        <Link
+        <CtaButton
+          variant="outline"
+          accent="var(--jsconf-yellow)"
+          accentText="var(--jsconf-bg)"
           href="/login?role=organizer"
-          className="text-center font-mono text-xs font-bold uppercase tracking-wider py-3 border-2 border-jsconf-yellow text-jsconf-yellow hover:bg-jsconf-yellow hover:text-jsconf-bg transition-colors"
+          className="w-full"
         >
           Get started free
-        </Link>
+        </CtaButton>
       </PlanCard>
       {ORGANIZER_PLAN_IDS.map((planId) => {
         const plan = PLANS[planId]
@@ -405,16 +412,15 @@ function OrganizerPlans({
             description={plan.description}
             features={ORGANIZER_FEATURES[planId]}
           >
-            <Link
+            <CtaButton
+              variant={featured ? "solid" : "outline"}
+              accent="var(--jsconf-yellow)"
+              accentText="var(--jsconf-bg)"
               href="/login?role=organizer"
-              className={`text-center font-mono text-xs font-bold uppercase tracking-wider py-3 border-2 transition-colors ${
-                featured
-                  ? "bg-jsconf-yellow text-jsconf-bg border-jsconf-yellow hover:opacity-90"
-                  : "border-jsconf-yellow text-jsconf-yellow hover:bg-jsconf-yellow hover:text-jsconf-bg"
-              }`}
+              className="w-full"
             >
               Get started
-            </Link>
+            </CtaButton>
           </PlanCard>
         )
       })}

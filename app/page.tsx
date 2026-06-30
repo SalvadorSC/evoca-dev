@@ -7,6 +7,7 @@ import { ChevronDown, QrCode, Trophy } from "lucide-react"
 import { STORAGE_KEYS } from "@/lib/storage-keys"
 import { InteractivePhoneMockup, HeroBackground } from "@/components/shared/phone-mockup"
 import { Logo } from "@/components/shared/logo"
+import { CtaButton } from "@/components/shared/cta-button"
 import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
 import { ReducedMotionToggle } from "@/components/shared/wave-background"
 import { OrganizerPricing } from "@/components/landing/organizer-pricing"
@@ -72,12 +73,14 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
           <p className="font-sans text-jsconf-muted text-base lg:text-lg mb-8">
             Turn any talk into a live experience
           </p>
-          <button
+          <CtaButton
+            variant="outline"
+            accent="var(--jsconf-yellow)"
+            accentText="var(--jsconf-bg)"
             onClick={() => onSelectRole("speaker")}
-            className="font-mono text-sm font-bold uppercase tracking-wide px-6 py-3 border-2 border-jsconf-yellow text-jsconf-yellow hover:bg-jsconf-yellow hover:text-jsconf-bg transition-colors"
           >
             {ROLES.speaker.action} →
-          </button>
+          </CtaButton>
         </div>
       </div>
 
@@ -89,12 +92,14 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
           <p className="font-sans text-jsconf-muted text-base lg:text-lg mb-8">
             One platform for your schedule, speakers and live engagement
           </p>
-          <button
+          <CtaButton
+            variant="outline"
+            accent="var(--jsconf-yellow)"
+            accentText="var(--jsconf-bg)"
             onClick={() => onSelectRole("organizer")}
-            className="font-mono text-sm font-bold uppercase tracking-wide px-6 py-3 border-2 border-jsconf-yellow text-jsconf-yellow hover:bg-jsconf-yellow hover:text-jsconf-bg transition-colors"
           >
             {ROLES.organizer.action} →
-          </button>
+          </CtaButton>
         </div>
       </div>
     </div>
@@ -116,28 +121,24 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
         >
           Pricing
         </Link>
-        <button
+        <CtaButton
+          variant="outline"
+          accent={otherAccent}
+          accentText={ROLES[otherRole].accentText}
           onClick={onSwitchRole}
-          className="font-mono text-xs font-bold px-3 py-2 border-2 transition-colors hidden sm:inline-block"
-          style={{ borderColor: otherAccent, color: otherAccent }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = otherAccent
-            e.currentTarget.style.color = ROLES[otherRole].accentText
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent"
-            e.currentTarget.style.color = otherAccent
-          }}
+          className="text-xs px-3 py-2 hidden sm:inline-flex"
         >
           {ROLES[otherRole].action} →
-        </button>
-        <Link
+        </CtaButton>
+        <CtaButton
+          variant="solid"
+          accent={ROLES[role].accent}
+          accentText={ROLES[role].accentText}
           href="/login"
-          className="font-mono text-sm font-bold px-4 py-2 transition-opacity hover:opacity-90 hidden sm:inline-block"
-          style={{ backgroundColor: ROLES[role].accent, color: ROLES[role].accentText }}
+          className="text-sm px-4 py-2 hidden sm:inline-flex"
         >
           Get started free →
-        </Link>
+        </CtaButton>
         <div className="hidden sm:block">
           <ThemeSwitcher />
         </div>
@@ -293,20 +294,12 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
               Slides, live reactions, Q&A and analytics — all in one place. Your audience participates, you stay in control.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link
-                href="/login"
-                className="font-mono text-sm font-bold px-6 py-3 transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
-              >
+              <CtaButton variant="solid" href="/login" className="text-sm">
                 Start for free →
-              </Link>
-              <Link
-                href={demoHref}
-                className="font-mono text-sm font-bold px-6 py-3 border-2 text-foreground hover:bg-white/5 transition-colors"
-                style={{ borderColor: "var(--accent)" }}
-              >
+              </CtaButton>
+              <CtaButton variant="ghost" href={demoHref} className="text-sm">
                 See it live →
-              </Link>
+              </CtaButton>
             </div>
           </div>
           <div className="flex-shrink-0 hidden lg:block">
@@ -433,20 +426,12 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
               Manage your event, onboard speakers and give every session live engagement — without the Slido price tag.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link
-                href="/login"
-                className="font-mono text-sm font-bold px-6 py-3 transition-opacity hover:opacity-90"
-                style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
-              >
+              <CtaButton variant="solid" href="/login" className="text-sm">
                 Set up your event →
-              </Link>
-              <Link
-                href={demoHref}
-                className="font-mono text-sm font-bold px-6 py-3 border-2 text-foreground hover:bg-white/5 transition-colors"
-                style={{ borderColor: "var(--accent)" }}
-              >
+              </CtaButton>
+              <CtaButton variant="ghost" href={demoHref} className="text-sm">
                 See it live →
-              </Link>
+              </CtaButton>
             </div>
           </div>
           <div className="flex-shrink-0 hidden lg:block">
