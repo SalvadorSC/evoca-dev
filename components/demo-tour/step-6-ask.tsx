@@ -15,7 +15,7 @@ interface FakeQuestion {
 }
 
 const INITIAL_QUESTIONS: FakeQuestion[] = [
-  { id: "q1", text: "What's the recommended approach for handling rate limits in production?", name: "Jordan P.", votes: 6, voted: false },
+  { id: "q1", text: "What's the recommended approach for handling rate limits in production?", name: "Jordan P.", votes: 7, voted: false },
   { id: "q2", text: "Does this work with edge functions?", name: "Lena M.", votes: 3, voted: false },
 ]
 
