@@ -14,15 +14,16 @@ export function Step5QnaIntro({ onNext }: Step5QnaIntroProps) {
         <div className="flex flex-col gap-4">
           <StepLabel>Live Q&amp;A</StepLabel>
           <h2 className="font-display font-bold text-3xl uppercase tracking-tight leading-tight text-balance">
-            Got a question?<br />The speaker will know.
+            Questions arrive<br />live to the speaker.
           </h2>
           <p className="font-sans text-base text-jsconf-muted leading-relaxed">
-            Alongside reactions, attendees can submit questions that appear live on
-            the speaker&apos;s screen. No shouting, no awkward mic queues.
+            As attendees type them, questions land directly on the speaker&apos;s
+            screen in real time — no shouting, no awkward mic queues.
           </p>
           <p className="font-sans text-base text-jsconf-muted leading-relaxed">
-            Everyone can vote for the questions they most want answered — so the
-            speaker always knows what the room cares about most.
+            Then a dedicated Q&amp;A space puts the speaker in control: pick what to
+            answer, see what the room is voting for, and manage the time however
+            the moment calls for.
           </p>
         </div>
 
