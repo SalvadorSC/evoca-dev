@@ -6,6 +6,6 @@ export const alt = siteConfig.title
 export const size = ogSize
 export const contentType = ogContentType
 
-export default function OpengraphImage() {
+export default function TwitterImage() {
   return renderSocialCard()
 }

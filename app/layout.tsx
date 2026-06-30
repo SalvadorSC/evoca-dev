@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: siteConfig.title,
     description: siteConfig.shortDescription,
-    images: ['/opengraph-image'],
+    images: ['/twitter-image'],
     creator: siteConfig.twitter,
   },
   robots: {
