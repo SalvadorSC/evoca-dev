@@ -254,6 +254,7 @@ export function InteractivePhoneMockup({
   // we record them locally and seed each with a believable 5–10 peer votes
   // (same trick as the demo tour) so the list feels alive.
   const [askQuestions, setAskQuestions] = useState<Question[]>([])
+  const voteRampTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
   const phoneTab = activeTab === "wall" ? "react" : "ask"
 
   const lastInteractionRef = useRef<number>(Date.now())
@@ -280,6 +281,8 @@ export function InteractivePhoneMockup({
         hasInteractedRef.current = false
         simRunningRef.current = true
         setResetKey((k) => k + 1) // remount tabs to clear any typed input
+        voteRampTimersRef.current.forEach(clearTimeout) // cancel any pending vote animations
+        voteRampTimersRef.current = []
         setAskQuestions([]) // clear visitor-submitted questions on reset
         setSim(EMPTY_SIM)
         setTimeout(() => { if (simRunningRef.current) runNextSim() }, 600)
@@ -426,6 +429,7 @@ export function InteractivePhoneMockup({
     return () => {
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
       if (resetTimerRef.current) clearTimeout(resetTimerRef.current)
+      voteRampTimersRef.current.forEach(clearTimeout)
       simRunningRef.current = false
     }
   }, [runNextSim])
@@ -473,21 +477,39 @@ export function InteractivePhoneMockup({
       onActivity(item)
     }
 
-    // Record the submitted question in the Ask tab list with seeded votes (5–10).
+    // Record the submitted question in the Ask tab list, starting at 1 vote and
+    // animating up to a believable target (5–10) like the demo tour does. This makes
+    // the question feel like it's getting peer engagement in real time.
     if (_msg.type === "question") {
-      const fakeVotes = Math.floor(Math.random() * 6) + 5
+      const qId = _msg.id ?? crypto.randomUUID()
+      const targetVotes = Math.floor(Math.random() * 6) + 5
+
+      // Start with 1 vote immediately
       setAskQuestions((prev) => [
         {
           type: "question",
-          id: _msg.id ?? crypto.randomUUID(),
+          id: qId,
           name: _msg.name || "Anonymous",
           text: _msg.text,
-          votes: fakeVotes,
+          votes: 1,
           answered: false,
           ts: Date.now(),
         },
         ...prev,
       ])
+
+      // Animate votes from 2 up to targetVotes (350ms initial delay, 120ms per step)
+      voteRampTimersRef.current.forEach(clearTimeout)
+      voteRampTimersRef.current = []
+
+      for (let v = 2; v <= targetVotes; v++) {
+        const t = setTimeout(() => {
+          setAskQuestions((qs) =>
+            qs.map((q) => (q.id === qId ? { ...q, votes: v } : q)),
+          )
+        }, 350 + (v - 1) * 120)
+        voteRampTimersRef.current.push(t)
+      }
     }
   }, [markInteraction, onActivity])
 
