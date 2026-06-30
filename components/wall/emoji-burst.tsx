@@ -145,7 +145,8 @@ export function EmojiBurst({ reactions, isQAMode, contained = false, scale = 1 }
                 background: "rgba(17,17,17,0.92)",
                 border: "1px solid #2a2a2a",
                 backdropFilter: "blur(8px)",
-                width: "100%",
+                width: "fit-content",
+                maxWidth: cardMaxWidth,
                 padding: `${8 * scale}px ${12 * scale}px`,
               }}
             >
