@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next'
 import { Space_Grotesk, Inter, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
-import { DevOverlay } from '@/components/dev/DevOverlay'
 import { PaywallProvider } from '@/components/billing/paywall-provider'
 import { ThemeProvider } from '@/components/theme/theme-provider'
 import { siteConfig } from '@/lib/site-config'
@@ -117,7 +116,6 @@ export default function RootLayout({
           <LegalFooter />
         </ThemeProvider>
         <Analytics />
-        {process.env.NODE_ENV === 'development' && <DevOverlay />}
       </body>
     </html>
   )
