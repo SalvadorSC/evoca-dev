@@ -136,7 +136,7 @@ export function EmojiBurst({ reactions, isQAMode, contained = false, scale = 1 }
         {textCards.map((card) => (
           <div
             key={card.id}
-            className={`absolute ${cardAnimClass}`}
+            className={`absolute left-0 right-0 ${cardAnimClass}`}
             style={{ bottom: `${card.slot * cardSlotGap}px` }}
           >
             <div
@@ -145,14 +145,14 @@ export function EmojiBurst({ reactions, isQAMode, contained = false, scale = 1 }
                 background: "rgba(17,17,17,0.92)",
                 border: "1px solid #2a2a2a",
                 backdropFilter: "blur(8px)",
-                maxWidth: cardMaxWidth,
+                width: "100%",
                 padding: `${8 * scale}px ${12 * scale}px`,
               }}
             >
               <span style={{ fontSize: `${1 * scale}rem`, lineHeight: 1.4 }}>{card.emoji}</span>
               <span
                 className="font-sans text-white"
-                style={{ fontSize: `${1 * scale}rem`, lineHeight: 1.4, wordBreak: "break-word" }}
+                style={{ fontSize: `${1 * scale}rem`, lineHeight: 1.4, overflowWrap: "anywhere" }}
               >
                 {card.text}
               </span>
