@@ -1,43 +1,29 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
+import type { Reaction } from "@/lib/types"
 import { StepShell, StepLabel, FakeSlide, YellowButton } from "./primitives"
+import { EmojiBurst } from "@/components/wall/emoji-burst"
 
-// A scripted feed that mirrors how reactions actually surface on the live wall:
-// emoji-only reactions float up over the talk, reactions with text pop into the
-// bottom-left corner. Each fires on its own beat so they appear "live".
-const SCRIPT = [
-  { id: "r1", emoji: "🔥", text: "This is exactly what we needed!", at: 600 },
-  { id: "r2", emoji: "👏", text: "", at: 1300 },
-  { id: "r3", emoji: "🤯", text: "Mind blown. Shipping this today.", at: 2100 },
-  { id: "r4", emoji: "🚀", text: "", at: 2700 },
-  { id: "r5", emoji: "💚", text: "When can I use this at my meetup?", at: 3500 },
-  { id: "r6", emoji: "😂", text: "", at: 4100 },
+// A scripted feed that mirrors how reactions actually surface on the live wall.
+// Emoji-only reactions float up over the talk; reactions with text pop in as
+// comment cards — both rendered by the real <EmojiBurst> the product uses.
+const SCRIPT: { id: string; name: string; emoji: string; text: string; at: number }[] = [
+  { id: "r1", name: "Priya", emoji: "🔥", text: "This is exactly what we needed!", at: 600 },
+  { id: "r2", name: "Marco", emoji: "👏", text: "", at: 1300 },
+  { id: "r3", name: "Dana", emoji: "🤯", text: "Mind blown. Shipping this today.", at: 2100 },
+  { id: "r4", name: "Sam", emoji: "🚀", text: "", at: 2700 },
+  { id: "r5", name: "Lena", emoji: "💚", text: "When can I use this at my meetup?", at: 3500 },
+  { id: "r6", name: "Theo", emoji: "😂", text: "", at: 4100 },
 ]
-
-interface FloatingEmoji {
-  key: string
-  emoji: string
-  x: number
-  rotation: number
-}
-
-interface TextCard {
-  key: string
-  emoji: string
-  text: string
-  slot: number
-}
 
 interface Step2WallProps {
   onNext: () => void
 }
 
 export function Step2Wall({ onNext }: Step2WallProps) {
-  const [floating, setFloating] = useState<FloatingEmoji[]>([])
-  const [cards, setCards] = useState<TextCard[]>([])
+  const [reactions, setReactions] = useState<Reaction[]>([])
   const [ctaVisible, setCtaVisible] = useState(false)
-  const slotRef = useRef(0)
 
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = []
@@ -45,25 +31,18 @@ export function Step2Wall({ onNext }: Step2WallProps) {
     SCRIPT.forEach((r) => {
       timers.push(
         setTimeout(() => {
-          if (r.text) {
-            // Text reaction → bottom-left card (auto-fades after 4s)
-            const slot = slotRef.current % 3
-            slotRef.current += 1
-            const key = `${r.id}-${Date.now()}`
-            setCards((prev) => [...prev, { key, emoji: r.emoji, text: r.text, slot }])
-            timers.push(
-              setTimeout(() => setCards((prev) => prev.filter((c) => c.key !== key)), 4000),
-            )
-          } else {
-            // Emoji-only → floats up (auto-removes after 2.8s)
-            const key = `${r.id}-${Date.now()}`
-            const x = 10 + Math.random() * 80
-            const rotation = -15 + Math.random() * 30
-            setFloating((prev) => [...prev, { key, emoji: r.emoji, x, rotation }])
-            timers.push(
-              setTimeout(() => setFloating((prev) => prev.filter((e) => e.key !== key)), 2800),
-            )
-          }
+          setReactions((prev) => [
+            ...prev,
+            {
+              type: "reaction",
+              id: r.id,
+              name: r.name,
+              text: r.text,
+              emoji: r.emoji,
+              ts: Date.now(),
+              flags: 0,
+            },
+          ])
         }, r.at),
       )
     })
@@ -85,58 +64,12 @@ export function Step2Wall({ onNext }: Step2WallProps) {
           </span>
         </div>
 
-        {/* Full-width talk stage with reactions overlaying it */}
-        <div className="relative flex-1 overflow-hidden border border-jsconf-border">
-          {/* The talk fills the stage */}
-          <FakeSlide showProgress={false} showHeader={false} />
-
-          {/* Floating emoji layer — rises over the lower half of the stage */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 top-1/2 overflow-hidden">
-            {floating.map((item) => (
-              <span
-                key={item.key}
-                className="absolute animate-tour-emoji-float text-3xl"
-                style={
-                  {
-                    left: `${item.x}%`,
-                    bottom: 0,
-                    transform: `rotate(${item.rotation}deg)`,
-                    "--rot": `${item.rotation}deg`,
-                  } as React.CSSProperties
-                }
-              >
-                {item.emoji}
-              </span>
-            ))}
-          </div>
-
-          {/* Text reaction cards — bottom-left stack, exactly like the real wall */}
-          <div
-            className="pointer-events-none absolute"
-            style={{ bottom: "12px", left: "12px", width: "75%" }}
-          >
-            {cards.map((card) => (
-              <div
-                key={card.key}
-                className="absolute animate-tour-card-in"
-                style={{ bottom: `${card.slot * 44}px` }}
-              >
-                <div
-                  className="flex items-center gap-2 px-2.5 py-1.5"
-                  style={{
-                    background: "rgba(17,17,17,0.92)",
-                    border: "1px solid #2a2a2a",
-                    backdropFilter: "blur(8px)",
-                  }}
-                >
-                  <span className="text-sm leading-none shrink-0">{card.emoji}</span>
-                  <span className="font-sans text-xs text-white truncate leading-snug">
-                    {card.text}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Full-width talk stage. The real wall component renders reactions
+            (floating emojis + comment cards) inside the slide screen. */}
+        <div className="flex-1 flex flex-col justify-center">
+          <FakeSlide showProgress={false} showHeader={false}>
+            <EmojiBurst reactions={reactions} isQAMode={false} contained scale={0.62} />
+          </FakeSlide>
         </div>
 
         <p className="font-mono text-xs text-jsconf-muted text-center text-balance">
@@ -150,46 +83,6 @@ export function Step2Wall({ onNext }: Step2WallProps) {
           </div>
         )}
       </div>
-
-      <style jsx>{`
-        @keyframes tour-emoji-float {
-          0% {
-            transform: translateY(0) rotate(var(--rot, 0deg));
-            opacity: 1;
-          }
-          80% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateY(-100%) rotate(var(--rot, 0deg));
-            opacity: 0;
-          }
-        }
-        .animate-tour-emoji-float {
-          animation: tour-emoji-float 2.8s ease-out forwards;
-        }
-
-        @keyframes tour-card-in {
-          0% {
-            opacity: 0;
-            transform: translateX(-12px);
-          }
-          10% {
-            opacity: 1;
-            transform: translateX(0);
-          }
-          75% {
-            opacity: 1;
-          }
-          100% {
-            opacity: 0;
-            transform: translateX(-8px);
-          }
-        }
-        .animate-tour-card-in {
-          animation: tour-card-in 4s ease-out forwards;
-        }
-      `}</style>
     </StepShell>
   )
 }

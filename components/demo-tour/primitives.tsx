@@ -54,9 +54,8 @@ export function StepShell({ label, children, className = "", scrollable = false 
   return (
     <section
       aria-label={label}
-      className={`flex flex-col w-full bg-jsconf-bg text-foreground animate-in slide-in-from-bottom-4 duration-300 ${
-        scrollable ? "overflow-y-auto" : "overflow-hidden"
-      } ${className}`}
+      className={`flex flex-col w-full bg-jsconf-bg text-foreground animate-in slide-in-from-bottom-4 duration-300 ${scrollable ? "overflow-y-auto" : "overflow-hidden"
+        } ${className}`}
       style={{ height: "100dvh", paddingTop: "2px" /* progress bar height */ }}
     >
       {children}
@@ -90,9 +89,8 @@ export function HighlightRing({
             aria-hidden="true"
           />
           <div
-            className={`absolute ${
-              labelPosition === "top" ? "bottom-full mb-2" : "top-full mt-2"
-            } left-0 right-0 flex justify-center z-20 pointer-events-none`}
+            className={`absolute ${labelPosition === "top" ? "bottom-full mb-2" : "top-full mt-2"
+              } left-0 right-0 flex justify-center z-20 pointer-events-none`}
           >
             <span className="bg-jsconf-yellow text-black font-mono text-xs font-bold uppercase tracking-wider px-2 py-1 text-center">
               {label}
@@ -113,6 +111,8 @@ interface FakeSlideProps {
   progress?: number // 0–100
   showProgress?: boolean
   showHeader?: boolean
+  /** Overlay rendered inside the talk "screen" (e.g. live reactions). */
+  children?: ReactNode
 }
 
 export function FakeSlide({
@@ -121,9 +121,10 @@ export function FakeSlide({
   progress = 62,
   showProgress = true,
   showHeader = true,
+  children,
 }: FakeSlideProps) {
   return (
-    <div className="bg-jsconf-surface border border-jsconf-border p-5 flex flex-col gap-3">
+    <div className="bg-jsconf-surface border border-jsconf-border flex flex-col gap-3">
       {showHeader && (
         <div className="flex items-center justify-between">
           <span className="font-mono text-[10px] uppercase tracking-widest text-jsconf-muted">
@@ -136,11 +137,13 @@ export function FakeSlide({
         </div>
       )}
 
-      <div className="bg-jsconf-surface-2 border border-jsconf-border aspect-video flex flex-col items-center justify-center gap-3 px-4">
+      <div className="relative overflow-hidden bg-jsconf-surface-2 border border-jsconf-border aspect-video flex flex-col items-center justify-center gap-3 px-4">
         <p className="font-display font-bold text-base text-center text-white leading-snug text-balance uppercase tracking-wide">
           {title}
         </p>
         <p className="font-mono text-xs text-jsconf-muted">{speaker}</p>
+        {/* Live reaction overlay sits on top of the talk content */}
+        {children}
       </div>
 
       {/* Progress bar */}
