@@ -481,39 +481,7 @@ function Footer() {
   )
 }
 
-// ─── Dev Color Toggle ─────────────────────────────────────────────────────────
-function DevColorToggle({ onColorChange }: { onColorChange: (color: string) => void }) {
-  const [active, setActive] = useState(ORGANIZER_ACCENTS[0].value)
-
-  return (
-    <div className="fixed bottom-6 left-6 z-[9999] bg-jsconf-surface-2 border border-jsconf-border rounded-full px-3 py-2 flex items-center gap-2">
-      <span className="font-mono text-[10px] text-red-500 font-bold">DEV</span>
-      {ORGANIZER_ACCENTS.map((accent) => (
-        <button
-          key={accent.value}
-          onClick={() => {
-            setActive(accent.value)
-            onColorChange(accent.value)
-          }}
-          className="flex items-center gap-1.5 px-2 py-1 rounded-full transition-colors"
-          style={{
-            border: active === accent.value ? `1px solid ${accent.value}` : "1px solid transparent"
-          }}
-        >
-          <span
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: accent.value }}
-          />
-          <span className="font-mono text-[10px] text-jsconf-muted">{accent.label}</span>
-        </button>
-      ))}
-    </div>
-  )
-}
-
-
-
-// ─── Main Landing Content ────────────────────────────────────────��────────────
+// ─── Main Landing Content ──────────────────────────────────────────────────────
 function LandingContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -575,14 +543,6 @@ function LandingContent() {
     handleSelectRole(newRole)
   }, [role, handleSelectRole])
 
-  const handleOrganizerColorChange = useCallback((color: string) => {
-    setOrganizerAccent(color)
-    localStorage.setItem(STORAGE_KEYS.organizerAccent, color)
-    if (role === "organizer") {
-      applyAccent("organizer", color)
-    }
-  }, [role, applyAccent])
-
   // Show dev toggle only in development or with ?dev=true
   const showDevToggle = process.env.NODE_ENV === "development" || searchParams.get("dev") === "true"
 
@@ -593,9 +553,6 @@ function LandingContent() {
         ? <SpeakerExperience waveAnimation={waveAnimation} onSwitchRole={handleSwitchRole} />
         : <OrganizerExperience waveAnimation={waveAnimation} onSwitchRole={handleSwitchRole} />}
 
-      {showDevToggle && role === "organizer" && (
-        <DevColorToggle onColorChange={handleOrganizerColorChange} />
-      )}
       {showDevToggle && (
         <ReducedMotionToggle value={waveAnimation} onChange={setWaveAnimation} />
       )}

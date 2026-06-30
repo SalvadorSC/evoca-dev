@@ -2,11 +2,11 @@ import type { Metadata, Viewport } from 'next'
 import { Space_Grotesk, Inter, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
-import { DevOverlay } from '@/components/dev/DevOverlay'
 import { PaywallProvider } from '@/components/billing/paywall-provider'
 import { ThemeProvider } from '@/components/theme/theme-provider'
 import { siteConfig } from '@/lib/site-config'
 import { StructuredData } from '@/components/seo/structured-data'
+import { LegalFooter } from '@/components/shared/legal-footer'
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -113,9 +113,9 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-jsconf-bg text-foreground">
         <ThemeProvider>
           <PaywallProvider>{children}</PaywallProvider>
+          <LegalFooter />
         </ThemeProvider>
         <Analytics />
-        {process.env.NODE_ENV === 'development' && <DevOverlay />}
       </body>
     </html>
   )

@@ -3,7 +3,9 @@
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import { useState } from 'react'
+import Link from 'next/link'
 import { Logo } from '@/components/shared/logo'
 
 // Mirrors scripts/seed-test-accounts.mjs + /api/dev-login. See docs/test-accounts.md.
@@ -23,12 +25,17 @@ const DEV_ACCOUNTS = [
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
+  const [agreed, setAgreed] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!agreed) {
+      setError('Please agree to the Terms of Service to continue.')
+      return
+    }
     const supabase = createClient()
     setIsLoading(true)
     setError(null)
@@ -111,6 +118,34 @@ export default function LoginPage() {
                   />
                 </div>
 
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="agree-terms"
+                    checked={agreed}
+                    onCheckedChange={(checked) => setAgreed(checked === true)}
+                    className="mt-0.5 border-jsconf-border data-[state=checked]:bg-jsconf-yellow data-[state=checked]:border-jsconf-yellow data-[state=checked]:text-black"
+                  />
+                  <label htmlFor="agree-terms" className="text-sm text-jsconf-muted leading-relaxed">
+                    I agree to the{' '}
+                    <Link
+                      href="/terms"
+                      target="_blank"
+                      className="text-jsconf-yellow underline underline-offset-2 hover:opacity-80"
+                    >
+                      Terms of Service
+                    </Link>
+                    {' '}and{' '}
+                    <Link
+                      href="/privacy"
+                      target="_blank"
+                      className="text-jsconf-yellow underline underline-offset-2 hover:opacity-80"
+                    >
+                      Privacy Policy
+                    </Link>
+                    .
+                  </label>
+                </div>
+
                 {error && (
                   <div className="bg-jsconf-red/10 border border-jsconf-red/20 px-4 py-3">
                     <p className="text-sm text-jsconf-red font-mono">{error}</p>
@@ -119,8 +154,8 @@ export default function LoginPage() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-jsconf-yellow text-black hover:bg-jsconf-yellow/90 font-mono font-bold uppercase tracking-wider h-12"
-                  disabled={isLoading}
+                  className="w-full bg-jsconf-yellow text-black hover:bg-jsconf-yellow/90 font-mono font-bold uppercase tracking-wider h-12 disabled:opacity-50"
+                  disabled={isLoading || !agreed}
                 >
                   {isLoading ? 'Sending...' : 'Send magic link'}
                 </Button>

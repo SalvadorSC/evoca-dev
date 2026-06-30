@@ -18,6 +18,12 @@ const ACCENT = "#f7e018"
 const logoSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 28 28" fill="none"><path d="M4 6C4 4.89543 4.89543 4 6 4H22C23.1046 4 24 4.89543 24 6V18C24 19.1046 23.1046 20 22 20H10L6 24V20H6C4.89543 20 4 19.1046 4 18V6Z" stroke="${FG}" stroke-width="2" fill="none"/><circle cx="9" cy="12" r="1.5" fill="${FG}"/><circle cx="14" cy="12" r="1.5" fill="${FG}"/><circle cx="19" cy="12" r="1.5" fill="${FG}"/></svg>`
 const logoDataUri = `data:image/svg+xml;utf8,${encodeURIComponent(logoSvg)}`
 
+// Hero wave background: same tiled 120x60 wave pattern as <WaveBackground>,
+// stretched across the full 1200x630 card. resvg (used by Satori to rasterize
+// img data URIs) supports <pattern>, so this renders the static hero look.
+const waveSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${OG_SIZE.width}" height="${OG_SIZE.height}" viewBox="0 0 ${OG_SIZE.width} ${OG_SIZE.height}"><defs><pattern id="w" x="0" y="0" width="120" height="60" patternUnits="userSpaceOnUse"><path d="M0 30 Q30 10 60 30 Q90 50 120 30" fill="none" stroke="${ACCENT}" stroke-width="2" stroke-opacity="0.10"/></pattern></defs><rect width="100%" height="100%" fill="url(#w)"/></svg>`
+const waveDataUri = `data:image/svg+xml;utf8,${encodeURIComponent(waveSvg)}`
+
 // Read assets from disk (these routes run on the Node runtime).
 const assetsDir = join(process.cwd(), "assets")
 const fontsDir = join(assetsDir, "fonts")
@@ -38,10 +44,21 @@ export function renderOgImage() {
           height: "100%",
           display: "flex",
           alignItems: "stretch",
+          position: "relative",
           backgroundColor: BG,
           fontFamily: "Inter",
         }}
       >
+        {/* Hero wave background (full-bleed, behind all content) */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={waveDataUri}
+          width={OG_SIZE.width}
+          height={OG_SIZE.height}
+          alt=""
+          style={{ position: "absolute", top: 0, left: 0 }}
+        />
+
         {/* Left column: brand + headline + description + footer */}
         <div
           style={{
