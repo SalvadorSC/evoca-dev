@@ -6,23 +6,22 @@ import type { UserReaction } from "./primitives"
 
 const EMOJI_OPTIONS = ["🔥", "🤯", "😂", "💀", "👏", "🚀"]
 
-type SubStep = "name" | "emoji" | "text" | "send"
+type SubStep = "emoji" | "text" | "send"
 
 interface Step3ReactProps {
   onReactionSent: (r: UserReaction) => void
 }
 
 export function Step3React({ onReactionSent }: Step3ReactProps) {
-  const [subStep, setSubStep] = useState<SubStep>("name")
+  const [subStep, setSubStep] = useState<SubStep>("emoji")
   const [name, setName] = useState("")
   const [text, setText] = useState("")
   const [emoji, setEmoji] = useState<string | null>(null)
 
   const subStepLabels: Record<SubStep, string> = {
-    name: "1 / 4 — Add your name",
-    emoji: "2 / 4 — Pick an emoji",
-    text: "3 / 4 — Add a thought",
-    send: "4 / 4 — Send it",
+    emoji: "1 / 3 — Pick an emoji",
+    text: "2 / 3 — Add a thought",
+    send: "3 / 3 — Send it",
   }
 
   const handleEmojiPick = (e: string) => {
@@ -61,35 +60,18 @@ export function Step3React({ onReactionSent }: Step3ReactProps) {
           </p>
         </div>
 
-        {/* Name field */}
+        {/* Name field (optional, not part of the guided flow) */}
         <div className="flex flex-col gap-2">
-          <HighlightRing
-            active={subStep === "name"}
-            label="Add your name (optional)"
-            labelPosition="bottom"
-          >
-            <div className="flex flex-col gap-2">
-              <label htmlFor="tour-name" className="font-mono text-xs uppercase tracking-wide text-jsconf-muted">
-                Your name <span className="normal-case font-sans text-jsconf-muted font-normal">(optional)</span>
-              </label>
-              <input
-                id="tour-name"
-                placeholder="Anonymous"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="bg-jsconf-surface border border-jsconf-border h-11 px-3 font-sans text-sm text-foreground placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
-              />
-            </div>
-          </HighlightRing>
-
-          {subStep === "name" && (
-            <button
-              onClick={() => setSubStep("emoji")}
-              className="self-start font-mono text-xs text-jsconf-muted hover:text-foreground underline-offset-2 hover:underline"
-            >
-              {name.trim() ? "Continue →" : "Skip name →"}
-            </button>
-          )}
+          <label htmlFor="tour-name" className="font-mono text-xs uppercase tracking-wide text-jsconf-muted">
+            Your name <span className="normal-case font-sans text-jsconf-muted font-normal">(optional)</span>
+          </label>
+          <input
+            id="tour-name"
+            placeholder="Anonymous"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="bg-jsconf-surface border border-jsconf-border h-11 px-3 font-sans text-sm text-foreground placeholder:text-jsconf-muted focus:outline-none focus:border-jsconf-yellow"
+          />
         </div>
 
         {/* Emoji grid */}
