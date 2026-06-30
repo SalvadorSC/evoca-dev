@@ -7,15 +7,25 @@ import type { UserReaction } from "./primitives"
 import { EmojiBurst } from "@/components/wall/emoji-burst"
 import { ReactionCard } from "@/components/wall/reaction-card"
 
-// Same scripted feed as step 2, mirroring the live wall. The user's own
-// reaction is appended as the climactic final entry (see buildScript).
-const BASE_SCRIPT: { id: string; name: string; emoji: string; text: string; at: number }[] = [
-  { id: "r1", name: "Priya", emoji: "🔥", text: "This is exactly what we needed!", at: 600 },
-  { id: "r2", name: "Marco", emoji: "👏", text: "", at: 1300 },
-  { id: "r3", name: "Dana", emoji: "🤯", text: "Mind blown. Shipping this today.", at: 2100 },
-  { id: "r4", name: "Sam", emoji: "🚀", text: "", at: 2700 },
-  { id: "r5", name: "Lena", emoji: "💚", text: "When can I use this at my meetup?", at: 3500 },
+// The first three reactions are pre-seeded (already on the wall) so the room
+// feels alive and continuous — they are NOT re-animated. A fresh reaction then
+// arrives, the user's reaction lands as the 5th, and two more follow.
+const PRESEED: { id: string; name: string; emoji: string; text: string }[] = [
+  { id: "r1", name: "Priya", emoji: "🔥", text: "This is exactly what we needed!" },
+  { id: "r2", name: "Marco", emoji: "👏", text: "" },
+  { id: "r3", name: "Dana", emoji: "🤯", text: "Mind blown. Shipping this today." },
 ]
+
+// Animated arrivals. `userId` is spliced in as the 5th reaction.
+const BEFORE_USER: { id: string; name: string; emoji: string; text: string; at: number }[] = [
+  { id: "r4", name: "Sam", emoji: "🚀", text: "", at: 700 },
+]
+const AFTER_USER: { id: string; name: string; emoji: string; text: string; at: number }[] = [
+  { id: "r6", name: "Lena", emoji: "💚", text: "When can I use this at my meetup?", at: 2200 },
+  { id: "r7", name: "Theo", emoji: "😂", text: "", at: 3000 },
+]
+const USER_AT = 1500
+const LAST_AT = 3000
 
 interface Step4YourReactionProps {
   userReaction: UserReaction
@@ -32,23 +42,39 @@ export function Step4YourReaction({ userReaction, onNext }: Step4YourReactionPro
   const userId = "user-reaction"
 
   useEffect(() => {
-    setReactions([])
+    // Pre-seed the first three reactions instantly with a PAST timestamp so
+    // EmojiBurst skips animating them (it ignores reactions older than mount),
+    // yet they stay listed in Live Comments for continuity.
+    const seededTs = Date.now() - 10000
+    setReactions(
+      PRESEED.map((r) => ({
+        type: "reaction",
+        id: `${r.id}-${runId}`,
+        name: r.name,
+        text: r.text,
+        emoji: r.emoji,
+        ts: seededTs,
+        flags: 0,
+      })),
+    )
     // ctaVisible intentionally not reset so the Replay + CTA stay on screen.
 
-    const script = [
-      ...BASE_SCRIPT,
+    // New arrival → user (5th) → two more, all freshly animated.
+    const animated = [
+      ...BEFORE_USER,
       {
         id: userId,
         name: userReaction.name || "Anonymous",
         emoji: userReaction.emoji,
         text: userReaction.text || "",
-        at: 4300,
+        at: USER_AT,
       },
+      ...AFTER_USER,
     ]
 
     const timers: ReturnType<typeof setTimeout>[] = []
 
-    script.forEach((r) => {
+    animated.forEach((r) => {
       timers.push(
         setTimeout(() => {
           setReactions((prev) => [
@@ -69,8 +95,7 @@ export function Step4YourReaction({ userReaction, onNext }: Step4YourReactionPro
       )
     })
 
-    const lastAt = 4300
-    timers.push(setTimeout(() => setCtaVisible(true), lastAt + 700))
+    timers.push(setTimeout(() => setCtaVisible(true), LAST_AT + 700))
 
     return () => timers.forEach(clearTimeout)
   }, [runId, userReaction])
@@ -106,16 +131,15 @@ export function Step4YourReaction({ userReaction, onNext }: Step4YourReactionPro
               comments.map((reaction, i) => {
                 const isUser = reaction.id.startsWith(userId)
                 return (
-                  <div
-                    key={reaction.id}
-                    className={isUser ? "relative border-2 border-jsconf-yellow" : ""}
-                  >
+                  <div key={reaction.id} className="flex flex-col">
                     {isUser && (
-                      <span className="absolute -top-2 left-2 z-10 bg-jsconf-yellow text-black font-mono text-[9px] font-bold uppercase tracking-widest px-2 py-0.5">
+                      <span className="self-start bg-jsconf-yellow text-black font-mono text-[9px] font-bold uppercase tracking-widest px-2 py-0.5">
                         Your reaction
                       </span>
                     )}
-                    <ReactionCard reaction={reaction} index={i} compact />
+                    <div className={isUser ? "border-2 border-jsconf-yellow" : ""}>
+                      <ReactionCard reaction={reaction} index={i} compact />
+                    </div>
                   </div>
                 )
               })
