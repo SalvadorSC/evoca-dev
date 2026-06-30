@@ -105,7 +105,7 @@ export function Step2Wall({ onNext }: Step2WallProps) {
               type="button"
               onClick={() => setRunId((n) => n + 1)}
               aria-label="Replay reactions"
-              className="text-2xl leading-none text-jsconf-muted border border-jsconf-border px-4 py-2 hover:text-foreground hover:border-foreground transition-colors shrink-0"
+              className="text-xl leading-none text-jsconf-muted border border-jsconf-border px-4 py-2 hover:text-foreground hover:border-foreground transition-colors shrink-0"
             >
               {"↺"}
             </button>
