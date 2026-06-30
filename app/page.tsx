@@ -24,8 +24,8 @@ const ROLES = {
     action: "I'm giving a talk"
   },
   organizer: {
-    accent: "#00E887",
-    accentDim: "rgba(0, 232, 135, 0.12)",
+    accent: "#F7E018",
+    accentDim: "rgba(247, 224, 24, 0.12)",
     accentText: "#000",
     wipeDirection: "right" as const,
     label: "I'm an Organizer",
@@ -34,9 +34,19 @@ const ROLES = {
 }
 
 const ORGANIZER_ACCENTS = [
+  { label: "Yellow", value: "#F7E018" },
   { label: "Green", value: "#00E887" },
   { label: "Teal", value: "#00E8E0" },
 ]
+
+// Convert a hex accent into a dim rgba(…, 0.12) for backgrounds.
+function accentDim(hex: string): string {
+  const h = hex.replace("#", "")
+  const r = parseInt(h.slice(0, 2), 16)
+  const g = parseInt(h.slice(2, 4), 16)
+  const b = parseInt(h.slice(4, 6), 16)
+  return `rgba(${r}, ${g}, ${b}, 0.12)`
+}
 
 type Role = "speaker" | "organizer"
 
@@ -81,7 +91,7 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
           </p>
           <button
             onClick={() => onSelectRole("organizer")}
-            className="font-mono text-sm font-bold uppercase tracking-wide px-6 py-3 border-2 border-[#00E887] text-[#00E887] hover:bg-[#00E887] hover:text-black transition-colors"
+            className="font-mono text-sm font-bold uppercase tracking-wide px-6 py-3 border-2 border-jsconf-yellow text-jsconf-yellow hover:bg-jsconf-yellow hover:text-jsconf-bg transition-colors"
           >
             Get started free →
           </button>
@@ -108,16 +118,19 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
         </Link>
         <button
           onClick={onSwitchRole}
-          className="font-mono text-xs font-bold px-3 py-2 border-2 transition-colors hidden sm:inline-block hover:text-black"
-          style={{ borderColor: otherAccent, color: otherAccent }}
-          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = otherAccent }}
-          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent" }}
+          className="role-switch-btn font-mono text-xs font-bold px-3 py-2 border-2 transition-colors hidden sm:inline-block"
+          style={{
+            "--switch-accent": otherAccent,
+            "--switch-accent-text": ROLES[otherRole].accentText,
+            borderColor: otherAccent,
+            color: otherAccent,
+          } as React.CSSProperties}
         >
           {ROLES[otherRole].action} →
         </button>
         <Link
           href="/login"
-          className="font-mono text-sm font-bold px-4 py-2 transition-colors hidden sm:inline-block"
+          className="font-mono text-sm font-bold px-4 py-2 transition-opacity hover:opacity-90 hidden sm:inline-block"
           style={{ backgroundColor: ROLES[role].accent, color: ROLES[role].accentText }}
         >
           Get started free →
@@ -187,7 +200,7 @@ function ProWaitlistForm() {
 
   if (state === "done") {
     return (
-      <p className="font-mono text-xs text-[#00E887] uppercase tracking-wider">
+      <p className="font-mono text-xs uppercase tracking-wider" style={{ color: "var(--accent)" }}>
         You&apos;re on the list. We&apos;ll reach out when Pro launches.
       </p>
     )
@@ -279,7 +292,7 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/login"
-                className="font-mono text-sm font-bold px-6 py-3"
+                className="font-mono text-sm font-bold px-6 py-3 transition-opacity hover:opacity-90"
                 style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
               >
                 Start for free →
@@ -418,7 +431,7 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
             <div className="flex flex-wrap gap-4">
               <Link
                 href="/login"
-                className="font-mono text-sm font-bold px-6 py-3"
+                className="font-mono text-sm font-bold px-6 py-3 transition-opacity hover:opacity-90"
                 style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
               >
                 Set up your event →
@@ -581,7 +594,7 @@ function LandingContent() {
     const tokens = ROLES[r]
     const finalAccent = accent || tokens.accent
     document.documentElement.style.setProperty("--accent", finalAccent)
-    document.documentElement.style.setProperty("--accent-dim", r === "organizer" ? `rgba(0, 232, 135, 0.12)` : tokens.accentDim)
+    document.documentElement.style.setProperty("--accent-dim", accentDim(finalAccent))
     document.documentElement.style.setProperty("--accent-text", tokens.accentText)
   }, [])
 
