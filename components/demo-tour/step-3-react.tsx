@@ -34,7 +34,7 @@ export function Step3React({ onReactionSent }: Step3ReactProps) {
   }
 
   const handleSubmit = () => {
-    if (!emoji) return
+    if (!emoji || !text.trim()) return
     onReactionSent({
       name: name.trim() || "Anonymous",
       text: text.trim(),
@@ -109,12 +109,12 @@ export function Step3React({ onReactionSent }: Step3ReactProps) {
         <div className="flex flex-col gap-2">
           <HighlightRing
             active={subStep === "text"}
-            label="Add a thought (optional)"
+            label="Add a thought"
             labelPosition="bottom"
           >
             <div className="flex flex-col gap-1">
               <label htmlFor="tour-text" className="font-mono text-xs uppercase tracking-wide text-jsconf-muted flex justify-between">
-                <span>Your reaction <span className="normal-case font-sans font-normal">(optional)</span></span>
+                <span>Your reaction <span className="normal-case font-sans font-normal text-jsconf-yellow">(required)</span></span>
                 <span>{text.length}/160</span>
               </label>
               <textarea
@@ -132,9 +132,10 @@ export function Step3React({ onReactionSent }: Step3ReactProps) {
           {subStep === "text" && (
             <button
               onClick={handleTextStep}
-              className="self-start font-mono text-xs text-jsconf-muted hover:text-foreground underline-offset-2 hover:underline"
+              disabled={!text.trim()}
+              className="self-start font-mono text-xs text-jsconf-muted hover:text-foreground underline-offset-2 hover:underline disabled:opacity-40 disabled:hover:no-underline disabled:hover:text-jsconf-muted"
             >
-              Skip text →
+              Continue →
             </button>
           )}
         </div>
@@ -144,14 +145,14 @@ export function Step3React({ onReactionSent }: Step3ReactProps) {
           <HighlightRing active={subStep === "send"} label="Send your reaction" labelPosition="top">
             <YellowButton
               onClick={handleSubmit}
-              disabled={!emoji}
+              disabled={!emoji || !text.trim()}
             >
               Send Reaction
             </YellowButton>
           </HighlightRing>
-          {!emoji && subStep !== "emoji" && (
+          {subStep !== "emoji" && (!emoji || !text.trim()) && (
             <p className="text-center font-mono text-xs text-jsconf-muted mt-2">
-              Pick an emoji first
+              {!emoji ? "Pick an emoji first" : "Add your reaction text first"}
             </p>
           )}
         </div>
