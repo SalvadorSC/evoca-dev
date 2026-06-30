@@ -250,6 +250,10 @@ export function InteractivePhoneMockup({
   const [sim, setSim] = useState<SimState | null>(null)
   const [activeTab, setActiveTab] = useState<"wall" | "qa">("wall")
   const [resetKey, setResetKey] = useState(0)
+  // Questions the visitor submits in the Ask tab. There's no PartyKit here, so
+  // we record them locally and seed each with a believable 5–10 peer votes
+  // (same trick as the demo tour) so the list feels alive.
+  const [askQuestions, setAskQuestions] = useState<Question[]>([])
   const phoneTab = activeTab === "wall" ? "react" : "ask"
 
   const lastInteractionRef = useRef<number>(Date.now())
@@ -276,6 +280,7 @@ export function InteractivePhoneMockup({
         hasInteractedRef.current = false
         simRunningRef.current = true
         setResetKey((k) => k + 1) // remount tabs to clear any typed input
+        setAskQuestions([]) // clear visitor-submitted questions on reset
         setSim(EMPTY_SIM)
         setTimeout(() => { if (simRunningRef.current) runNextSim() }, 600)
       }
@@ -467,6 +472,23 @@ export function InteractivePhoneMockup({
       }
       onActivity(item)
     }
+
+    // Record the submitted question in the Ask tab list with seeded votes (5–10).
+    if (_msg.type === "question") {
+      const fakeVotes = Math.floor(Math.random() * 6) + 5
+      setAskQuestions((prev) => [
+        {
+          type: "question",
+          id: _msg.id ?? crypto.randomUUID(),
+          name: _msg.name || "Anonymous",
+          text: _msg.text,
+          votes: fakeVotes,
+          answered: false,
+          ts: Date.now(),
+        },
+        ...prev,
+      ])
+    }
   }, [markInteraction, onActivity])
 
   return (
@@ -520,7 +542,7 @@ export function InteractivePhoneMockup({
 
             <TabsContent value="ask" className="mt-0 flex-1 min-h-0 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] relative">
               <div style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }} className="pb-8">
-                <AskTab key={resetKey} send={stubSend} questions={[]} />
+                <AskTab key={resetKey} send={stubSend} questions={askQuestions} />
               </div>
             </TabsContent>
           </Tabs>
