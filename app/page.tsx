@@ -107,38 +107,45 @@ function SplitHero({ onSelectRole }: { onSelectRole: (role: Role) => void }) {
 }
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
-function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
-  const otherRole: Role = role === "speaker" ? "organizer" : "speaker"
-  const otherAccent = ROLES[otherRole].accent
+function Nav({ role }: { role: Role }) {
+  // The "Pricing" link and primary CTA only appear once the visitor has
+  // scrolled past the hero section (the hero carries its own CTAs).
+  const [pastHero, setPastHero] = useState(false)
+
+  useEffect(() => {
+    const hero = document.querySelector("[data-hero]")
+    if (!hero) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setPastHero(!entry.isIntersecting),
+      { threshold: 0 },
+    )
+    observer.observe(hero)
+    return () => observer.disconnect()
+  }, [])
 
   return (
     <nav className="sticky top-0 z-50 bg-jsconf-bg/95 backdrop-blur border-b border-jsconf-border px-6 py-4 flex items-center justify-between">
       <Logo size="sm" />
       <div className="flex items-center gap-4">
-        <Link
-          href={`/pricing?for=${role}`}
-          className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors hidden sm:inline"
-        >
-          Pricing
-        </Link>
-        <CtaButton
-          variant="outline"
-          accent={otherAccent}
-          accentText={ROLES[otherRole].accentText}
-          onClick={onSwitchRole}
-          className="text-xs px-3 py-2 hidden sm:inline-flex"
-        >
-          {ROLES[otherRole].action} →
-        </CtaButton>
-        <CtaButton
-          variant="solid"
-          accent={ROLES[role].accent}
-          accentText={ROLES[role].accentText}
-          href="/login"
-          className="text-sm px-4 py-2 hidden sm:inline-flex"
-        >
-          Get started free →
-        </CtaButton>
+        {pastHero && (
+          <>
+            <Link
+              href={`/pricing?for=${role}`}
+              className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors hidden sm:inline"
+            >
+              Pricing
+            </Link>
+            <CtaButton
+              variant="solid"
+              accent={ROLES[role].accent}
+              accentText={ROLES[role].accentText}
+              href="/login"
+              className="text-sm px-4 py-2 hidden sm:inline-flex"
+            >
+              Get started free →
+            </CtaButton>
+          </>
+        )}
         <div className="hidden sm:block">
           <ThemeSwitcher />
         </div>
@@ -262,7 +269,7 @@ function FAQ({ items }: { items: { q: string; a: string }[] }) {
 }
 
 // ─── Speaker Experience ───────────────────────────────────────────────────────
-function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) {
+function SpeakerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: WaveAnimation; onSwitchRole: () => void }) {
   const isMobile = useIsMobile()
   // On phones, "See it live" sends visitors to the guided story tour instead
   // of the desktop-oriented demo page.
@@ -283,7 +290,7 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
   return (
     <div>
       {/* Hero */}
-      <section className="relative px-6 py-4 lg:py-12 overflow-hidden min-h-[480px]">
+      <section data-hero className="relative px-6 py-4 lg:py-12 overflow-hidden min-h-[480px]">
         <HeroBackground items={heroItems} accentColor="var(--wave-color, var(--accent))" waveAnimation={waveAnimation} />
         <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
@@ -299,6 +306,11 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
               </CtaButton>
               <CtaButton variant="ghost" href={demoHref} className="text-sm">
                 See it live →
+              </CtaButton>
+            </div>
+            <div className="mt-4">
+              <CtaButton variant="ghost" onClick={onSwitchRole} className="text-sm">
+                {ROLES.organizer.action} →
               </CtaButton>
             </div>
           </div>
@@ -393,7 +405,7 @@ function SpeakerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) 
 }
 
 // ─── Organizer Experience ──────────────────────────────────────────────────���──
-function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }) {
+function OrganizerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: WaveAnimation; onSwitchRole: () => void }) {
   const isMobile = useIsMobile()
   // On phones, "See it live" sends visitors to the guided story tour instead
   // of the desktop-oriented demo page.
@@ -415,7 +427,7 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
   return (
     <div>
       {/* Hero */}
-      <section className="relative px-6 py-16 lg:py-12 overflow-hidden min-h-[480px]">
+      <section data-hero className="relative px-6 py-16 lg:py-12 overflow-hidden min-h-[480px]">
         <HeroBackground items={heroItems} accentColor="var(--wave-color, var(--accent))" waveAnimation={waveAnimation} />
         <div className="relative z-10 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
           <div className="flex-1">
@@ -431,6 +443,11 @@ function OrganizerExperience({ waveAnimation }: { waveAnimation: WaveAnimation }
               </CtaButton>
               <CtaButton variant="ghost" href={demoHref} className="text-sm">
                 See it live →
+              </CtaButton>
+            </div>
+            <div className="mt-4">
+              <CtaButton variant="ghost" onClick={onSwitchRole} className="text-sm">
+                {ROLES.speaker.action} →
               </CtaButton>
             </div>
           </div>
@@ -616,10 +633,10 @@ function LandingContent() {
         <SplitHero onSelectRole={handleSelectRole} />
       ) : (
         <>
-          <Nav role={role} onSwitchRole={handleSwitchRole} />
+          <Nav role={role} />
           {role === "speaker"
-            ? <SpeakerExperience waveAnimation={waveAnimation} />
-            : <OrganizerExperience waveAnimation={waveAnimation} />}
+            ? <SpeakerExperience waveAnimation={waveAnimation} onSwitchRole={handleSwitchRole} />
+            : <OrganizerExperience waveAnimation={waveAnimation} onSwitchRole={handleSwitchRole} />}
 
 
           {showDevToggle && role === "organizer" && (
