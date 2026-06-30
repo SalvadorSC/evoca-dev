@@ -196,8 +196,8 @@ export function Step6Ask({ onNext }: Step6AskProps) {
       {subStep === "done" && (
         <div className="fixed inset-x-0 bottom-0 z-40 p-5 bg-gradient-to-t from-jsconf-bg via-jsconf-bg to-transparent animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex flex-col gap-3">
-            <div className="bg-jsconf-yellow-dim border border-jsconf-yellow/30 px-4 py-3">
-              <p className="font-mono text-sm text-jsconf-yellow text-balance">
+            <div className="bg-green-500/10 border border-green-500/30 px-4 py-3">
+              <p className="font-mono text-sm text-green-400 text-balance">
                 You know it&apos;s good, now it&apos;s time for your attendees to feel it.
               </p>
             </div>
