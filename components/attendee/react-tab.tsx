@@ -82,7 +82,7 @@ export function ReactTab({ send }: ReactTabProps) {
           value={text}
           onChange={(e) => setText(e.target.value.slice(0, 160))}
           maxLength={160}
-          className="bg-jsconf-surface rounded-none font-sans text-foreground placeholder:text-jsconf-muted resize-none transition-colors border-jsconf-border focus:border-jsconf-yellow focus:ring-jsconf-yellow/20"
+          className="bg-jsconf-surface rounded-none font-sans text-foreground placeholder:text-jsconf-muted resize-none transition-colors border-jsconf-border focus:border-jsconf-yellow focus:ring-jsconf-yellow/20 min-h-[72px]"
           rows={3}
         />
         {text.trim() && (
