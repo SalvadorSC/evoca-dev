@@ -145,47 +145,45 @@ export function Step6Ask({ onNext }: Step6AskProps) {
             const isUserQ = q.id === userQId
             const canVote = subStep === "vote" && isUserQ && !q.voted
             return (
-            <HighlightRing
-              key={q.id}
-              active={canVote}
-              label="Add your own vote"
-              labelPosition="bottom"
-            >
-              <div
-                className={`bg-jsconf-surface border border-jsconf-border p-3 flex gap-3 items-start animate-in slide-in-from-top-2 duration-300 ${
-                  q.id.startsWith("q-user") ? "border-jsconf-yellow/30" : ""
-                }`}
+              <HighlightRing
+                key={q.id}
+                active={canVote}
+                label="Add your own vote"
+                labelPosition="bottom"
               >
-                <button
-                  onClick={() => canVote && handleVote(q.id)}
-                  disabled={!canVote}
-                  className={`flex flex-col items-center gap-0.5 p-2 border transition-all duration-150 ${
-                    q.voted
-                      ? "text-jsconf-yellow bg-jsconf-yellow-dim border-jsconf-yellow"
-                      : canVote
-                        ? "text-jsconf-muted border-jsconf-border hover:text-jsconf-yellow hover:border-jsconf-yellow"
-                        : "text-jsconf-muted border-jsconf-border"
-                  } disabled:cursor-not-allowed`}
+                <div
+                  className={`bg-jsconf-surface border border-jsconf-border p-3 flex gap-3 items-start animate-in slide-in-from-top-2 duration-300 ${q.id.startsWith("q-user") ? "border-jsconf-yellow/30" : ""
+                    }`}
                 >
-                  <ChevronUp className="h-4 w-4" />
-                  <span
-                    key={q.votes}
-                    className="font-mono text-sm font-bold inline-block animate-in zoom-in-50 duration-150"
+                  <button
+                    onClick={() => canVote && handleVote(q.id)}
+                    disabled={!canVote}
+                    className={`flex flex-col items-center gap-0.5 p-2 border transition-all duration-150 ${q.voted
+                        ? "text-jsconf-yellow bg-jsconf-yellow-dim border-jsconf-yellow"
+                        : canVote
+                          ? "text-jsconf-muted border-jsconf-border hover:text-jsconf-yellow hover:border-jsconf-yellow"
+                          : "text-jsconf-muted border-jsconf-border"
+                      } disabled:cursor-not-allowed`}
                   >
-                    {q.votes}
-                  </span>
-                </button>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-white font-sans">{q.text}</p>
-                  <p className="font-mono text-xs text-jsconf-muted mt-1">
-                    {q.name}
-                    {q.id.startsWith("q-user") && (
-                      <span className="ml-2 text-jsconf-yellow">← yours</span>
-                    )}
-                  </p>
+                    <ChevronUp className="h-4 w-4" />
+                    <span
+                      key={q.votes}
+                      className="font-mono text-sm font-bold inline-block animate-in zoom-in-50 duration-150"
+                    >
+                      {q.votes}
+                    </span>
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-white font-sans">{q.text}</p>
+                    <p className="font-mono text-xs text-jsconf-muted mt-1">
+                      {q.name}
+                      {q.id.startsWith("q-user") && (
+                        <span className="ml-2 text-jsconf-yellow">← yours</span>
+                      )}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </HighlightRing>
+              </HighlightRing>
             )
           })}
         </div>
@@ -196,7 +194,7 @@ export function Step6Ask({ onNext }: Step6AskProps) {
       {subStep === "done" && (
         <div className="fixed inset-x-0 bottom-0 z-40 p-5 bg-gradient-to-t from-jsconf-bg via-jsconf-bg to-transparent animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex flex-col gap-3">
-            <div className="bg-green-500/10 border border-green-500/30 px-4 py-3">
+            <div className="bg-green-500/10 border border-green-500/80 px-4 py-3">
               <p className="font-mono text-sm text-green-400 text-balance">
                 You know it&apos;s good, now it&apos;s time for your attendees to feel it.
               </p>
