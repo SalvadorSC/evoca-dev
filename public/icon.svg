@@ -1,17 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" width="28" height="28">
-  <style>
-    .shell { stroke: #F7E018; }
-    @media (prefers-color-scheme: light) {
-      .shell { stroke: #0A0A0A; }
-    }
-  </style>
-  <path
-    class="shell"
-    d="M4 6C4 4.89543 4.89543 4 6 4H22C23.1046 4 24 4.89543 24 6V18C24 19.1046 23.1046 20 22 20H10L6 24V20H6C4.89543 20 4 19.1046 4 18V6Z"
-    stroke-width="2"
-    fill="none"
-  />
-  <circle cx="9"  cy="12" r="1.5" fill="#F7E018" />
-  <circle cx="14" cy="12" r="1.5" fill="#F7E018" />
-  <circle cx="19" cy="12" r="1.5" fill="#F7E018" />
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#080808"/>
+  <g transform="translate(2,2)">
+    <path d="M4 6C4 4.89543 4.89543 4 6 4H22C23.1046 4 24 4.89543 24 6V18C24 19.1046 23.1046 20 22 20H10L6 24V20H6C4.89543 20 4 19.1046 4 18V6Z" stroke="#FAFAFA" stroke-width="2" fill="none"/>
+    <circle cx="9" cy="12" r="1.5" fill="#FAFAFA"/>
+    <circle cx="14" cy="12" r="1.5" fill="#FAFAFA"/>
+    <circle cx="19" cy="12" r="1.5" fill="#FAFAFA"/>
+  </g>
 </svg>
