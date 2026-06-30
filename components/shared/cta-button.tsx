@@ -4,7 +4,7 @@ import Link from "next/link"
 import type { ComponentPropsWithoutRef, CSSProperties, ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
-type CtaVariant = "solid" | "outline" | "ghost" | "rainbow"
+type CtaVariant = "solid" | "outline" | "ghost"
 
 interface CtaButtonBaseProps {
   variant?: CtaVariant
@@ -38,12 +38,6 @@ function variantClasses(variant: CtaVariant): string {
   if (variant === "ghost") {
     // Subdued secondary: keeps foreground text, only a faint accent tint on hover.
     return "bg-transparent text-foreground border-[var(--cta-accent)] hover:bg-[color-mix(in_srgb,var(--cta-accent)_14%,transparent)]"
-  }
-  if (variant === "rainbow") {
-    // Opaque page-colored body so the animated conic-gradient pseudo-element only
-    // shows through the 2px border gap (border, not background). background-clip:
-    // padding-box on .cta-rainbow keeps this fill inside the border.
-    return "cta-rainbow bg-jsconf-bg text-foreground border-transparent hover:bg-jsconf-surface"
   }
   return "bg-transparent text-[var(--cta-accent)] border-[var(--cta-accent)] hover:bg-[var(--cta-accent)] hover:text-[var(--cta-accent-text)]"
 }

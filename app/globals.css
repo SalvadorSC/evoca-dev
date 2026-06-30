@@ -201,50 +201,6 @@
   }
 }
 
-/* ── Animated rainbow border ───────────────────────────────────────────────
-   Uses a CSS @property to animate --angle, which drives a conic-gradient
-   pseudo-element that bleeds through a transparent border-gap.
-   Respects prefers-reduced-motion by switching to a static rainbow border. */
-@property --rainbow-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
-@keyframes rainbow-spin {
-  to { --rainbow-angle: 360deg; }
-}
-
-.cta-rainbow {
-  position: relative;
-  border-color: transparent !important;
-  background-clip: padding-box;
-  isolation: isolate;
-}
-
-.cta-rainbow::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  z-index: -1;
-  border-radius: inherit;
-  background: conic-gradient(
-    from var(--rainbow-angle),
-    #ff0080, #ff8c00, #ffe600, #39ff14, #00c8ff, #7b2fff, #ff0080
-  );
-  animation: rainbow-spin 3s linear infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cta-rainbow::before {
-    animation: none;
-    background: conic-gradient(
-      from 0deg,
-      #ff0080, #ff8c00, #ffe600, #39ff14, #00c8ff, #7b2fff, #ff0080
-    );
-  }
-}
-
 @keyframes zap-jiggle {
   0%   { transform: rotate(0deg)   scale(1);    color: inherit;               fill: inherit; }
   15%  { transform: rotate(-20deg) scale(1.2);  color: var(--jsconf-yellow);  fill: var(--jsconf-yellow); }

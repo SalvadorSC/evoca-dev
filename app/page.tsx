@@ -249,7 +249,7 @@ function SpeakerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: Wav
               </CtaButton>
             </div>
             <div className="mt-4">
-              <CtaButton variant="rainbow" onClick={onSwitchRole} className="text-sm">
+              <CtaButton variant="ghost" onClick={onSwitchRole} className="text-sm">
                 {ROLES.organizer.action}
               </CtaButton>
             </div>
@@ -386,7 +386,7 @@ function OrganizerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: W
               </CtaButton>
             </div>
             <div className="mt-4">
-              <CtaButton variant="rainbow" onClick={onSwitchRole} className="text-sm">
+              <CtaButton variant="ghost" onClick={onSwitchRole} className="text-sm">
                 {ROLES.speaker.action}
               </CtaButton>
             </div>
