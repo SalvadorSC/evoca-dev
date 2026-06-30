@@ -120,7 +120,7 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
       <div className="flex items-center gap-4">
         <Link
           href="/pricing"
-          className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors"
+          className="font-mono text-xs text-jsconf-muted hover:text-foreground transition-colors hidden sm:inline"
         >
           Pricing
         </Link>
@@ -130,10 +130,12 @@ function Nav({ role, onSwitchRole }: { role: Role; onSwitchRole: () => void }) {
         >
           Switch to {otherRole}
         </button>
-        <ThemeSwitcher />
+        <div className="hidden sm:block">
+          <ThemeSwitcher />
+        </div>
         <Link
           href="/login"
-          className="font-mono text-sm font-bold px-4 py-2 transition-colors bg-primary text-primary-foreground"
+          className="font-mono text-sm font-bold px-4 py-2 transition-colors bg-primary text-primary-foreground hidden sm:inline-block"
         >
           Get started free →
         </Link>
