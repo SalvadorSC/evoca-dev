@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { ChevronDown, Trophy } from "lucide-react"
+import { ChevronDown, Trophy, Flame, BarChart2, Smartphone, Gift, CalendarDays, Mic, WallpaperIcon, TrendingUp } from "lucide-react"
 import { STORAGE_KEYS } from "@/lib/storage-keys"
 import { InteractivePhoneMockup, HeroBackground } from "@/components/shared/phone-mockup"
 import { Logo } from "@/components/shared/logo"
@@ -109,11 +109,11 @@ function Nav({ role }: { role: Role }) {
 
 
 // ─── Feature Card ─────────────────────────────────────────────────────────────
-function FeatureCard({ icon, title, description, badge }: { icon: string; title: string; description: string; badge?: string }) {
+function FeatureCard({ icon, title, description, badge }: { icon: React.ReactNode; title: string; description: string; badge?: string }) {
   return (
     <div className="bg-jsconf-surface border-l-[3px] p-5" style={{ borderLeftColor: "var(--accent)" }}>
       <div className="flex items-start justify-between mb-2">
-        <span className="text-2xl">{icon}</span>
+        <span className="text-jsconf-yellow" style={{ color: "var(--accent)" }}>{icon}</span>
         {badge && (
           <span className="font-mono text-[10px] px-2 py-0.5 border" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>
             {badge}
@@ -277,23 +277,23 @@ function SpeakerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: Wav
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FeatureCard
-              icon="🔥"
+              icon={<Flame className="h-6 w-6" />}
               title="Live reactions + Q&A"
               description={"Your audience reacts in real time.\nQuestions are upvoted to the top."}
             />
             <FeatureCard
-              icon="📊"
+              icon={<BarChart2 className="h-6 w-6" />}
               title="Post-session analytics"
               description={"Engagement over time, top questions\nand reaction peaks after every talk."}
               badge="PAID"
             />
             <FeatureCard
-              icon="📱"
+              icon={<Smartphone className="h-6 w-6" />}
               title="No sign-up for attendees"
               description={"Attendees join by scanning a QR.\nNo app, no account, no friction."}
             />
             <FeatureCard
-              icon="🆓"
+              icon={<Gift className="h-6 w-6" />}
               title="Free to start"
               description={"5 talks free forever.\nUpgrade only when you need more."}
             />
@@ -414,22 +414,22 @@ function OrganizerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: W
         <div className="max-w-4xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FeatureCard
-              icon="📅"
+              icon={<CalendarDays className="h-6 w-6" />}
               title="Schedule management"
               description={"Build your event schedule.\nAttendees see it live and plan their day."}
             />
             <FeatureCard
-              icon="🎤"
+              icon={<Mic className="h-6 w-6" />}
               title="Speaker onboarding"
               description={"Invite speakers by email or join link.\nThey set up their own talks in minutes."}
             />
             <FeatureCard
-              icon="🔥"
+              icon={<WallpaperIcon className="h-6 w-6" />}
               title="Live Wall for every session"
               description={"Every talk gets reactions, Q&A and a\nprojector wall automatically."}
             />
             <FeatureCard
-              icon="📊"
+              icon={<TrendingUp className="h-6 w-6" />}
               title="Engagement metrics"
               description={"See which sessions drove the most\nengagement across your entire event."}
             />

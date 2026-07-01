@@ -262,7 +262,7 @@ export default function PresentPage() {
     ])
 
     await finishSession(supabase, sessionId)
-    router.push("/dashboard")
+    router.push("/dashboard/conference")
   }
 
   // ── Phone remote ────────────────────────────────────────────────────────────
@@ -318,7 +318,7 @@ export default function PresentPage() {
     return (
       <div className="fixed inset-0 bg-[#080808] flex flex-col items-center justify-center gap-6">
         <p className="font-display font-bold text-white text-2xl uppercase tracking-wide">Session not found</p>
-        <a href="/dashboard" className="font-mono text-sm text-jsconf-yellow underline">
+        <a href="/dashboard/conference" className="font-mono text-sm text-jsconf-yellow underline">
           Back to dashboard
         </a>
       </div>
