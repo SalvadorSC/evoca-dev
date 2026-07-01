@@ -16,11 +16,18 @@ import { Logo } from "@/components/shared/logo"
  * isn't readable here. It increments/decrements with each tap and never drops
  * below 1.
  */
+interface SlidePreview {
+  url: string
+  index: number
+  total: number
+}
+
 export function RemoteControl({ room, token }: { room: string; token: string }) {
   const socketRef = useRef<PartySocket | null>(null)
   const [connected, setConnected] = useState(false)
   const [slide, setSlide] = useState(1)
   const [flash, setFlash] = useState<"prev" | "next" | null>(null)
+  const [preview, setPreview] = useState<SlidePreview | null>(null)
   const touchStartX = useRef<number | null>(null)
 
   // ── Connect to the room as the speaker (token grants the role) ──────────────
@@ -29,11 +36,23 @@ export function RemoteControl({ room, token }: { room: string; token: string }) 
     socketRef.current = socket
     const onOpen = () => setConnected(true)
     const onClose = () => setConnected(false)
+    const onMessage = (event: MessageEvent) => {
+      if (typeof event.data !== "string") return
+      try {
+        const msg = JSON.parse(event.data)
+        if (msg.type === "slide_image" && typeof msg.url === "string") {
+          setPreview({ url: msg.url, index: msg.index ?? 0, total: msg.total ?? 0 })
+          setSlide((msg.index ?? 0) + 1)
+        }
+      } catch { /* ignore malformed messages */ }
+    }
     socket.addEventListener("open", onOpen)
     socket.addEventListener("close", onClose)
+    socket.addEventListener("message", onMessage)
     return () => {
       socket.removeEventListener("open", onOpen)
       socket.removeEventListener("close", onClose)
+      socket.removeEventListener("message", onMessage)
       socket.close()
     }
   }, [room, token])
@@ -110,13 +129,35 @@ export function RemoteControl({ room, token }: { room: string; token: string }) 
         </span>
       </div>
 
-      {/* Slide counter */}
-      <div className="flex-1 flex flex-col items-center justify-center gap-2">
-        <span className="font-mono text-xs uppercase tracking-widest text-jsconf-muted">Slide</span>
-        <span className="font-display font-bold text-white text-7xl tabular-nums">{slide}</span>
-        <span className="font-mono text-[10px] uppercase tracking-widest text-jsconf-muted mt-2">
-          Swipe or tap below
-        </span>
+      {/* Slide preview / counter */}
+      <div className="flex-1 flex flex-col items-center justify-center gap-3 px-4">
+        {preview ? (
+          <>
+            {/* Slide thumbnail */}
+            <div className="w-full max-w-xs border border-jsconf-border bg-black overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={preview.url}
+                alt={`Slide ${preview.index + 1}`}
+                className="w-full object-contain"
+                style={{ maxHeight: "200px" }}
+              />
+            </div>
+            <div className="flex items-center gap-1.5 font-mono text-sm text-jsconf-muted">
+              <span className="text-white font-bold">{preview.index + 1}</span>
+              <span>/</span>
+              <span>{preview.total}</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <span className="font-mono text-xs uppercase tracking-widest text-jsconf-muted">Slide</span>
+            <span className="font-display font-bold text-white text-7xl tabular-nums">{slide}</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-jsconf-muted mt-2">
+              Swipe or tap below
+            </span>
+          </>
+        )}
       </div>
 
       {/* Big tap targets */}

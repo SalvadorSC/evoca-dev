@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { submitProposal } from "@/lib/cfp"
 import { sendEmail, cfpConfirmationEmail } from "@/lib/email"
+import { CFP_ENABLED } from "@/lib/flags"
 
 export const dynamic = "force-dynamic"
 
@@ -20,6 +21,10 @@ interface Body {
 }
 
 export async function POST(req: NextRequest) {
+  if (!CFP_ENABLED) {
+    return NextResponse.json({ error: "CFP is not enabled." }, { status: 403 })
+  }
+
   let body: Body
   try {
     body = await req.json()

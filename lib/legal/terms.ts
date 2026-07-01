@@ -52,7 +52,7 @@ We provide the Service on a commercially reasonable, best-efforts basis and do n
 
 To access certain features you must create an account. EVOCA uses passwordless ("magic link") authentication, so you are responsible for maintaining the security of the email account associated with your EVOCA account. You agree to provide accurate, current, and complete information and to keep it up to date.
 
-You are responsible for all activity that occurs under your account. Do not share your account or sign-in links with others. Notify us promptly at [security@evoca.dev](mailto:security@evoca.dev) [VERIFY] if you suspect unauthorized use. We may suspend or terminate accounts as described in Section 12.
+You are responsible for all activity that occurs under your account. Do not share your account or sign-in links with others. Notify us promptly at [hello@evoca.dev](mailto:hello@evoca.dev) if you suspect unauthorized use. We may suspend or terminate accounts as described in Section 12.
 
 ---
 
@@ -89,7 +89,7 @@ The Service lets users submit content such as audience questions, reactions, pol
 
 You grant EVOCA a worldwide, non-exclusive, royalty-free license to host, store, reproduce, display, and distribute your User Content solely as necessary to operate and provide the Service. You represent that you have the rights to submit your User Content and that it does not violate any law or third-party right.
 
-We may remove User Content that violates these Terms or is otherwise objectionable. If you believe content on the Service infringes your copyright, send a notice to [legal@evoca.dev](mailto:legal@evoca.dev) [VERIFY] with the information required under applicable law (including the DMCA, where relevant): identification of the work, the infringing material's location, your contact details, and a good-faith statement.
+We may remove User Content that violates these Terms or is otherwise objectionable. If you believe content on the Service infringes your copyright, send a notice to [hello@evoca.dev](mailto:hello@evoca.dev) with the information required under applicable law (including the DMCA, where relevant): identification of the work, the infringing material's location, your contact details, and a good-faith statement.
 
 ---
 
@@ -120,11 +120,11 @@ We process personal data such as account email addresses, optional display names
 
 ### 8.1 GDPR (European Economic Area, UK)
 
-If you are located in the EEA or UK, we process your personal data on the following legal bases: performance of our contract with you, your consent, our legitimate interests, and compliance with legal obligations. You have the right to access, rectify, erase, restrict, and port your data, and to object to certain processing. You may exercise these rights by contacting [privacy@evoca.dev](mailto:privacy@evoca.dev) [VERIFY]. You also have the right to lodge a complaint with your local supervisory authority. Where data is transferred outside the EEA/UK, we rely on appropriate safeguards such as Standard Contractual Clauses. [VERIFY: confirm sub-processors and transfer mechanisms.]
+If you are located in the EEA or UK, we process your personal data on the following legal bases: performance of our contract with you, your consent, our legitimate interests, and compliance with legal obligations. You have the right to access, rectify, erase, restrict, and port your data, and to object to certain processing. You may exercise these rights by contacting [hello@evoca.dev](mailto:hello@evoca.dev). You also have the right to lodge a complaint with your local supervisory authority. Where data is transferred outside the EEA/UK, we rely on appropriate safeguards such as Standard Contractual Clauses. [VERIFY: confirm sub-processors and transfer mechanisms.]
 
 ### 8.2 CCPA/CPRA (California)
 
-If you are a California resident, you have the right to know what personal information we collect, to request deletion of your personal information, to opt out of the "sale" or "sharing" of personal information, and to non-discrimination for exercising your rights. We do not sell your personal information. To exercise these rights, contact [privacy@evoca.dev](mailto:privacy@evoca.dev) [VERIFY].
+If you are a California resident, you have the right to know what personal information we collect, to request deletion of your personal information, to opt out of the "sale" or "sharing" of personal information, and to non-discrimination for exercising your rights. We do not sell your personal information. To exercise these rights, contact [hello@evoca.dev](mailto:hello@evoca.dev).
 
 ### 8.3 Cookies
 
@@ -156,7 +156,7 @@ You agree to indemnify and hold harmless EVOCA and its officers, employees, and 
 
 > **Plain English:** You can leave anytime by deleting your account. We can suspend or close accounts that break the rules. When an account ends, access stops and we handle your data as described.
 
-You may stop using the Service and delete your account at any time from your account settings or by contacting [support@evoca.dev](mailto:support@evoca.dev) [VERIFY]. We may suspend or terminate your access if you violate these Terms or to protect the Service or other users, with notice where reasonable.
+You may stop using the Service and delete your account at any time from your account settings or by contacting [hello@evoca.dev](mailto:hello@evoca.dev). We may suspend or terminate your access if you violate these Terms or to protect the Service or other users, with notice where reasonable.
 
 On termination, your right to use the Service ceases. We may retain or delete your data in accordance with our Privacy Policy and applicable law. [VERIFY: confirm data retention/deletion periods.] Sections that by their nature should survive termination (including Sections 5, 9, 10, 13, and 14) will survive.
 
@@ -168,7 +168,7 @@ On termination, your right to use the Service ceases. We may retain or delete yo
 
 **Governing law.** These Terms are governed by the laws of [VERIFY: specify governing jurisdiction], without regard to conflict-of-laws rules.
 
-**Informal resolution.** Before filing a claim, you agree to contact us at [legal@evoca.dev](mailto:legal@evoca.dev) [VERIFY] and attempt to resolve the dispute informally for at least 30 days.
+**Informal resolution.** Before filing a claim, you agree to contact us at [hello@evoca.dev](mailto:hello@evoca.dev) and attempt to resolve the dispute informally for at least 30 days.
 
 **Arbitration and class-action waiver.** [VERIFY: confirm whether binding arbitration applies in your jurisdiction.] Where permitted and adopted, disputes will be resolved by binding individual arbitration administered by a recognized provider (e.g., AAA or JAMS), and **you and EVOCA waive the right to participate in a class action**. You may opt out of arbitration by emailing us within 30 days of first accepting these Terms. Either party may bring a qualifying claim in small claims court.
 
@@ -196,9 +196,7 @@ These Terms constitute the entire agreement between you and EVOCA regarding the 
 
 > **Plain English:** Questions about these terms? Here's how to reach us.
 
-- **General support:** [support@evoca.dev](mailto:support@evoca.dev) [VERIFY]
-- **Legal notices:** [legal@evoca.dev](mailto:legal@evoca.dev) [VERIFY]
-- **Privacy requests:** [privacy@evoca.dev](mailto:privacy@evoca.dev) [VERIFY]
+- **General, legal and privacy enquiries:** [hello@evoca.dev](mailto:hello@evoca.dev)
 - **Mailing address:** [VERIFY: add a physical mailing address — required under various regulations.]
 
 ---

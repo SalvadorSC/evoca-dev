@@ -4,6 +4,7 @@ import { getCfpBySlug } from "@/lib/cfp"
 import { CfpSubmissionForm } from "@/components/cfp/cfp-submission-form"
 import { Logo } from "@/components/shared/logo"
 import { CalendarClock, Lock } from "lucide-react"
+import { CFP_ENABLED } from "@/lib/flags"
 
 export const dynamic = "force-dynamic"
 
@@ -41,6 +42,8 @@ export default async function CfpPage({
 }: {
   params: Promise<{ slug: string }>
 }) {
+  if (!CFP_ENABLED) notFound()
+
   const { slug } = await params
   const cfp = await getCfpBySlug(slug)
   if (!cfp) notFound()
