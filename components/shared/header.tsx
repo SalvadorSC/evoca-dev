@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { Menu, X, Zap, MessageCircleQuestion, Calendar, Monitor, Shield, Mic, Code2, ExternalLink } from "lucide-react"
+import { Menu, X, Zap, MessageCircleQuestion, Calendar, Monitor, Shield, Mic, ExternalLink } from "lucide-react"
 import { Logo } from "@/components/shared/logo"
 
 const ROUTES = [
@@ -10,7 +10,6 @@ const ROUTES = [
   { path: "/wall", name: "Wall", icon: Monitor, description: "Projector view — live reactions & Q&A" },
   { path: "/speaker", name: "Speaker", icon: Mic, description: "Q&A dashboard with timer" },
   { path: "/admin", name: "Admin", icon: Shield, description: "Moderation & control panel" },
-  { path: "/dev", name: "Dev", icon: Code2, description: "Debug dashboard", disabled: true },
 ]
 
 interface HeaderProps {
@@ -88,7 +87,7 @@ export function Header({ pageName, connectionCount, isConnected = true, currentT
                 <Link
                   key={route.path}
                   href={route.path}
-                  onClick={() => { if (!route.disabled) { setMenuOpen(false) } }}
+                  onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-3 px-3 py-2.5 border border-transparent hover:border-jsconf-yellow hover:bg-jsconf-surface-2 transition-all duration-150 group"
                 >
                   <div className="w-8 h-8 flex items-center justify-center bg-jsconf-bg border border-jsconf-border group-hover:border-jsconf-yellow flex-shrink-0">
@@ -96,7 +95,7 @@ export function Header({ pageName, connectionCount, isConnected = true, currentT
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs text-jsconf-muted">{route.path} {route.disabled && '(Route disabled :D)'}</span>
+                      <span className="font-mono text-xs text-jsconf-muted">{route.path}</span>
                     </div>
                     <p className="font-display font-bold text-sm text-white uppercase tracking-wide">{route.name}</p>
                     <p className="font-sans text-xs text-jsconf-muted truncate">{route.description}</p>

@@ -117,16 +117,17 @@ export function ConferenceEditor({
 
   const [editingName, setEditingName] = useState(false)
   const [nameDraft, setNameDraft] = useState(conference.name)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   function run(fn: () => Promise<void>) {
+    setActionError(null)
     startTransition(async () => {
       try {
         await fn()
         router.refresh()
       } catch (e) {
-        // Surface a minimal alert; inline errors handled within dialogs.
-        console.log("[v0] conference action error:", e instanceof Error ? e.message : e)
-        window.alert(e instanceof Error ? e.message : "Action failed.")
+        const msg = e instanceof Error ? e.message : "Action failed."
+        setActionError(msg)
       }
     })
   }
@@ -252,6 +253,14 @@ export function ConferenceEditor({
         />
       </div>
 
+      {/* Inline action error */}
+      {actionError && (
+        <div className="mb-4 px-4 py-3 bg-jsconf-red/10 border border-jsconf-red/30 font-mono text-xs text-jsconf-red flex items-center justify-between gap-4">
+          <span>{actionError}</span>
+          <button onClick={() => setActionError(null)} className="text-jsconf-red hover:text-foreground shrink-0">Dismiss</button>
+        </div>
+      )}
+
       {/* Day tabs */}
       <div className="flex items-center gap-2 flex-wrap border-b border-jsconf-border mb-6 pb-3 mt-4">
         {days.map((day) => (
@@ -267,15 +276,19 @@ export function ConferenceEditor({
             {day.label}
           </button>
         ))}
-        {days.length < MAX_CONFERENCE_DAYS && (
+        {days.length < MAX_CONFERENCE_DAYS ? (
           <button
             onClick={() => run(() => addDay(conference.id))}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 px-3 py-2 border border-dashed border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-foreground hover:border-white transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-2 border border-dashed border-jsconf-border font-mono text-xs uppercase tracking-wider text-jsconf-muted hover:text-foreground hover:border-white transition-colors disabled:opacity-50"
           >
             <Plus className="h-3 w-3" />
             Add day
           </button>
+        ) : (
+          <span className="font-mono text-xs text-jsconf-muted px-2">
+            Max {MAX_CONFERENCE_DAYS} days reached
+          </span>
         )}
       </div>
 

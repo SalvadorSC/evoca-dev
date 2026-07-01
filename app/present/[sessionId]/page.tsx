@@ -8,6 +8,7 @@ import { getSessionById, finishSession } from "@/lib/db"
 import { useParty } from "@/hooks/use-party"
 import { EmojiBurst } from "@/components/wall/emoji-burst"
 import { Pin, PinOff, ExternalLink, Smartphone } from "lucide-react"
+import { PHONE_CONTROLLER_ENABLED } from "@/lib/flags"
 import { PresenterQuestionCard } from "@/components/shared/question-card"
 import { Logo } from "@/components/shared/logo"
 
@@ -99,6 +100,8 @@ export default function PresentPage() {
           const manifest = await fetch(data.talks.slide_url).then(r => r.json())
           if (Array.isArray(manifest.slides)) {
             setFileSlides(manifest.slides)
+            // Will be broadcast once the PartyKit connection is ready — sent
+            // from broadcastSlidePreview which is called on first navigation.
           }
         } catch (err) {
           console.error("Failed to load slide manifest:", err)
@@ -117,21 +120,39 @@ export default function PresentPage() {
     iframeRef.current?.contentWindow?.postMessage({ method }, "*")
   }, [])
 
+  const broadcastSlidePreview = useCallback((index: number, slides: string[]) => {
+    if (slides.length === 0) return
+    send({
+      type: "slide_image",
+      url: slides[index],
+      index,
+      total: slides.length,
+    } as any)
+  }, [send]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const slideNext = useCallback(() => {
     if (isFileSlide && fileSlides.length > 0) {
-      setCurrentFileSlideIndex(i => Math.min(i + 1, fileSlides.length - 1))
+      setCurrentFileSlideIndex(i => {
+        const next = Math.min(i + 1, fileSlides.length - 1)
+        broadcastSlidePreview(next, fileSlides)
+        return next
+      })
     } else {
       postToIframe("next")
     }
-  }, [isFileSlide, fileSlides.length, postToIframe])
+  }, [isFileSlide, fileSlides, postToIframe, broadcastSlidePreview])
 
   const slidePrev = useCallback(() => {
     if (isFileSlide && fileSlides.length > 0) {
-      setCurrentFileSlideIndex(i => Math.max(i - 1, 0))
+      setCurrentFileSlideIndex(i => {
+        const prev = Math.max(i - 1, 0)
+        broadcastSlidePreview(prev, fileSlides)
+        return prev
+      })
     } else {
       postToIframe("prev")
     }
-  }, [isFileSlide, fileSlides.length, postToIframe])
+  }, [isFileSlide, fileSlides, postToIframe, broadcastSlidePreview])
 
   const slideUp = useCallback(() => postToIframe("up"), [postToIframe])
   const slideDown = useCallback(() => postToIframe("down"), [postToIframe])
@@ -223,17 +244,22 @@ export default function PresentPage() {
     // Broadcast to all attendees that the session is finished
     send({ type: "session_finished", sessionId })
 
-    // Persist the final Q&A so it appears in the dashboard history.
-    // Best-effort: never block ending the session on this.
-    try {
-      await fetch("/api/sessions/snapshot-questions", {
+    // Persist the final Q&A and reaction count so they appear in the dashboard
+    // history. Both are best-effort: never block ending the session on these.
+    await Promise.allSettled([
+      fetch("/api/sessions/snapshot-questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId, questions: state.questions }),
-      })
-    } catch (err) {
-      console.error("[v0] Failed to snapshot Q&A:", (err as Error).message)
-    }
+      }).catch((err) => console.error("[v0] Failed to snapshot Q&A:", (err as Error).message)),
+      fetch("/api/sessions/snapshot-reactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, reactionCount: state.reactions?.length ?? 0 }),
+      }).catch((err) =>
+        console.error("[v0] Failed to snapshot reactions:", (err as Error).message),
+      ),
+    ])
 
     await finishSession(supabase, sessionId)
     router.push("/dashboard")
@@ -512,13 +538,15 @@ export default function PresentPage() {
           <Divider />
           <ControlBtn onClick={toggleFullscreen} title="Toggle fullscreen (F)">⛶</ControlBtn>
           <ControlBtn onClick={() => setQaOpen((v) => !v)} title="Toggle Q&A (Q)">Q</ControlBtn>
-          <button
-            onClick={openRemote}
-            title="Phone remote"
-            className="text-white hover:text-jsconf-yellow transition-colors px-3 py-1.5 flex items-center"
-          >
-            <Smartphone className="h-4 w-4" />
-          </button>
+          {PHONE_CONTROLLER_ENABLED && (
+            <button
+              onClick={openRemote}
+              title="Phone remote"
+              className="text-white hover:text-jsconf-yellow transition-colors px-3 py-1.5 flex items-center"
+            >
+              <Smartphone className="h-4 w-4" />
+            </button>
+          )}
           <Divider />
           <button
             onClick={() => setShowEndConfirm(true)}
@@ -532,7 +560,7 @@ export default function PresentPage() {
       </div>
 
       {/* ── Phone remote modal ── */}
-      {showRemote && (
+      {PHONE_CONTROLLER_ENABLED && showRemote && (
         <div
           className="fixed inset-0 flex items-center justify-center"
           style={{ zIndex: 50, background: "rgba(0,0,0,0.7)" }}

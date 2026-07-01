@@ -133,9 +133,22 @@ export async function extractSlides(file: File): Promise<SlideExtractionResult> 
 
   if (ext === 'pptx') {
     const slides = await extractPptxImages(file)
+    if (slides.length === 0) {
+      throw new Error(
+        'No images could be extracted from this PPTX. ' +
+        'Slides that contain only text or shapes without embedded images are not supported — ' +
+        'try exporting your presentation as a PDF instead.',
+      )
+    }
     return { slides, totalSlides: slides.length, format: 'pptx' }
   } else if (ext === 'pdf') {
     const slides = await extractPdfPages(file)
+    if (slides.length === 0) {
+      throw new Error(
+        'No pages could be rendered from this PDF. ' +
+        'Make sure the file is a valid, non-encrypted PDF.',
+      )
+    }
     return { slides, totalSlides: slides.length, format: 'pdf' }
   } else {
     throw new Error('Unsupported file format. Use .pptx or .pdf')
