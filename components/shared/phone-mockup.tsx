@@ -131,8 +131,6 @@ const MAX_VISIBLE = 10
 import { WaveBackground } from "@/components/shared/wave-background"
 import type { WaveAnimation } from "@/components/shared/wave-background"
 export type { WaveAnimation }
-import { PhoneOverlay } from "@/components/landing/phone-overlay-variants"
-import type { VariantId } from "@/components/landing/variant-picker"
 
 export function HeroBackground({
   items,
@@ -243,11 +241,9 @@ const IDLE_MS = 3_000
 export function InteractivePhoneMockup({
   onActivity,
   currentItems = [],
-  variant = "A",
 }: {
   onActivity: (item: LiveItem) => void
   currentItems?: LiveItem[]
-  variant?: VariantId
 }) {
   // Sim overlay state — shown on top of the real tabs during automation
   // null = user is interacting (real tab visible), non-null = sim overlay shown (even between rounds)
@@ -562,7 +558,7 @@ export function InteractivePhoneMockup({
 
               {/* Sim overlay for React tab */}
               {sim?.active && sim.tab === "react" && (
-                <PhoneOverlay sim={sim} variant={variant} />
+                <SimOverlayReact sim={sim} />
               )}
             </TabsContent>
 
@@ -573,6 +569,60 @@ export function InteractivePhoneMockup({
             </TabsContent>
           </Tabs>
         </PhoneFrame>
+      </div>
+    </div>
+  )
+}
+
+// ─── Sim Overlay — React Tab ──────────────────────────────────────────────────
+// Covers the real ReactTab during simulation. Renders the same fields (name,
+// reaction text, emoji picker, CTA) so the layout does not shift when toggled.
+const SIM_EMOJI_OPTIONS = ["🔥", "🤯", "😂", "💀", "👏", "🚀"]
+
+function SimOverlayReact({ sim }: { sim: SimState }) {
+  const isTypingName = sim.phase === "typing-name"
+  const isTypingText = sim.phase === "typing-text"
+
+  return (
+    <div
+      className="absolute inset-0 pointer-events-none"
+      style={{ transform: "scale(0.82)", transformOrigin: "top center", width: "122%", marginLeft: "-11%" }}
+    >
+      <div className="flex flex-col gap-5 pb-4 bg-jsconf-bg min-h-full">
+        {/* Name */}
+        <div className="flex flex-col gap-2">
+          <label className="font-mono text-xs text-jsconf-muted uppercase tracking-wide">
+            Your Name <span className="normal-case">(optional)</span>
+          </label>
+          <div className={`bg-jsconf-surface border h-11 flex items-center px-3 font-sans text-sm ${isTypingName && sim.typedName ? "border-jsconf-yellow" : "border-jsconf-border"}`}>
+            {sim.typedName ? <span className="text-foreground">{sim.typedName}</span> : <span className="text-jsconf-muted">Anonymous</span>}
+            {isTypingName && sim.typedName && <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />}
+          </div>
+        </div>
+        {/* Reaction */}
+        <div className="flex flex-col gap-2">
+          <label className="font-mono text-xs text-jsconf-muted uppercase tracking-wide flex justify-between">
+            <span>Your Reaction <span className="normal-case font-sans font-normal">(optional)</span></span>
+            <span>{sim.typedText.length}/160</span>
+          </label>
+          <div className={`bg-jsconf-surface border px-3 py-2 font-sans text-sm min-h-[72px] ${isTypingText ? "border-jsconf-yellow" : "border-jsconf-border"}`}>
+            {sim.typedText ? <span className="text-foreground">{sim.typedText}</span> : <span className="text-jsconf-muted">Share your thoughts</span>}
+            {isTypingText && sim.typedText && <span className="inline-block w-[2px] h-[14px] bg-jsconf-yellow ml-[1px] animate-pulse" />}
+          </div>
+        </div>
+        {/* Emoji picker */}
+        <div className="flex flex-col gap-2">
+          <label className="font-mono text-xs text-jsconf-muted uppercase tracking-wide">How are you feeling?</label>
+          <div className="flex gap-2 flex-wrap p-2">
+            {SIM_EMOJI_OPTIONS.map((e) => (
+              <div key={e} className={`text-3xl p-3 border transition-all duration-150 ${sim.emoji === e ? "bg-jsconf-yellow-dim border-jsconf-yellow scale-110" : "bg-jsconf-surface border-jsconf-border"}`}>{e}</div>
+            ))}
+          </div>
+        </div>
+        {/* CTA */}
+        <div className="w-full h-12 flex items-center justify-center font-display font-bold uppercase tracking-wide text-sm bg-jsconf-yellow text-black">
+          {sim.phase === "done" ? "Sent!" : sim.emoji ? `Send ${sim.emoji}` : "Send Reaction"}
+        </div>
       </div>
     </div>
   )

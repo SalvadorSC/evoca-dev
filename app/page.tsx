@@ -12,8 +12,6 @@ import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
 import { ReducedMotionToggle } from "@/components/shared/wave-background"
 import { OrganizerPricing } from "@/components/landing/organizer-pricing"
 import { InteractivePhoneHint } from "@/components/landing/interactive-phone-hint"
-import { FloatingVariantPicker } from "@/components/landing/variant-picker"
-import type { VariantId } from "@/components/landing/variant-picker"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -224,7 +222,7 @@ function FAQ({ items }: { items: { q: string; a: string }[] }) {
 }
 
 // ─── Speaker Experience ───────────────────────────────────────────────────────
-function SpeakerExperience({ waveAnimation, onSwitchRole, phoneVariant }: { waveAnimation: WaveAnimation; onSwitchRole: () => void; phoneVariant: VariantId }) {
+function SpeakerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: WaveAnimation; onSwitchRole: () => void }) {
   const isMobile = useIsMobile()
   // On phones, "See it live" sends visitors to the guided story tour instead
   // of the desktop-oriented demo page.
@@ -271,7 +269,7 @@ function SpeakerExperience({ waveAnimation, onSwitchRole, phoneVariant }: { wave
           </div>
           <div className="flex-shrink-0 hidden lg:block relative">
             <InteractivePhoneHint />
-            <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} variant={phoneVariant} />
+            <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} />
           </div>
         </div>
       </section>
@@ -360,8 +358,8 @@ function SpeakerExperience({ waveAnimation, onSwitchRole, phoneVariant }: { wave
   )
 }
 
-// ─── Organizer Experience ──────��──��────────────────────────────────────────���──
-function OrganizerExperience({ waveAnimation, onSwitchRole, phoneVariant }: { waveAnimation: WaveAnimation; onSwitchRole: () => void; phoneVariant: VariantId }) {
+// ─── Organizer Experience ──────��─����────────────────────────────────────────���──
+function OrganizerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: WaveAnimation; onSwitchRole: () => void }) {
   const isMobile = useIsMobile()
   // On phones, "See it live" sends visitors to the guided story tour instead
   // of the desktop-oriented demo page.
@@ -409,7 +407,7 @@ function OrganizerExperience({ waveAnimation, onSwitchRole, phoneVariant }: { wa
           </div>
           <div className="flex-shrink-0 hidden lg:block relative">
             <InteractivePhoneHint />
-            <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} variant={phoneVariant} />
+            <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} />
           </div>
         </div>
       </section>
@@ -459,7 +457,6 @@ function LandingContent() {
   const [role, setRole] = useState<Role>(initialRole)
   const [organizerAccent, setOrganizerAccent] = useState(ORGANIZER_ACCENTS[0].value)
   const [waveAnimation, setWaveAnimation] = useState<WaveAnimation>("drift-cursor")
-  const [phoneVariant, setPhoneVariant] = useState<VariantId>("A")
 
   // Resolve role + accent: URL wins, then localStorage (only available post-mount).
   useEffect(() => {
@@ -514,10 +511,8 @@ function LandingContent() {
     <div className="min-h-screen bg-jsconf-bg text-foreground">
       <Nav role={role} />
       {role === "speaker"
-        ? <SpeakerExperience waveAnimation={waveAnimation} onSwitchRole={handleSwitchRole} phoneVariant={phoneVariant} />
-        : <OrganizerExperience waveAnimation={waveAnimation} onSwitchRole={handleSwitchRole} phoneVariant={phoneVariant} />}
-
-      <FloatingVariantPicker value={phoneVariant} onChange={setPhoneVariant} />
+        ? <SpeakerExperience waveAnimation={waveAnimation} onSwitchRole={handleSwitchRole} />
+        : <OrganizerExperience waveAnimation={waveAnimation} onSwitchRole={handleSwitchRole} />}
 
       {showDevToggle && (
         <ReducedMotionToggle value={waveAnimation} onChange={setWaveAnimation} />
