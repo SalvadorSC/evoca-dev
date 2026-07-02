@@ -5,6 +5,9 @@ import { MousePointerClick } from "lucide-react"
 
 // The DOM id of the hint badge, used as the react-xarrows start anchor.
 export const PHONE_HINT_BADGE_ID = "evoca-hint-badge"
+// Invisible anchor at 25% from the badge's right edge (bottom), the actual
+// arrow start point. Percentage-based so it stays at 25% responsively.
+export const PHONE_HINT_ANCHOR_ID = "evoca-hint-arrow-anchor"
 
 // A floating callout that points to the interactive phone mockup in the hero.
 // Fixed to the top-left of the phone: it lives in the whitespace between the
@@ -33,9 +36,16 @@ export function InteractivePhoneHint({ onPoke }: { onPoke?: () => void }) {
         type="button"
         onClick={onPoke}
         aria-label="Poke the interactive demo"
-        className="flex items-center gap-2 px-3 py-2 border select-none cursor-pointer transition-transform duration-150 hover:scale-[1.03] active:scale-95"
+        className="relative flex items-center gap-2 px-3 py-2 border select-none cursor-pointer transition-transform duration-150 hover:scale-[1.03] active:scale-95"
         style={{ borderColor: "var(--accent)", backgroundColor: "rgba(247,224,24,0.06)" }}
       >
+        {/* Arrow start anchor: 25% in from the badge's right edge, on the bottom. */}
+        <span
+          id={PHONE_HINT_ANCHOR_ID}
+          aria-hidden="true"
+          className="absolute bottom-0 pointer-events-none"
+          style={{ right: "25%", width: 1, height: 1 }}
+        />
         <span className="relative flex h-2 w-2 shrink-0">
           <span
             className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"

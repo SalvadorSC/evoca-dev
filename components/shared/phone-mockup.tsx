@@ -131,7 +131,7 @@ const MAX_VISIBLE = 10
 import { WaveBackground } from "@/components/shared/wave-background"
 import type { WaveAnimation } from "@/components/shared/wave-background"
 export type { WaveAnimation }
-import { InteractivePhoneHint, PHONE_HINT_BADGE_ID } from "@/components/landing/interactive-phone-hint"
+import { InteractivePhoneHint, PHONE_HINT_ANCHOR_ID } from "@/components/landing/interactive-phone-hint"
 import Xarrow from "react-xarrows"
 
 // DOM id of the phone frame, used as the react-xarrows end anchor.
@@ -626,7 +626,7 @@ export function InteractivePhoneMockup({
           with no hardcoded pixel positions. */}
       {showArrow && (
         <Xarrow
-          start={PHONE_HINT_BADGE_ID}
+          start={PHONE_HINT_ANCHOR_ID}
           end={PHONE_ARROW_ANCHOR_ID}
           startAnchor="bottom"
           endAnchor="left"
