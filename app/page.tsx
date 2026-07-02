@@ -11,7 +11,6 @@ import { CtaButton } from "@/components/shared/cta-button"
 import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
 import { ReducedMotionToggle } from "@/components/shared/wave-background"
 import { OrganizerPricing } from "@/components/landing/organizer-pricing"
-import { InteractivePhoneHint } from "@/components/landing/interactive-phone-hint"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -268,7 +267,6 @@ function SpeakerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: Wav
             </div>
           </div>
           <div className="flex-shrink-0 hidden lg:block relative">
-            <InteractivePhoneHint />
             <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} />
           </div>
         </div>
@@ -406,7 +404,6 @@ function OrganizerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: W
             </div>
           </div>
           <div className="flex-shrink-0 hidden lg:block relative">
-            <InteractivePhoneHint />
             <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} />
           </div>
         </div>

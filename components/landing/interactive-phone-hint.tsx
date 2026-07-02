@@ -6,18 +6,16 @@ import { MousePointerClick } from "lucide-react"
 // A floating callout that points to the interactive phone mockup in the hero.
 // Fixed to the top-left of the phone: it lives in the whitespace between the
 // headline and the phone, so it never overlaps hero text (in either role) and
-// never gets clipped by the right viewport edge. Rendered as an absolute child
-// of the phone's `relative` wrapper. Click to dismiss.
+// never gets clipped by the right viewport edge. Rendered inside the phone's
+// `relative` wrapper, so hovering it triggers the phone's own hover effect
+// (frame lift + paused auto-reset). It is not dismissable.
 export function InteractivePhoneHint() {
   const [visible, setVisible] = useState(false)
-  const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 1000)
     return () => clearTimeout(t)
   }, [])
-
-  if (dismissed) return null
 
   return (
     <div
@@ -26,11 +24,8 @@ export function InteractivePhoneHint() {
       }`}
       style={{ transform: "translateX(-100%)" }}
     >
-      <button
-        type="button"
-        onClick={() => setDismissed(true)}
-        aria-label="Dismiss hint"
-        className="flex items-center gap-2 px-3 py-2 border cursor-pointer select-none"
+      <div
+        className="flex items-center gap-2 px-3 py-2 border select-none"
         style={{ borderColor: "var(--accent)", backgroundColor: "rgba(247,224,24,0.06)" }}
       >
         <span className="relative flex h-2 w-2 shrink-0">
@@ -50,7 +45,7 @@ export function InteractivePhoneHint() {
         >
           Try it, it&apos;s interactive
         </span>
-      </button>
+      </div>
 
       {/* Dashed arrow swooping down-right toward the phone's top-left corner.
           The container sits up-and-left of the phone, so the arrow starts near

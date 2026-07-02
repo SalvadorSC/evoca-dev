@@ -131,6 +131,7 @@ const MAX_VISIBLE = 10
 import { WaveBackground } from "@/components/shared/wave-background"
 import type { WaveAnimation } from "@/components/shared/wave-background"
 export type { WaveAnimation }
+import { InteractivePhoneHint } from "@/components/landing/interactive-phone-hint"
 
 export function HeroBackground({
   items,
@@ -264,6 +265,9 @@ export function InteractivePhoneMockup({
   const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isHoveringRef = useRef(false)
   const hasInteractedRef = useRef(false)
+  // Drives the visual lift so it can be triggered by anything in the subtree
+  // (including the InteractivePhoneHint), not just CSS :hover on the frame.
+  const [isHovered, setIsHovered] = useState(false)
   const currentItemsRef = useRef<LiveItem[]>(currentItems)
   useEffect(() => { currentItemsRef.current = currentItems }, [currentItems])
 
@@ -308,11 +312,13 @@ export function InteractivePhoneMockup({
 
   const handleMouseEnter = useCallback(() => {
     isHoveringRef.current = true
+    setIsHovered(true)
     cancelResetTimer()
   }, [cancelResetTimer])
 
   const handleMouseLeave = useCallback(() => {
     isHoveringRef.current = false
+    setIsHovered(false)
     // If user interacted but didn't submit, start the reset countdown
     if (hasInteractedRef.current && !simRunningRef.current) {
       startResetTimer()
@@ -522,9 +528,13 @@ export function InteractivePhoneMockup({
       onTouchStart={markInteraction}
       style={{ width: "260px" }}
     >
+      {/* Callout pointing at the phone. Lives inside this wrapper so hovering it
+          triggers the same mouse handlers (pausing reset + lifting the frame). */}
+      <InteractivePhoneHint />
+
       {/* 3D tilt wrapper */}
       <div
-        className="transition-transform duration-500 hover:scale-[1.02]"
+        className={`transition-transform duration-500 ${isHovered ? "scale-[1.02]" : ""}`}
         style={{ transform: "perspective(1000px) rotateY(-12deg) rotateX(4deg)" }}
       >
         <PhoneFrame>
