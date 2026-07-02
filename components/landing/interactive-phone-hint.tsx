@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { TouchIcon } from "lucide-react"
+import { MousePointerClick } from "lucide-react"
 
 /**
  * A floating callout that points to the interactive phone mockup in the hero.
@@ -53,13 +53,13 @@ export function InteractivePhoneHint() {
             />
           </span>
 
-          <TouchIcon className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--accent)" }} />
+          <MousePointerClick className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--accent)" }} />
 
           <span
             className="font-mono text-[11px] uppercase tracking-wider whitespace-nowrap"
             style={{ color: "var(--accent)" }}
           >
-            Try it — it&apos;s interactive
+            Try it, it&apos;s interactive
           </span>
         </div>
 
