@@ -12,6 +12,8 @@ import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
 import { ReducedMotionToggle } from "@/components/shared/wave-background"
 import { OrganizerPricing } from "@/components/landing/organizer-pricing"
 import { InteractivePhoneHint } from "@/components/landing/interactive-phone-hint"
+import { VariantPicker } from "@/components/landing/variant-picker"
+import type { VariantId } from "@/components/landing/variant-picker"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -228,6 +230,7 @@ function SpeakerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: Wav
   // of the desktop-oriented demo page.
   const demoHref = isMobile ? "/demo/tour" : "/demo"
   const [heroItems, setHeroItems] = useState<LiveItem[]>([])
+  const [phoneVariant, setPhoneVariant] = useState<VariantId>("A")
 
   const handleActivity = useCallback((item: LiveItem) => {
     setHeroItems((prev) => [...prev.slice(-6), item])
@@ -267,9 +270,12 @@ function SpeakerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: Wav
               </CtaButton>
             </div>
           </div>
-          <div className="flex-shrink-0 hidden lg:block relative">
-            <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} />
+          <div className="flex-shrink-0 hidden lg:block relative flex flex-col items-center gap-4">
+            <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} variant={phoneVariant} />
             <InteractivePhoneHint />
+            <div className="mt-3">
+              <VariantPicker value={phoneVariant} onChange={setPhoneVariant} />
+            </div>
           </div>
         </div>
       </section>
