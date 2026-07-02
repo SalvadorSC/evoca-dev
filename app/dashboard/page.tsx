@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 
-// The primary entry point is now the conference dashboard.
-// Any existing bookmarks to /dashboard are forwarded automatically.
+// The Talks list is the primary entry point. Any existing bookmarks to
+// /dashboard are forwarded to it automatically.
 export default function DashboardPage() {
-  redirect("/dashboard/conference")
+  redirect("/dashboard/talks")
 }

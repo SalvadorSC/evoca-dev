@@ -9,7 +9,7 @@ import { Mic2, User, Zap, LogOut, CalendarRange } from "lucide-react"
 import { Logo } from "@/components/shared/logo"
 
 const NAV_ITEMS = [
-  { label: "Talks", href: "/dashboard", icon: Mic2 },
+  { label: "Talks", href: "/dashboard/talks", icon: Mic2 },
   { label: "Events", href: "/dashboard/conference", icon: CalendarRange },
   { label: "Account", href: "/dashboard/account", icon: User },
 ]
