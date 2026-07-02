@@ -250,7 +250,7 @@ export default function AccountPage() {
         {/* Socials */}
         <div className="border-t border-jsconf-border pt-5">
           <p className="font-mono text-[10px] text-jsconf-muted uppercase tracking-widest mb-4">
-            Socials — shown on the post-session feedback screen (PRO)
+            Socials, shown on the post-session feedback screen (PRO)
           </p>
           <div className="flex flex-col gap-4">
             <FieldRow

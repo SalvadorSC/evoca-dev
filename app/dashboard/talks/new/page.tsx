@@ -396,7 +396,7 @@ export default function NewTalkPage() {
                   </div>
                 </>
               ) : (
-                <p className="font-mono text-sm text-foreground">None — skipped</p>
+                <p className="font-mono text-sm text-foreground">None, skipped</p>
               )}
             </div>
           </div>

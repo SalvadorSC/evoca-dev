@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
         price_data: {
           currency: currency.toLowerCase(),
           unit_amount: unitAmount,
-          product_data: { name: `Evoca — ${plan.name}` },
+          product_data: { name: `Evoca: ${plan.name}` },
           ...(plan.mode === "subscription"
             ? { recurring: { interval: plan.recurringInterval! } }
             : {}),

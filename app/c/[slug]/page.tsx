@@ -19,7 +19,7 @@ export async function generateMetadata({
   const conference = await getPublicConferenceBySlug(supabase, slug)
   if (!conference) return { title: "Conference not found" }
   return {
-    title: `${conference.name} — Live`,
+    title: `${conference.name} | Live`,
     description: `Watch ${conference.name} live and follow the schedule.`,
   }
 }

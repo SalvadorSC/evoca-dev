@@ -30,7 +30,7 @@ function LiveBanner() {
     const url = window.location.href
     if (navigator.share) {
       try {
-        await navigator.share({ title: "EVOCA — Live Wall", url })
+        await navigator.share({ title: "EVOCA Live Wall", url })
       } catch { }
     } else {
       await navigator.clipboard.writeText(url)

@@ -11,6 +11,7 @@ import { CtaButton } from "@/components/shared/cta-button"
 import type { LiveItem, WaveAnimation } from "@/components/shared/phone-mockup"
 import { ReducedMotionToggle } from "@/components/shared/wave-background"
 import { OrganizerPricing } from "@/components/landing/organizer-pricing"
+import { InteractivePhoneHint } from "@/components/landing/interactive-phone-hint"
 import { ThemeSwitcher } from "@/components/theme/theme-switcher"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -235,7 +236,7 @@ function SpeakerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: Wav
   const speakerFAQ = [
     { q: "Do attendees need an account?", a: "No, they scan a QR and they're in." },
     { q: "What happens to Q&A after the talk?", a: "When you end a session, the questions are saved to your dashboard under the talk's Q&A History." },
-    { q: "Does it work with my existing slides?", a: "Yes — PPTX, PDF, or Slides.com link." },
+    { q: "Does it work with my existing slides?", a: "Yes. PPTX, PDF, or Slides.com link." },
     { q: "Is it really free?", a: "Yes, 5 talks free forever. No credit card needed. See full pricing for what's included." },
   ]
 
@@ -250,7 +251,7 @@ function SpeakerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: Wav
               Turn any talk into a live experience
             </h1>
             <p className="font-sans text-jsconf-muted text-lg lg:text-xl mb-8 leading-relaxed">
-              Slides, live reactions, Q&A and analytics — all in one place. Your audience participates, you stay in control.
+              Slides, live reactions, Q&A and analytics. All in one place. Your audience participates, you stay in control.
             </p>
             <div className="flex flex-wrap gap-4">
               <CtaButton variant="solid" href="/login" className="text-sm">
@@ -266,8 +267,9 @@ function SpeakerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: Wav
               </CtaButton>
             </div>
           </div>
-          <div className="flex-shrink-0 hidden lg:block">
+          <div className="flex-shrink-0 hidden lg:block relative">
             <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} />
+            <InteractivePhoneHint />
           </div>
         </div>
       </section>
@@ -309,7 +311,7 @@ function SpeakerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: Wav
             style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
           >
             <Trophy className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            Winner — JSConf España 2026 Hackathon
+            Winner at JSConf España 2026 Hackathon
           </span>
           <span className="font-sans text-sm text-jsconf-muted text-balance">Built at JSConf. Loved by the community.</span>
         </div>
@@ -328,7 +330,7 @@ function SpeakerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: Wav
             <div className="border border-jsconf-border p-6">
               <h3 className="font-display font-bold text-foreground text-xl mb-3">Speaker Pro</h3>
               <p className="font-sans text-jsconf-muted text-sm leading-relaxed mb-4">
-                Coming soon — unlimited talks, analytics, no watermark
+                Coming soon: unlimited talks, analytics, no watermark
               </p>
               <ProWaitlistForm />
             </div>
@@ -387,7 +389,7 @@ function OrganizerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: W
               One platform for your schedule, speakers and live engagement
             </h1>
             <p className="font-sans text-jsconf-muted text-lg lg:text-xl mb-8 leading-relaxed">
-              Manage your event, onboard speakers and give every session live engagement — without the Slido price tag.
+              Manage your event, onboard speakers and give every session live engagement. Simple pricing, no hidden fees.
             </p>
             <div className="flex flex-wrap gap-4">
               <CtaButton variant="solid" href="/login" className="text-sm">
@@ -403,8 +405,9 @@ function OrganizerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: W
               </CtaButton>
             </div>
           </div>
-          <div className="flex-shrink-0 hidden lg:block">
+          <div className="flex-shrink-0 hidden lg:block relative">
             <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} />
+            <InteractivePhoneHint />
           </div>
         </div>
       </section>
@@ -445,7 +448,7 @@ function OrganizerExperience({ waveAnimation, onSwitchRole }: { waveAnimation: W
             style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
           >
             <Trophy className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            Winner — JSConf España 2026 Hackathon
+            Winner at JSConf España 2026 Hackathon
           </span>
           <span className="font-sans text-sm text-jsconf-muted text-balance">Built at JSConf. Loved by the community.</span>
         </div>

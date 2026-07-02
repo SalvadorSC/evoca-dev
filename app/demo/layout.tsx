@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Live Demo",
   description:
-    "See EVOCA in action — try live reactions, Q&A, and real-time audience engagement in an interactive demo.",
+    "See EVOCA in action: try live reactions, Q&A, and real-time audience engagement in an interactive demo.",
   alternates: {
     canonical: "/demo",
   },

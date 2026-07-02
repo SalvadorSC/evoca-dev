@@ -34,7 +34,7 @@ const initialState: AppState = {
 
 const DEMO_REACTIONS = [
   { name: "Jamie Chen", text: "This is exactly what I needed to hear today", emoji: "🔥" },
-  { name: "Morgan Lee", text: "Mind blown — didn't know this was possible", emoji: "🤯" },
+  { name: "Morgan Lee", text: "Mind blown. Didn't know this was possible", emoji: "🤯" },
   { name: "Sam Rivera", text: "Taking notes like crazy right now", emoji: "👏" },
   { name: "Alex Kim", text: "When does the recording come out?", emoji: "😂" },
   { name: "Taylor Brooks", text: "We need to implement this at work ASAP", emoji: "🚀" },
