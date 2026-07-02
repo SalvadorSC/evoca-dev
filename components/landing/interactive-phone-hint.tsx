@@ -52,10 +52,12 @@ export function InteractivePhoneHint() {
         </span>
       </button>
 
-      {/* Dashed arrow swooping down-right toward the phone's top-left corner */}
-      <svg width="64" height="52" viewBox="0 0 64 52" fill="none" aria-hidden="true" className="-mt-1 self-end">
+      {/* Dashed arrow swooping down-right toward the phone's top-left corner.
+          The container sits up-and-left of the phone, so the arrow starts near
+          the callout and curves toward the bottom-right, arrowhead pointing in. */}
+      <svg width="72" height="56" viewBox="0 0 72 56" fill="none" aria-hidden="true" className="-mt-1 self-end">
         <path
-          d="M52 4 C 52 28, 32 40, 12 48"
+          d="M8 6 C 22 8, 40 20, 62 46"
           stroke="var(--accent)"
           strokeWidth="1.5"
           strokeDasharray="4 3"
@@ -63,7 +65,7 @@ export function InteractivePhoneHint() {
           fill="none"
         />
         <path
-          d="M7 44 L13 50 L16 43"
+          d="M51 42 L64 48 L55 54"
           stroke="var(--accent)"
           strokeWidth="1.5"
           strokeLinecap="round"
