@@ -131,7 +131,11 @@ const MAX_VISIBLE = 10
 import { WaveBackground } from "@/components/shared/wave-background"
 import type { WaveAnimation } from "@/components/shared/wave-background"
 export type { WaveAnimation }
-import { InteractivePhoneHint } from "@/components/landing/interactive-phone-hint"
+import { InteractivePhoneHint, PHONE_HINT_BADGE_ID } from "@/components/landing/interactive-phone-hint"
+import Xarrow from "react-xarrows"
+
+// DOM id of the phone frame, used as the react-xarrows end anchor.
+const PHONE_TARGET_ID = "evoca-phone-target"
 
 export function HeroBackground({
   items,
@@ -268,6 +272,24 @@ export function InteractivePhoneMockup({
   // Drives the visual lift so it can be triggered by anything in the subtree
   // (including the InteractivePhoneHint), not just CSS :hover on the frame.
   const [isHovered, setIsHovered] = useState(false)
+  // Jiggle the phone when the hint badge is poked (clicked).
+  const [jiggle, setJiggle] = useState(false)
+  // Only draw the connecting arrow after mount + the badge's 1s fade-in, and
+  // never during SSR (react-xarrows needs the DOM). Keeps the two in sync.
+  const [showArrow, setShowArrow] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowArrow(true), 1050)
+    return () => clearTimeout(t)
+  }, [])
+
+  const pokePhone = useCallback(() => {
+    setJiggle(false)
+    // Re-trigger the CSS animation even on rapid repeat clicks.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setJiggle(true))
+    })
+  }, [])
   const currentItemsRef = useRef<LiveItem[]>(currentItems)
   useEffect(() => { currentItemsRef.current = currentItems }, [currentItems])
 
@@ -529,14 +551,21 @@ export function InteractivePhoneMockup({
       style={{ width: "260px" }}
     >
       {/* Callout pointing at the phone. Lives inside this wrapper so hovering it
-          triggers the same mouse handlers (pausing reset + lifting the frame). */}
-      <InteractivePhoneHint />
+          triggers the same mouse handlers (pausing reset + lifting the frame).
+          Clicking it pokes the phone into a jiggle. */}
+      <InteractivePhoneHint onPoke={pokePhone} />
 
-      {/* 3D tilt wrapper */}
+      {/* 3D tilt wrapper — also the react-xarrows end anchor. The jiggle lives on
+          an inner wrapper so it never overrides this element's 3D transform. */}
       <div
+        id={PHONE_TARGET_ID}
         className={`transition-transform duration-500 ${isHovered ? "scale-[1.02]" : ""}`}
         style={{ transform: "perspective(1000px) rotateY(-12deg) rotateX(4deg)" }}
       >
+       <div
+         className={jiggle ? "phone-jiggle" : undefined}
+         onAnimationEnd={() => setJiggle(false)}
+       >
         <PhoneFrame>
           {/* Status bar */}
           <div className="shrink-0 bg-jsconf-bg flex items-center justify-between px-5 pt-6 pb-1 z-10" />
@@ -579,7 +608,27 @@ export function InteractivePhoneMockup({
             </TabsContent>
           </Tabs>
         </PhoneFrame>
+       </div>
       </div>
+
+      {/* Curved yellow arrow guiding the eye from the hint badge to the phone.
+          Connected by DOM id so it stays glued to both elements responsively,
+          with no hardcoded pixel positions. */}
+      {showArrow && (
+        <Xarrow
+          start={PHONE_HINT_BADGE_ID}
+          end={PHONE_TARGET_ID}
+          startAnchor="bottom"
+          endAnchor="left"
+          color="#F7E018"
+          strokeWidth={2}
+          headSize={4}
+          curveness={1.1}
+          path="smooth"
+          SVGcanvasStyle={{ pointerEvents: "none" }}
+          divContainerStyle={{ pointerEvents: "none" }}
+        />
+      )}
     </div>
   )
 }
