@@ -136,6 +136,8 @@ import Xarrow from "react-xarrows"
 
 // DOM id of the phone frame, used as the react-xarrows end anchor.
 const PHONE_TARGET_ID = "evoca-phone-target"
+// Invisible anchor at 25% from the phone's top-left, the actual arrow end point.
+const PHONE_ARROW_ANCHOR_ID = "evoca-phone-arrow-anchor"
 
 export function HeroBackground({
   items,
@@ -559,9 +561,17 @@ export function InteractivePhoneMockup({
           an inner wrapper so it never overrides this element's 3D transform. */}
       <div
         id={PHONE_TARGET_ID}
-        className={`transition-transform duration-500 ${isHovered ? "scale-[1.02]" : ""}`}
+        className={`relative transition-transform duration-500 ${isHovered ? "scale-[1.02]" : ""}`}
         style={{ transform: "perspective(1000px) rotateY(-12deg) rotateX(4deg)" }}
       >
+        {/* Invisible arrow target at 25% from the top of the phone's left edge.
+            Percentage-based, so it stays at 25% responsively at any phone size. */}
+        <span
+          id={PHONE_ARROW_ANCHOR_ID}
+          aria-hidden="true"
+          className="absolute left-0 pointer-events-none"
+          style={{ top: "25%", width: 1, height: 1 }}
+        />
        <div
          className={jiggle ? "phone-jiggle" : undefined}
          onAnimationEnd={() => setJiggle(false)}
@@ -617,7 +627,7 @@ export function InteractivePhoneMockup({
       {showArrow && (
         <Xarrow
           start={PHONE_HINT_BADGE_ID}
-          end={PHONE_TARGET_ID}
+          end={PHONE_ARROW_ANCHOR_ID}
           startAnchor="bottom"
           endAnchor="left"
           color="#F7E018"
@@ -625,6 +635,7 @@ export function InteractivePhoneMockup({
           headSize={4}
           curveness={1.1}
           path="smooth"
+          dashness={{ strokeLen: 6, nonStrokeLen: 4 }}
           SVGcanvasStyle={{ pointerEvents: "none" }}
           divContainerStyle={{ pointerEvents: "none" }}
         />
