@@ -269,9 +269,9 @@ function SpeakerExperience({ waveAnimation, onSwitchRole, phoneVariant }: { wave
               </CtaButton>
             </div>
           </div>
-          <div className="flex-shrink-0 hidden lg:block relative">
-            <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} variant={phoneVariant} />
+          <div className="flex-shrink-0 hidden lg:flex items-center gap-0">
             <InteractivePhoneHint />
+            <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} variant={phoneVariant} />
           </div>
         </div>
       </section>
@@ -360,7 +360,7 @@ function SpeakerExperience({ waveAnimation, onSwitchRole, phoneVariant }: { wave
   )
 }
 
-// ─── Organizer Experience ──────────────────────────────────────────────────���──
+// ─── Organizer Experience ─────────��────────────────────────────────────────���──
 function OrganizerExperience({ waveAnimation, onSwitchRole, phoneVariant }: { waveAnimation: WaveAnimation; onSwitchRole: () => void; phoneVariant: VariantId }) {
   const isMobile = useIsMobile()
   // On phones, "See it live" sends visitors to the guided story tour instead
@@ -407,52 +407,10 @@ function OrganizerExperience({ waveAnimation, onSwitchRole, phoneVariant }: { wa
               </CtaButton>
             </div>
           </div>
-          <div className="flex-shrink-0 hidden lg:block relative">
-            <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} variant={phoneVariant} />
+          <div className="flex-shrink-0 hidden lg:flex items-center gap-0">
             <InteractivePhoneHint />
+            <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} variant={phoneVariant} />
           </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="px-6 py-16 border-t border-jsconf-border">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FeatureCard
-              icon={<CalendarDays className="h-6 w-6" />}
-              title="Schedule management"
-              description={"Build your event schedule.\nAttendees see it live and plan their day."}
-            />
-            <FeatureCard
-              icon={<Mic className="h-6 w-6" />}
-              title="Speaker onboarding"
-              description={"Invite speakers by email or join link.\nThey set up their own talks in minutes."}
-            />
-            <FeatureCard
-              icon={<WallpaperIcon className="h-6 w-6" />}
-              title="Live Wall for every session"
-              description={"Every talk gets reactions, Q&A and a\nprojector wall automatically."}
-            />
-            <FeatureCard
-              icon={<TrendingUp className="h-6 w-6" />}
-              title="Engagement metrics"
-              description={"See which sessions drove the most\nengagement across your entire event."}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Social proof */}
-      <section className="px-6 py-8 bg-jsconf-surface border-y border-jsconf-border">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 text-center">
-          <span
-            className="inline-flex items-center justify-center gap-1.5 font-mono text-xs sm:text-sm font-bold px-3 py-1.5 leading-snug text-balance"
-            style={{ backgroundColor: "var(--accent)", color: "var(--accent-text)" }}
-          >
-            <Trophy className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            Winner at JSConf España 2026 Hackathon
-          </span>
-          <span className="font-sans text-sm text-jsconf-muted text-balance">Built at JSConf. Loved by the community.</span>
         </div>
       </section>
 
