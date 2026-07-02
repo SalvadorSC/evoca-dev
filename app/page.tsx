@@ -269,7 +269,7 @@ function SpeakerExperience({ waveAnimation, onSwitchRole, phoneVariant }: { wave
               </CtaButton>
             </div>
           </div>
-          <div className="flex-shrink-0 hidden lg:flex items-center gap-0">
+          <div className="flex-shrink-0 hidden lg:block relative">
             <InteractivePhoneHint />
             <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} variant={phoneVariant} />
           </div>
@@ -360,7 +360,7 @@ function SpeakerExperience({ waveAnimation, onSwitchRole, phoneVariant }: { wave
   )
 }
 
-// ─── Organizer Experience ─────────��────────────────────────────────────────���──
+// ─── Organizer Experience ──────��──��────────────────────────────────────────���──
 function OrganizerExperience({ waveAnimation, onSwitchRole, phoneVariant }: { waveAnimation: WaveAnimation; onSwitchRole: () => void; phoneVariant: VariantId }) {
   const isMobile = useIsMobile()
   // On phones, "See it live" sends visitors to the guided story tour instead
@@ -407,7 +407,7 @@ function OrganizerExperience({ waveAnimation, onSwitchRole, phoneVariant }: { wa
               </CtaButton>
             </div>
           </div>
-          <div className="flex-shrink-0 hidden lg:flex items-center gap-0">
+          <div className="flex-shrink-0 hidden lg:block relative">
             <InteractivePhoneHint />
             <InteractivePhoneMockup onActivity={handleActivity} currentItems={heroItems} variant={phoneVariant} />
           </div>
