@@ -209,7 +209,7 @@ function FloatingItem({ item, paused }: { item: LiveItem; paused: boolean }) {
             <span className="font-mono text-xs text-white/40 whitespace-nowrap">{item.name}</span>
           </div>
         ) : (
-          <div className="bg-black/50 border border-white/10 px-4 py-2.5 rounded-xl backdrop-blur-sm shrink-0 max-w-[280px]">
+          <div className="bg-black/50 border-2 border-white/90 px-4 py-2.5 rounded-xl backdrop-blur-sm shrink-0 max-w-[280px] shadow-[0_0_0_1px_rgba(255,255,255,0.15)]">
             <p className="font-sans text-sm text-white/80 leading-snug mb-1">{item.text}</p>
             <p className="font-mono text-xs text-white/40">{item.name}</p>
           </div>
